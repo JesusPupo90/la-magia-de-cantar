@@ -30,8 +30,21 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# agent files
+AGENTS.md
+**/AGENTS.md
+AGENTS-*.md
+*.agent.md
+*.agents.md
+
+# env files and any variation (can opt-in for committing if needed)
+.env
+.env.*
+!.env.example
+.env.*.local
+*.env
+.envrc
+.envvars
 
 # vercel
 .vercel
