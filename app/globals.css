@@ -27,4 +27,8 @@
   --color-dark-mint: #008f54;
   --color-mint: #00C8b3;
   --color-lilac: #f2d7fe;
+  --color-pink-soft: #fce7f3;
+  --shadow-soft-sm: 0 4px 12px rgba(9, 9, 11, 0.04);
+  --shadow-soft-md: 0 8px 24px rgba(9, 9, 11, 0.08);
+  --shadow-soft-lg: 0 16px 40px rgba(9, 9, 11, 0.12);
 }
