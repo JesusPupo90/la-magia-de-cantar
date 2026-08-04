@@ -16,8 +16,7 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/95 backdrop-blur-md">
-      {/* Ajustado px-6 en móviles y px-8 en tablet/escritorio para dar más aire */}
+    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 sm:px-8 lg:px-8">
         
         {/* 1. LOGO */}
@@ -46,7 +45,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* 3. BOTÓN DERECHA: WhatsApp Directo (Aporta simetría sin competir con el Hero CTA) */}
+        {/* 3. BOTÓN DERECHA: WhatsApp Directo (Desktop) */}
         <div className="hidden items-center lg:flex">
           <a
             href="https://wa.me/573000000000?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
@@ -54,7 +53,6 @@ export default function Navbar() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-2xl border-2 border-brown bg-mint px-5 py-2 font-poppins text-xs font-bold uppercase tracking-wider text-black shadow-soft-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange hover:shadow-soft-md"
           >
-            {/* SVG Icono WhatsApp */}
             <svg
               className="h-4 w-4 fill-current"
               viewBox="0 0 24 24"
@@ -69,7 +67,7 @@ export default function Navbar() {
         {/* BOTÓN MÓVIL (Hamburguesa) */}
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-xl p-2 text-gray-800 hover:bg-gray-100 focus:outline-none lg:hidden"
+          className="relative z-50 inline-flex items-center justify-center rounded-xl p-2 text-black hover:bg-gray-100 focus:outline-none lg:hidden"
           aria-label={open ? "Cerrar menú" : "Abrir menú"}
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
@@ -91,16 +89,16 @@ export default function Navbar() {
         </button>
       </nav>
 
-      {/* MENÚ MÓVIL DESPLEGABLE (Absolute top-full para desplegarse limpiamente sobre la vista) */}
+      {/* MENÚ MÓVIL DESPLEGABLE CON POSICIÓN FIXED */}
       {open && (
-        <div className="absolute left-0 top-full z-50 w-full border-b border-gray-100 bg-white/98 px-6 pb-6 pt-3 shadow-xl backdrop-blur-xl lg:hidden">
-          <ul className="flex flex-col gap-2">
+        <div className="fixed inset-x-0 top-[60px] z-40 h-[calc(100vh-60px)] overflow-y-auto bg-white px-6 pb-12 pt-6 shadow-2xl lg:hidden">
+          <ul className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block rounded-xl px-4 py-3 font-poppins text-base font-semibold text-gray-800 transition-colors hover:bg-purple/10 hover:text-purple"
+                  className="block rounded-2xl border border-gray-100 bg-gray-50/80 px-5 py-4 font-poppins text-lg font-bold text-black transition-colors hover:bg-purple/10 hover:text-purple"
                 >
                   {link.label}
                 </a>
@@ -108,13 +106,13 @@ export default function Navbar() {
             ))}
           </ul>
 
-          <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="mt-6 border-t border-gray-100 pt-6">
             <a
               href="https://wa.me/573000000000?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-brown bg-mint py-3 text-center font-poppins text-sm font-bold text-black shadow-soft-sm"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-black bg-mint py-4 text-center font-poppins text-base font-bold text-black shadow-soft-md"
             >
               Contactar por WhatsApp
             </a>
