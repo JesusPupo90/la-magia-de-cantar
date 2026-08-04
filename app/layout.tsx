@@ -5,6 +5,7 @@ import {
   Plus_Jakarta_Sans,
   JetBrains_Mono,
 } from "next/font/google";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const bebasNeue = Bebas_Neue({
@@ -44,7 +45,10 @@ export default function RootLayout({
       lang="en"
       className={`${bebasNeue.variable} ${poppins.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body className="flex min-h-svh flex-col">
+        <Navbar />
+        {children}
+      </body>
     </html>
   );
 }
