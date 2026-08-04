@@ -19,7 +19,7 @@ export default function Hero() {
   const marqueeList = [...tvShows, ...tvShows];
 
   return (
-    <section id="inicio" className="relative w-full overflow-hidden bg-white px-8 py-8 sm:py-12 lg:py-12">
+    <section id="inicio" className="relative w-full overflow-hidden bg-white px-4 py-8 sm:px-8 sm:py-12 lg:py-12">
       
       {/* Resplandor sutil de fondo */}
       <div className="pointer-events-none absolute -left-20 -top-20 h-96 w-96 rounded-full bg-violet/10 blur-3xl" />
@@ -30,15 +30,15 @@ export default function Hero() {
         <CurlyArrow className="h-full w-full stroke-[2.5]" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+      <div className="relative z-10 mx-auto max-w-7xl sm:px-6">
         
         {/* ========================================================= */}
-        {/* GRILLA PRINCIPAL CON ORDENAMIENTO RESPONSIVO               */}
+        {/* GRILLA PRINCIPAL CON ORDENAMIENTO Y ALINEACIÓN CENTRADA     */}
         {/* ========================================================= */}
         <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-12 lg:gap-8">
           
-          {/* 1. MARQUESINA DE PROGRAMAS (Order 1 en móvil) */}
-          <div className="order-1 w-full max-w-sm overflow-hidden rounded-full border border-pink/30 bg-pink-soft/80 py-2 backdrop-blur-sm sm:max-w-md lg:col-span-5 lg:col-start-1">
+          {/* 1. MARQUESINA DE PROGRAMAS */}
+          <div className="order-1 mx-auto w-full max-w-sm overflow-hidden rounded-full border border-pink/30 py-2 backdrop-blur-sm sm:max-w-md lg:col-span-5 lg:col-start-1 lg:mx-0">
             <div className="flex w-max animate-marquee gap-6">
               {marqueeList.map((show, index) => (
                 <div key={index} className="flex items-center gap-3 whitespace-nowrap">
@@ -51,16 +51,17 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* 2. TÍTULO PRINCIPAL (Order 2 en móvil) */}
-          <h1 className="order-2 font-poppins text-4xl font-extrabold tracking-tight text-black sm:text-6xl lg:col-span-5 lg:col-start-1 lg:text-7xl lg:leading-[1.08]">
-            Descubre <br />
+          {/* 2. TÍTULO PRINCIPAL (Salto oculto en móvil con hidden lg:inline) */}
+          <h1 className="order-2 text-center font-poppins text-4xl font-extrabold tracking-tight text-black sm:text-6xl lg:col-span-5 lg:col-start-1 lg:text-left lg:text-7xl lg:leading-[1.08]">
+            Descubre{" "}
+            <br className="hidden lg:inline" />
             la magia de <br />
             cantar
           </h1>
 
-          {/* 3. IMAGEN DE YANETSIS (Order 3 en móvil -> Justo debajo del Título) */}
+          {/* 3. IMAGEN DE YANETSIS */}
           <div className="order-3 pointer-events-none flex items-center justify-center lg:order-none lg:col-span-7 lg:col-start-6 lg:row-span-5 lg:row-start-1 lg:justify-end">
-            <div className="w-full max-w-[22rem] sm:max-w-[500px] lg:w-[1100px] lg:max-w-none lg:scale-110">
+            <div className="w-full max-w-[22rem] sm:max-w-[600px] lg:w-[1100px] lg:max-w-none lg:scale-110">
               <Image
                 src="/assets/yanetsis.webp"
                 alt="Yanetsis cantando"
@@ -74,13 +75,13 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* 4. SUBTÍTULO (Order 4 en móvil) */}
-          <p className="order-4 max-w-lg font-jakarta text-base font-medium leading-relaxed text-gray-900 sm:text-lg lg:col-span-5 lg:col-start-1">
+          {/* 4. SUBTÍTULO */}
+          <p className="order-4 mx-auto max-w-lg text-center font-jakarta text-base font-medium leading-relaxed text-gray-900 sm:text-lg lg:col-span-5 lg:col-start-1 lg:mx-0 lg:text-left">
             {subtitle}
           </p>
 
-          {/* 5. BOTÓN CTA (Order 5 en móvil) */}
-          <div className="order-5 pt-2 lg:col-span-5 lg:col-start-1">
+          {/* 5. BOTÓN CTA */}
+          <div className="order-5 flex justify-center pt-2 lg:col-span-5 lg:col-start-1 lg:justify-start">
             <a
               href="#nuestros-servicios"
               className="inline-flex items-center justify-center rounded-2xl border-2 border-black bg-mint px-8 py-4 font-poppins text-base font-bold text-black shadow-soft-md transition-all duration-200 ease-out hover:-translate-y-1 hover:bg-orange hover:shadow-soft-lg active:translate-y-0 md:text-lg"
@@ -98,8 +99,8 @@ export default function Hero() {
           <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
             
             {/* Mensaje de Autoridad */}
-            <div className="lg:col-span-5">
-              <p className="max-w-md font-poppins text-xl font-bold leading-snug tracking-tight text-black sm:text-2xl">
+            <div className="text-center lg:col-span-5 lg:text-left">
+              <p className="mx-auto max-w-md font-poppins text-xl font-bold leading-snug tracking-tight text-black sm:text-2xl lg:mx-0">
                 La plataforma de transformación vocal elegida por artistas y apasionados del canto.
               </p>
             </div>
