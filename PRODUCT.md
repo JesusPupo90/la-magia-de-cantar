@@ -27,7 +27,7 @@ No es una academia tradicional: es un proceso integral que une técnica vocal, c
 
 - Ubicación física en Bogotá, Colombia, con modalidad presencial y virtual.
 - Pagos directos vía Mercado Pago Colombia (PSE, tarjetas, Nequi/Daviplata) para servicios estandarizados; cotización personalizada para servicios B2B y coaching directo.
-- Contacto principal por WhatsApp Business y correo `yanetsisvoz@gmail.com`.
+- Contacto principal por WhatsApp Business y correo `yanetsisvoz@gmail.com`. El número de WhatsApp aún es un placeholder (`wa.me/573000000000`); reemplazar por el real antes de publicar.
 - Regulaciones locales: tratamiento de datos personales (Habeas Data, Ley 1581), términos y condiciones y política de cancelación.
 
 ## Capabilities and Constraints
@@ -37,7 +37,7 @@ No es una academia tradicional: es un proceso integral que une técnica vocal, c
 - Formularios: B2B institucional (envío de correo a `yanetsisvoz@gmail.com`), captura de leads por nivel de servicio y contacto general.
 - Integraciones previstas: Mercado Pago, WhatsApp Business, motor de mailing y analítica (GTM/GA4, Meta Pixel).
 - SEO local e internacional con datos estructurados JSON-LD (Organization, LocalBusiness, Person, Service, FAQPage).
-- El sitio actual solo cuenta con Hero y Navbar; el resto de las secciones está pendiente de construir.
+- El sitio actual cuenta con Navbar, Hero y banner de cifras (AchievementsBanner); el resto de las secciones está pendiente de construir.
 - Método Yanetsis: 5 pilares (Voz, Técnica & Cuerpo, Emoción & Mente, Interpretación & Escena, Comunidad).
 
 ## Brand Commitments
@@ -51,8 +51,10 @@ No es una academia tradicional: es un proceso integral que une técnica vocal, c
 
 - `docs/spec.md`: especificaciones técnicas / PRD (fuente principal de producto).
 - `docs/design.md`: sistema de diseño UI/UX vigente.
-- **Las cifras y programas de TV del Hero actual (+500 alumnos, 15+ años, La Voz Kids, Yo Me Llamo, etc.) son marcadores ficticios para visualizar el diseño; no son hechos confirmados.** La trayectoria real de Yanetsis es amplia y puede superar esas cifras, pero los valores finales deben verificarse con la clienta antes de publicarse.
-- No hay testimonios, fotos reales, videos ni logotipos confirmados; no fabricar.
+- **Activos de marca confirmados en uso** en `public/assets/`: `dark-logo.png`, `light-logo.png`, fotos de Yanetsis (`yanetsis.webp`, `yanetsis(2).webp`) y fondos (`bg-img.webp`, `bg-composition.webp`). La imagen del Hero es definitiva y **no debe cambiarse**.
+- **Imágenes de secciones futuras:** no hay fotos definitivas para las secciones que faltan; usar imágenes de ejemplo (p. ej. Unsplash) como placeholders de vista previa para que la clienta las reemplace después.
+- **Las cifras y programas de TV del Hero/banner actual (+500 alumnos, 15+ años, 10+ programas, La Voz Kids, Yo Me Llamo, etc.) son marcadores ficticios para visualizar el diseño; no son hechos confirmados.** La trayectoria real de Yanetsis es amplia y puede superar esas cifras, pero los valores finales deben verificarse con la clienta antes de publicarse.
+- No hay testimonios, videos ni casos de éxito confirmados; no fabricar.
 
 ## Product Principles
 

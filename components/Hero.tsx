@@ -31,7 +31,7 @@ export default function Hero() {
       {/* ========================================================= */}
       <div className="relative w-full px-4 py-8 sm:px-8 sm:py-12 lg:py-12">
         
-        {/* 📍 IMAGEN DE FONDO (Limitada solo a la grilla principal) */}
+        {/* 📍 IMAGEN DE FONDO */}
         <div className="pointer-events-none absolute inset-0 z-0 h-full w-full">
           <Image
             src="/assets/bg-img.webp"
@@ -108,58 +108,6 @@ export default function Hero() {
 
           </div>
 
-        </div>
-      </div>
-
-      {/* ========================================================= */}
-      {/* 2. BANNER DE LOGROS Y TRAYECTORIA (Fondo blanco limpio)   */}
-      {/* ========================================================= */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 pb-12 sm:px-8 sm:pb-16">
-        <div className="border-t border-gray-100 pt-10 lg:pt-12">
-          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
-            
-            {/* Mensaje de Autoridad */}
-            <div className="text-center lg:col-span-5 lg:text-left">
-              <p className="mx-auto max-w-md font-poppins text-xl font-bold leading-snug tracking-tight text-black sm:text-2xl lg:mx-0">
-                La plataforma de transformación vocal más elegida por artistas y apasionados del canto.
-              </p>
-            </div>
-
-            {/* Tarjeta con Cifras de Impacto */}
-            <div className="rounded-3xl border border-gray-100/80 bg-gray-50/90 p-6 sm:p-8 lg:col-span-7">
-              <div className="grid grid-cols-3 gap-4 text-center sm:text-left">
-                
-                <div>
-                  <span className="block font-poppins text-3xl font-black text-black sm:text-4xl">
-                    +500
-                  </span>
-                  <span className="mt-1 block font-jakarta text-xs font-semibold text-gray-900 sm:text-sm">
-                    Alumnos formados
-                  </span>
-                </div>
-
-                <div>
-                  <span className="block font-poppins text-3xl font-black text-purple sm:text-4xl">
-                    15+
-                  </span>
-                  <span className="mt-1 block font-jakarta text-xs font-semibold text-gray-900 sm:text-sm">
-                    Años de trayectoria
-                  </span>
-                </div>
-
-                <div>
-                  <span className="block font-poppins text-3xl font-black text-black sm:text-4xl">
-                    6+
-                  </span>
-                  <span className="mt-1 block font-jakarta text-xs font-semibold text-gray-900 sm:text-sm">
-                    Programas de TV
-                  </span>
-                </div>
-
-              </div>
-            </div>
-
-          </div>
         </div>
       </div>
 
