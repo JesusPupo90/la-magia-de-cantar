@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { CurlyArrow } from "@/lib/iconsLibrary";
+import Cta from "./Cta";
 
 const subtitle =
   "Prepara tu voz y domina el escenario con Yanetsis Alfonso, coach vocal de TV. Un entrenamiento integral para quienes sueñan en grande.";
@@ -98,12 +99,7 @@ export default function Hero() {
 
             {/* 5. BOTÓN CTA */}
             <div className="order-5 flex justify-center pt-2 lg:col-span-5 lg:col-start-1 lg:justify-start">
-              <a
-                href="#nuestros-servicios"
-                className="inline-flex items-center justify-center rounded-2xl border-2 border-black bg-mint px-8 py-4 font-poppins text-base font-bold text-black shadow-soft-md transition-all duration-200 ease-out hover:-translate-y-1 hover:bg-orange hover:shadow-soft-lg active:translate-y-0 md:text-lg"
-              >
-                Quiero tener la magia
-              </a>
+              <Cta />
             </div>
 
           </div>

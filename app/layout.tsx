@@ -43,7 +43,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${bebasNeue.variable} ${poppins.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable}`}
+      className={`${bebasNeue.variable} ${poppins.variable} ${plusJakartaSans.variable} ${jetbrainsMono.variable} scroll-smooth`}
     >
       <body className="flex min-h-svh flex-col">
         <Navbar />
