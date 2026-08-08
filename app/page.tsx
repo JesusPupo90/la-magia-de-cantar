@@ -2,6 +2,7 @@ import Hero from "@/components/Hero";
 import AchievementsBanner from "@/components/AchievementsBanner";
 import LaMagiaDeCantar from "@/components/LaMagiaDeCantar";
 import MetodoYanetsis from "@/components/MetodoYanetsis";
+import NuestrosServicios from "@/components/NuestrosServicios";
 // import DemoEstetica from "@/components/DemoEstetica";
 
 export default function Home() {
@@ -11,6 +12,7 @@ export default function Home() {
       <AchievementsBanner />
       <LaMagiaDeCantar />
       <MetodoYanetsis />
+      <NuestrosServicios />
       {/* <DemoEstetica /> */}
     </main>
   );
