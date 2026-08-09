@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  ChevronDown, 
-  ChevronUp, 
-  Check, 
-  ShieldCheck, 
-  Sparkles, 
+import {
+  ChevronDown,
+  ChevronUp,
+  Check,
+  ShieldCheck,
+  Sparkles,
   Crown,
   Clock,
   MapPin,
@@ -23,7 +23,6 @@ export default function NuestrosServicios() {
   const [selectedPlanIndexes, setSelectedPlanIndexes] = useState<{ [serviceId: string]: number }>({});
   const [expandedCards, setExpandedCards] = useState<{ [serviceId: string]: boolean }>({});
 
-  // Manejo de anclas externas (ej: un CTA que salte a #tecnica-yanetsis)
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "");
@@ -54,12 +53,18 @@ export default function NuestrosServicios() {
     <section
       id="nuestros-servicios"
       aria-labelledby="servicios-titulo"
-      className="relative w-full overflow-hidden bg-white py-16 sm:py-20 lg:py-24"
+      className="relative w-full overflow-hidden bg-mint py-16 sm:py-20 lg:py-24"
     >
+      {/* 📍 Fondo Vectorial con Opacidad Suavizada para No Interferir con la Lectura */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-15 bg-[url('/assets/patron-1.svg')] bg-repeat bg-top-left [background-size:1400px] md:bg-auto"
+      ></div>
+
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        
-        {/* ENCABEZADO */}
-        <div className="mx-auto max-w-3xl text-center">
+
+        {/* 1. ENCABEZADO DENTRO DE "STICKER CARD" PARA MÁXIMO CONTRASTE */}
+        <div className="mx-auto max-w-3xl text-center rounded-3xl border-2 border-black bg-white p-6 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-pink-soft px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             ✦ NUESTROS SERVICIOS
           </p>
@@ -74,43 +79,49 @@ export default function NuestrosServicios() {
             </span>
           </h2>
 
-          <p className="mt-4 font-jakarta text-base leading-relaxed text-gray-700 sm:text-lg">
+          <p className="mt-4 font-jakarta text-base leading-relaxed text-gray-800 font-medium sm:text-lg">
             En La Magia de Cantar cada voz tiene una ruta. Encuentra el proceso que necesitas e invierte en línea de forma fácil y segura.
           </p>
 
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-4 pt-2">
-            <span className="inline-flex items-center gap-1.5 font-poppins text-xs font-bold text-gray-800">
+          {/* Badges en Cajas Sólidas con Borde Negro */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3 pt-2">
+            <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#F8FAFC] px-3.5 py-1.5 font-poppins text-xs font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <ShieldCheck className="h-4 w-4 text-emerald-600" /> Pago seguro
             </span>
-            <span className="inline-flex items-center gap-1.5 font-poppins text-xs font-bold text-gray-800">
+            <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#F8FAFC] px-3.5 py-1.5 font-poppins text-xs font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <Sparkles className="h-4 w-4 text-amber-500" /> Planes flexibles
             </span>
           </div>
         </div>
 
-        {/* NAVEGACIÓN DE CATEGORÍAS */}
-        <div className="mt-10 sm:hidden px-2">
-          <label htmlFor="mobile-category-select" className="mb-2 block text-center font-poppins text-xs font-black uppercase tracking-wider text-gray-500">
-            Estoy buscando:
-          </label>
-          <div className="relative">
-            <select
-              id="mobile-category-select"
-              value={activeFilter}
-              onChange={(e) => setActiveFilter(e.target.value)}
-              className="w-full rounded-2xl border-2 border-black bg-white px-4 py-3 font-poppins text-xs font-bold text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] focus:outline-none"
-            >
-              {CATEGORIES.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        {/* 2. NAVEGACIÓN DE CATEGORÍAS */}
+        <div className="mt-8 sm:hidden sticky top-4 z-20 px-2">
+  <div className="rounded-2xl border-2 border-black bg-yellow p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <label
+      htmlFor="mobile-category-select"
+      className="mb-1.5 flex items-center justify-center gap-1.5 font-poppins text-[11px] font-black uppercase tracking-wider text-black"
+    >
+      <span>✨ ESTOY BUSCANDO:</span>
+    </label>
+    <div className="relative">
+      <select
+        id="mobile-category-select"
+        value={activeFilter}
+        onChange={(e) => setActiveFilter(e.target.value)}
+        className="w-full rounded-xl border-2 border-black bg-white px-3.5 py-2.5 font-poppins text-xs font-extrabold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] focus:outline-none focus:ring-2 focus:ring-purple"
+      >
+        {CATEGORIES.map((category) => (
+          <option key={category} value={category}>
+            {category}
+          </option>
+        ))}
+      </select>
+    </div>
+  </div>
+</div>
 
         <div className="mt-10 hidden sm:block">
-          <p className="mb-3 text-center font-poppins text-xs font-black uppercase tracking-wider text-gray-500">
+          <p className="mb-3 text-center font-poppins text-xs font-black uppercase tracking-wider text-black">
             Estoy buscando:
           </p>
           <div className="flex items-center gap-2 overflow-x-auto pb-4 pt-1 justify-center no-scrollbar px-2">
@@ -118,11 +129,10 @@ export default function NuestrosServicios() {
               <button
                 key={category}
                 onClick={() => setActiveFilter(category)}
-                className={`whitespace-nowrap shrink-0 rounded-xl border-2 border-black px-4 py-2 font-poppins text-xs font-bold transition-all duration-200 ${
-                  activeFilter === category
-                    ? "bg-purple text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] -translate-y-0.5"
-                    : "bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                }`}
+                className={`whitespace-nowrap shrink-0 rounded-xl border-2 border-black px-4 py-2 font-poppins text-xs font-bold transition-all duration-200 ${activeFilter === category
+                  ? "bg-purple text-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] -translate-y-0.5"
+                  : "bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                  }`}
               >
                 {category}
               </button>
@@ -130,18 +140,16 @@ export default function NuestrosServicios() {
           </div>
         </div>
 
-        {/* GRILLA DE TARJETAS */}
-        <div className={`mt-8 grid gap-4 ${
-          filteredServices.length === 1 
-            ? "max-w-md mx-auto grid-cols-1" 
-            : filteredServices.length === 2
+        {/* 3. GRILLA DE TARJETAS */}
+        <div className={`mt-8 grid gap-4 ${filteredServices.length === 1
+          ? "max-w-md mx-auto grid-cols-1"
+          : filteredServices.length === 2
             ? "max-w-3xl mx-auto grid-cols-1 md:grid-cols-2"
             : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-        }`}>
+          }`}>
           {filteredServices.map((service) => {
             const isExpanded = !!expandedCards[service.id];
-            
-            // Selección por defecto del plan recomendado
+
             const recommendedIdx = service.plans.findIndex(p => p.isRecommended);
             const defaultIdx = recommendedIdx !== -1 ? recommendedIdx : 0;
             const currentPlanIdx = selectedPlanIndexes[service.id] ?? defaultIdx;
@@ -151,12 +159,11 @@ export default function NuestrosServicios() {
               <article
                 key={service.id}
                 id={service.id}
-                className={`group relative flex flex-col justify-between rounded-3xl border-2 border-black bg-white p-5 transition-all duration-300 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] ${
-                  service.isSpecial ? "bg-[#FEF9C3]/40 border-amber-500" : ""
-                }`}
+                className={`group relative flex flex-col justify-between rounded-3xl border-2 border-black bg-white p-5 transition-all duration-300 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)] ${service.isSpecial ? "bg-[#FEF9C3] border-amber-500" : ""
+                  }`}
               >
                 <div>
-                  {/* Encabezado */}
+                  {/* Encabezado Tarjeta */}
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <span className="inline-block rounded-md border border-black bg-pink-soft/80 px-2.5 py-0.5 font-poppins text-[10px] font-black uppercase text-black">
@@ -206,11 +213,10 @@ export default function NuestrosServicios() {
                             <button
                               key={planOpt.id}
                               onClick={() => handleSelectPlan(service.id, idx)}
-                              className={`relative rounded-lg py-1.5 font-poppins text-xs font-black transition-all ${
-                                isSelected
-                                  ? "border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
-                                  : "text-gray-600 hover:text-black"
-                              }`}
+                              className={`relative rounded-lg py-1.5 font-poppins text-xs font-black transition-all ${isSelected
+                                ? "border-2 border-black bg-white text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                                : "text-gray-600 hover:text-black"
+                                }`}
                             >
                               {planOpt.label}
                               {planOpt.isRecommended && (
@@ -255,7 +261,7 @@ export default function NuestrosServicios() {
                       onClick={() => toggleExpandCard(service.id)}
                       className="inline-flex items-center gap-1 font-poppins text-xs font-black uppercase tracking-wider text-purple hover:underline"
                     >
-                      {isExpanded ? "Ocultar detalles" : "Ver qué aprende y descripción"} 
+                      {isExpanded ? "Ocultar detalles" : "Ver qué aprende y descripción"}
                       {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </button>
 
@@ -286,8 +292,8 @@ export default function NuestrosServicios() {
                 <div className="mt-6 pt-2">
                   <a
                     href={
-                      service.isCustomQuote 
-                        ? "#formulario-cotizacion" 
+                      service.isCustomQuote
+                        ? "#formulario-cotizacion"
                         : `#formulario-compra?service=${service.id}&plan=${selectedPlan?.id || "mensual"}`
                     }
                     className="flex w-full items-center justify-center rounded-xl border-2 border-black bg-mint px-6 py-3.5 font-poppins text-sm font-black uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 hover:bg-mint/80 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0"
@@ -300,11 +306,13 @@ export default function NuestrosServicios() {
           })}
         </div>
 
-        {/* FRASE DE CIERRE */}
-        <div className="mt-16 text-center">
-          <p className="font-jakarta text-sm font-bold text-gray-500 uppercase tracking-widest">
-            &ldquo;Tu voz puede empezar desde cualquier lugar. Lo importante es entrenarla con intención y llevarla más lejos.&rdquo;
-          </p>
+        {/* 4. FRASE DE CIERRE DE SECCIÓN DENTRO DE STICKER BOX */}
+        <div className="mt-12 text-center">
+          <div className="mx-auto max-w-xl rounded-2xl border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <p className="font-jakarta text-xs font-black text-black uppercase tracking-widest">
+              &ldquo;Tu voz puede empezar desde cualquier lugar. Lo importante es entrenarla con intención y llevarla más lejos.&rdquo;
+            </p>
+          </div>
         </div>
 
       </div>
