@@ -19,21 +19,21 @@ export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
   // ⚡ AQUÍ USAMOS EL AWAIT
   const supabase = await createClient();
 
-  const { error } = await supabase.from("company_quotes").insert({
-    company_name: data.companyName,
-    entity_type: data.entityType || null,
-    contact_name: data.contactName,
-    job_title: data.jobTitle,
-    email: data.email,
-    phone: data.phone,
-    city: data.city,
-    location_type: data.locationType || null,
-    participants_range: data.participantsRange || null,
-    service_interest: data.serviceInterest || null,
-    objective: data.objective || null,
-    tentative_date: data.tentativeDate || null,
-    desired_duration: data.desiredDuration || null,
-    message: data.message || null,
+  const { error } = await supabase.rpc("submit_company_quote", {
+    p_company_name: data.companyName,
+    p_entity_type: data.entityType || null,
+    p_contact_name: data.contactName,
+    p_job_title: data.jobTitle,
+    p_email: data.email,
+    p_phone: data.phone,
+    p_city: data.city,
+    p_location_type: data.locationType || null,
+    p_participants_range: data.participantsRange || null,
+    p_service_interest: data.serviceInterest || null,
+    p_objective: data.objective || null,
+    p_tentative_date: data.tentativeDate || null,
+    p_desired_duration: data.desiredDuration || null,
+    p_message: data.message || null,
   });
 
   if (error) {
