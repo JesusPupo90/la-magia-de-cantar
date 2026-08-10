@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ChevronDown,
   ChevronUp,
@@ -22,6 +22,7 @@ export default function NuestrosServicios() {
   const [activeFilter, setActiveFilter] = useState(CATEGORIES[0]);
   const [selectedPlanIndexes, setSelectedPlanIndexes] = useState<{ [serviceId: string]: number }>({});
   const [expandedCards, setExpandedCards] = useState<{ [serviceId: string]: boolean }>({});
+  const lastScrolled = useRef<string | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -38,6 +39,16 @@ export default function NuestrosServicios() {
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
+
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (!hash || lastScrolled.current === hash) return;
+    const el = document.getElementById(hash);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      lastScrolled.current = hash;
+    }
+  }, [activeFilter]);
 
   const filteredServices = SERVICES.filter(s => s.category === activeFilter);
 

@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- native anchors are required so the browser fires hashchange for same-page service deep links */
 "use client";
 
 import Link from "next/link";
@@ -172,14 +173,46 @@ export default function Footer() {
               Servicios Destacados
             </h4>
             <ul className="space-y-2.5 text-xs text-neutral-400 font-poppins">
-              <li>Clases de canto en Bogotá</li>
-              <li>Técnica vocal</li>
-              <li>Entrenamiento vocal para niños</li>
-              <li>Entrenamiento vocal para adolescentes</li>
-              <li>Canto para adultos</li>
-              <li>Técnica vocal con Yanetsis Alfonso</li>
-              <li>Coaching artístico</li>
-              <li>Entrenamiento vocal corporativo</li>
+              <li>
+                <a href="/#tecnica-vocal-ind" className="hover:text-white transition-colors">
+                  Clases de canto en Bogotá
+                </a>
+              </li>
+              <li>
+                <a href="/#tecnica-vocal-ind" className="hover:text-white transition-colors">
+                  Técnica vocal
+                </a>
+              </li>
+              <li>
+                <a href="/#kids-grupales" className="hover:text-white transition-colors">
+                  Entrenamiento vocal para niños
+                </a>
+              </li>
+              <li>
+                <a href="/#teens-grupales" className="hover:text-white transition-colors">
+                  Entrenamiento vocal para adolescentes
+                </a>
+              </li>
+              <li>
+                <a href="/#adultos-grupales" className="hover:text-white transition-colors">
+                  Canto para adultos
+                </a>
+              </li>
+              <li>
+                <a href="/#tecnica-yanetsis" className="hover:text-white transition-colors">
+                  Técnica vocal con Yanetsis Alfonso
+                </a>
+              </li>
+              <li>
+                <a href="/#coaching-yanetsis" className="hover:text-white transition-colors">
+                  Coaching artístico
+                </a>
+              </li>
+              <li>
+                <a href="/#empresas-e-instituciones" className="hover:text-white transition-colors">
+                  Entrenamiento vocal corporativo
+                </a>
+              </li>
             </ul>
           </div>
 
