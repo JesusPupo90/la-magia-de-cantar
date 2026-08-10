@@ -1,7 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Send, Briefcase, ChevronRight, ChevronLeft, AlertCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { CheckCircle2, Send, Briefcase, ChevronRight, ChevronLeft, AlertCircle, Loader2 } from "lucide-react";
+import { cotizacionEmpresaSchema, type CotizacionEmpresaInput } from "@/lib/schemas/cotizacion.schema";
+import { submitCompanyQuote } from "@/app/actions/cotizaciones";
 
 const WORK_AREAS = [
   {
@@ -74,82 +78,69 @@ const ENTITY_TYPES = ["Empresa privada", "Institución educativa", "Entidad púb
 const LOCATION_OPTIONS = ["En sus instalaciones", "En La Magia de Cantar", "Virtual", "Híbrido"];
 const PARTICIPANT_OPTIONS = ["1 a 5 personas", "6 a 15 personas", "16 a 30 personas", "Más de 30 personas"];
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const PHONE_RE = /^\+?[\d\s()-]{7,30}$/;
-
 export default function EmpresasEInstituciones() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [stepError, setStepError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
-  const [formData, setFormData] = useState({
-    empresa: "",
-    tipoEntidad: "",
-    nombreContacto: "",
-    cargo: "",
-    email: "",
-    telefono: "",
-    ciudad: "",
-    lugar: "",
-    participantes: "",
-    servicioInteres: "",
-    objetivo: "",
-    duracionDeseada: "",
+  const {
+    register,
+    handleSubmit: rhfHandleSubmit,
+    trigger,
+    watch,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CotizacionEmpresaInput>({
+    resolver: zodResolver(cotizacionEmpresaSchema),
+    mode: "onTouched",
+    defaultValues: {
+      companyName: "",
+      entityType: "",
+      contactName: "",
+      jobTitle: "",
+      email: "",
+      phone: "",
+      city: "",
+      locationType: "",
+      participantsRange: "",
+      serviceInterest: "",
+      objective: "",
+      tentativeDate: "",
+      desiredDuration: "",
+      message: "",
+    },
   });
 
-  const validateStep = (step: number) => {
-    setStepError("");
-    if (step === 1) {
-      if (!formData.tipoEntidad) {
-        setStepError("Por favor selecciona el tipo de entidad.");
-        return false;
-      }
-      if (!formData.empresa.trim()) {
-        setStepError("Por favor ingresa el nombre de la empresa o entidad.");
-        return false;
-      }
-    }
-    return true;
-  };
+  const values = watch();
 
-  const nextStep = () => {
-    if (validateStep(currentStep)) {
-      if (currentStep < 3) {
-        setStepError("");
-        setCurrentStep(prev => prev + 1);
-      }
+  const STEP_1_FIELDS: (keyof CotizacionEmpresaInput)[] = ["companyName"];
+  const STEP_3_FIELDS: (keyof CotizacionEmpresaInput)[] = ["contactName", "jobTitle", "email", "phone", "city"];
+
+  const currentStepFields =
+    currentStep === 1 ? STEP_1_FIELDS : currentStep === 3 ? STEP_3_FIELDS : [];
+
+  const bannerMessage =
+    currentStepFields.map((field) => errors[field]?.message).find(Boolean) || submitError;
+
+  const nextStep = async () => {
+    if (currentStep >= 3) return;
+    if (currentStepFields.length === 0 || (await trigger(currentStepFields))) {
+      setCurrentStep(prev => prev + 1);
     }
   };
 
   const prevStep = () => {
-    setStepError("");
+    setSubmitError("");
     if (currentStep > 1) setCurrentStep(prev => prev - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const nombreContacto = formData.nombreContacto.trim();
-    const cargo = formData.cargo.trim();
-    const email = formData.email.trim();
-    const telefono = formData.telefono.trim();
-    const ciudad = formData.ciudad.trim();
-    const empresa = formData.empresa.trim();
-    const objetivo = formData.objetivo.trim();
-
-    if (!nombreContacto || !cargo || !email || !telefono || !ciudad) {
-      setStepError("Por favor completa los campos de contacto requeridos (*).");
+  const onSubmit = async (data: CotizacionEmpresaInput) => {
+    setSubmitError("");
+    const result = await submitCompanyQuote(data);
+    if (!result.success) {
+      setSubmitError(result.message || "Ocurrió un error al enviar la solicitud. Inténtalo de nuevo.");
       return;
     }
-    if (!EMAIL_RE.test(email)) {
-      setStepError("Por favor ingresa un correo válido.");
-      return;
-    }
-    if (!PHONE_RE.test(telefono)) {
-      setStepError("Por favor ingresa un teléfono válido (dígitos, espacios, + y -).");
-      return;
-    }
-    setStepError("");
-    setFormData({ ...formData, nombreContacto, cargo, email, telefono, ciudad, empresa, objetivo });
     setIsSubmitted(true);
   };
 
@@ -287,20 +278,8 @@ export default function EmpresasEInstituciones() {
                   onClick={() => {
                     setIsSubmitted(false);
                     setCurrentStep(1);
-                    setFormData({
-                      empresa: "",
-                      tipoEntidad: "",
-                      nombreContacto: "",
-                      cargo: "",
-                      email: "",
-                      telefono: "",
-                      ciudad: "",
-                      lugar: "",
-                      participantes: "",
-                      servicioInteres: "",
-                      objetivo: "",
-                      duracionDeseada: "",
-                    });
+                    setSubmitError("");
+                    reset();
                   }}
                   className="mt-6 inline-flex items-center gap-2 rounded-xl border-2 border-black bg-white px-5 py-2.5 font-poppins text-xs font-black uppercase text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-50"
                 >
@@ -329,8 +308,11 @@ export default function EmpresasEInstituciones() {
                 </div>
 
                 <form
-                  onSubmit={handleSubmit}
+                  onSubmit={rhfHandleSubmit(onSubmit)}
                   noValidate
+                  onChange={() => {
+                    if (submitError) setSubmitError("");
+                  }}
                   onKeyDown={(e) => {
                     const tag = (e.target as HTMLElement).tagName;
                     if (e.key === "Enter" && (tag === "INPUT" || tag === "SELECT")) {
@@ -346,16 +328,12 @@ export default function EmpresasEInstituciones() {
                       
                       <div>
                         <label className="block font-poppins text-xs font-black uppercase text-black mb-1.5">
-                          Tipo de entidad *
+                          Tipo de entidad
                         </label>
                         <select
-                          value={formData.tipoEntidad}
-                          onChange={(e) => {
-                            setFormData({ ...formData, tipoEntidad: e.target.value });
-                            setStepError("");
-                          }}
+                          {...register("entityType")}
                           className={`w-full rounded-xl border-2 border-black px-4 py-3 font-jakarta text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                            formData.tipoEntidad === "" ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
+                            !values.entityType ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
                           }`}
                         >
                           <option value="" disabled hidden>
@@ -377,11 +355,7 @@ export default function EmpresasEInstituciones() {
                           type="text"
                           placeholder="Ej: Banco Nacional / Universidad X"
                           maxLength={120}
-                          value={formData.empresa}
-                          onChange={(e) => {
-                            setFormData({ ...formData, empresa: e.target.value });
-                            setStepError("");
-                          }}
+                          {...register("companyName")}
                           className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                         />
                       </div>
@@ -391,10 +365,9 @@ export default function EmpresasEInstituciones() {
                           Número estimado de participantes
                         </label>
                         <select
-                          value={formData.participantes}
-                          onChange={(e) => setFormData({ ...formData, participantes: e.target.value })}
+                          {...register("participantsRange")}
                           className={`w-full rounded-xl border-2 border-black px-4 py-3 font-jakarta text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                            formData.participantes === "" ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
+                            !values.participantsRange ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
                           }`}
                         >
                           <option value="" disabled hidden>
@@ -420,13 +393,9 @@ export default function EmpresasEInstituciones() {
                           Lugar preferido para la capacitación
                         </label>
                         <select
-                          value={formData.lugar}
-                          onChange={(e) => {
-                            setFormData({ ...formData, lugar: e.target.value });
-                            setStepError("");
-                          }}
+                          {...register("locationType")}
                           className={`w-full rounded-xl border-2 border-black px-4 py-3 font-jakarta text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                            formData.lugar === "" ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
+                            !values.locationType ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
                           }`}
                         >
                           <option value="" disabled hidden>
@@ -446,13 +415,9 @@ export default function EmpresasEInstituciones() {
                             Área de interés principal
                           </label>
                           <select
-                            value={formData.servicioInteres}
-                            onChange={(e) => {
-                              setFormData({ ...formData, servicioInteres: e.target.value });
-                              setStepError("");
-                            }}
+                            {...register("serviceInterest")}
                             className={`w-full rounded-xl border-2 border-black px-4 py-3 font-jakarta text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                              formData.servicioInteres === "" ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
+                              !values.serviceInterest ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
                             }`}
                           >
                             <option value="" disabled hidden>
@@ -474,10 +439,9 @@ export default function EmpresasEInstituciones() {
                             Duración o formato deseado
                           </label>
                           <select
-                            value={formData.duracionDeseada}
-                            onChange={(e) => setFormData({ ...formData, duracionDeseada: e.target.value })}
+                            {...register("desiredDuration")}
                             className={`w-full rounded-xl border-2 border-black px-4 py-3 font-jakarta text-sm font-semibold focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ${
-                              formData.duracionDeseada === "" ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
+                              !values.desiredDuration ? "bg-gray-50 text-gray-500" : "bg-gray-50 text-black"
                             }`}
                           >
                             <option value="" disabled hidden>
@@ -494,14 +458,24 @@ export default function EmpresasEInstituciones() {
 
                       <div>
                         <label className="block font-poppins text-xs font-black uppercase text-black mb-1.5">
+                          Fecha tentativa (Opcional)
+                        </label>
+                        <input
+                          type="date"
+                          {...register("tentativeDate")}
+                          className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-poppins text-xs font-black uppercase text-black mb-1.5">
                           ¿Qué objetivo o reto quieren resolver? (Opcional)
                         </label>
                         <textarea
                           rows={2}
                           maxLength={1000}
                           placeholder="Ej: Preparar a nuestros voceros para una rueda de prensa..."
-                          value={formData.objetivo}
-                          onChange={(e) => setFormData({ ...formData, objetivo: e.target.value })}
+                          {...register("objective")}
                           className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                         />
                       </div>
@@ -520,11 +494,7 @@ export default function EmpresasEInstituciones() {
                             type="text"
                             placeholder="Ej: Laura Pérez"
                             maxLength={120}
-                            value={formData.nombreContacto}
-                            onChange={(e) => {
-                              setFormData({ ...formData, nombreContacto: e.target.value });
-                              setStepError("");
-                            }}
+                            {...register("contactName")}
                             className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                           />
                         </div>
@@ -537,11 +507,7 @@ export default function EmpresasEInstituciones() {
                             type="text"
                             placeholder="Ej: Gerente de RRHH"
                             maxLength={80}
-                            value={formData.cargo}
-                            onChange={(e) => {
-                              setFormData({ ...formData, cargo: e.target.value });
-                              setStepError("");
-                            }}
+                            {...register("jobTitle")}
                             className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                           />
                         </div>
@@ -556,11 +522,7 @@ export default function EmpresasEInstituciones() {
                             type="email"
                             placeholder="contacto@empresa.com"
                             maxLength={254}
-                            value={formData.email}
-                            onChange={(e) => {
-                              setFormData({ ...formData, email: e.target.value });
-                              setStepError("");
-                            }}
+                            {...register("email")}
                             className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                           />
                         </div>
@@ -573,11 +535,7 @@ export default function EmpresasEInstituciones() {
                             type="tel"
                             placeholder="+57 300 000 0000"
                             maxLength={30}
-                            value={formData.telefono}
-                            onChange={(e) => {
-                              setFormData({ ...formData, telefono: e.target.value });
-                              setStepError("");
-                            }}
+                            {...register("phone")}
                             className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                           />
                         </div>
@@ -591,11 +549,20 @@ export default function EmpresasEInstituciones() {
                           type="text"
                           placeholder="Ej: Bogotá / Barranquilla"
                           maxLength={80}
-                          value={formData.ciudad}
-                          onChange={(e) => {
-                            setFormData({ ...formData, ciudad: e.target.value });
-                            setStepError("");
-                          }}
+                          {...register("city")}
+                          className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block font-poppins text-xs font-black uppercase text-black mb-1.5">
+                          Mensaje (Opcional)
+                        </label>
+                        <textarea
+                          rows={3}
+                          maxLength={1000}
+                          placeholder="Cuéntanos más sobre tu organización o lo que necesitas..."
+                          {...register("message")}
                           className="w-full rounded-xl border-2 border-black bg-gray-50 px-4 py-3 font-jakarta text-sm text-black placeholder-gray-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-purple shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
                         />
                       </div>
@@ -606,14 +573,14 @@ export default function EmpresasEInstituciones() {
                   <div
                     aria-live="polite"
                     className={`grid transition-[grid-template-rows] duration-300 ease-out ${
-                      stepError ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                      bannerMessage ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
                     }`}
                   >
                     <div className="min-h-0 overflow-hidden">
-                      {stepError && (
+                      {bannerMessage && (
                         <div className="flex items-center gap-2 rounded-xl border-2 border-black bg-pink-soft p-3 text-xs font-extrabold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] animate-fadeIn">
                           <AlertCircle className="h-4 w-4 shrink-0 text-red-600" />
-                          <span>{stepError}</span>
+                          <span>{bannerMessage}</span>
                         </div>
                       )}
                     </div>
@@ -645,13 +612,22 @@ export default function EmpresasEInstituciones() {
 
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       className={
                         currentStep < 3
                           ? "hidden"
-                          : "inline-flex items-center gap-2 rounded-xl border-2 border-black bg-yellow px-6 py-3 font-poppins text-xs font-black uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow/90"
+                          : "inline-flex items-center gap-2 rounded-xl border-2 border-black bg-yellow px-6 py-3 font-poppins text-xs font-black uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-yellow/90 disabled:cursor-not-allowed disabled:opacity-70"
                       }
                     >
-                      <Send className="h-4 w-4" /> SOLICITAR PROPUESTA
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" /> Enviando...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="h-4 w-4" /> SOLICITAR PROPUESTA
+                        </>
+                      )}
                     </button>
                   </div>
 
