@@ -29,7 +29,7 @@ const SocialIcons = {
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-neutral-900 text-neutral-300 font-jakarta border-t border-neutral-800">
+    <footer id="footer" className="w-full bg-neutral-900 text-neutral-300 font-jakarta border-t border-neutral-800">
 
       {/* 1. BANNER CON FRASE DE CIERRE */}
       <div className="border-b border-neutral-800 py-10 px-4 sm:px-6 lg:px-8 text-center bg-neutral-950/50">

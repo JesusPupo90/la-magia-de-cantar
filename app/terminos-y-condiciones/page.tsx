@@ -13,7 +13,7 @@ export default function TerminosCondicionesPage() {
 
       <div className="relative z-10 mx-auto max-w-4xl">
         <Link
-          href="/"
+          href="/#footer"
           className="inline-flex items-center gap-2 rounded-xl border-2 border-black bg-white px-4 py-2 font-poppins text-xs font-black uppercase text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:-translate-y-0.5 transition-transform mb-8"
         >
           <ArrowLeft className="h-4 w-4" /> Volver al Inicio
