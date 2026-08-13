@@ -47,7 +47,7 @@ export const DURACION_DESEADA_OPTIONS = [
 ] as const;
 
 // Helper para transformar valores vacíos de selecciones opcionales a undefined
-const optionalString = z.string().optional().or(z.literal(""));
+const optionalString = z.string().max(80).optional().or(z.literal(""));
 
 // 🛡️ ESQUEMA ALINEADO CON LA BASE DE DATOS
 export const cotizacionEmpresaSchema = z.object({
@@ -55,43 +55,54 @@ export const cotizacionEmpresaSchema = z.object({
   companyName: z
     .string({ message: "El nombre de la empresa es obligatorio" })
     .min(2, "El nombre de la empresa es obligatorio")
+    .max(120, "El nombre de la empresa no puede superar 120 caracteres")
     .trim(),
 
   contactName: z
     .string({ message: "El nombre del contacto es obligatorio" })
     .min(2, "El nombre del contacto es obligatorio")
+    .max(80, "El nombre del contacto no puede superar 80 caracteres")
     .trim(),
 
   jobTitle: z
     .string({ message: "El cargo es obligatorio" })
     .min(2, "El cargo es obligatorio")
+    .max(80, "El cargo no puede superar 80 caracteres")
     .trim(),
 
   email: z
     .string({ message: "El correo electrónico es obligatorio" })
     .email("Ingresa un correo electrónico válido")
+    .max(254, "El correo electrónico no puede superar 254 caracteres")
     .toLowerCase()
     .trim(),
 
   phone: z
     .string({ message: "El teléfono o WhatsApp es obligatorio" })
     .min(7, "Ingresa un número válido (mínimo 7 dígitos)")
+    .max(20, "Ingresa un número válido (máximo 20 caracteres)")
+    .regex(/^[0-9+()\-\s]{7,20}$/, "Ingresa un número de teléfono válido")
     .trim(),
 
   city: z
     .string({ message: "La ciudad es obligatoria" })
     .min(2, "La ciudad es obligatoria")
+    .max(80, "La ciudad no puede superar 80 caracteres")
     .trim(),
+
+  honeypot: z.string().optional(),
 
   // 🟢 CAMPOS OPCIONALES (NULL en SQL)
   entityType: optionalString,
   locationType: optionalString,
   participantsRange: optionalString,
   serviceInterest: optionalString,
-  objective: optionalString,
+  objective: z.string().max(2000).optional().or(z.literal("")),
   tentativeDate: optionalString,
   desiredDuration: optionalString,
-  message: optionalString,
+  message: z.string().max(2000).optional().or(z.literal("")),
 });
+
+
 
 export type CotizacionEmpresaInput = z.infer<typeof cotizacionEmpresaSchema>;

@@ -3,6 +3,7 @@
 
 import { cotizacionEmpresaSchema, CotizacionEmpresaInput } from "@/lib/schemas/cotizacion.schema";
 import { createClient } from "@/lib/supabase/server";
+import { sendQuoteNotification } from "@/lib/email";
 
 export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
   const validation = cotizacionEmpresaSchema.safeParse(formData);
@@ -15,9 +16,26 @@ export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
   }
 
   const data = validation.data;
-  
+
   // ⚡ AQUÍ USAMOS EL AWAIT
   const supabase = await createClient();
+
+  // 🍯 Honeypot anti-spam
+  if (data.honeypot && data.honeypot.trim() !== "") {
+    return { success: true, message: "Solicitud enviada correctamente." };
+  }
+
+  // 🔁 Dedupe por email: evita spam repetido sin informar al atacante
+  const existing = await supabase
+    .from("company_quotes")
+    .select("id")
+    .eq("email", data.email)
+    .limit(1)
+    .maybeSingle();
+
+  if (existing.data) {
+    return { success: true, message: "Solicitud enviada correctamente." };
+  }
 
   const { error } = await supabase.rpc("submit_company_quote", {
     p_company_name: data.companyName,
@@ -43,6 +61,9 @@ export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
       message: "Ocurrió un error al enviar la solicitud. Inténtalo de nuevo.",
     };
   }
+
+  // 📧 Notificación al dueño (inactiva hasta configurar las claves en .env.local)
+  await sendQuoteNotification(data);
 
   return {
     success: true,

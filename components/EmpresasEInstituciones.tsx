@@ -96,6 +96,7 @@ export default function EmpresasEInstituciones() {
     defaultValues: {
       companyName: "",
       entityType: "",
+      honeypot: "",
       contactName: "",
       jobTitle: "",
       email: "",
@@ -322,6 +323,17 @@ export default function EmpresasEInstituciones() {
                   className="space-y-6"
                 >
                   
+                  {/* 🍯 Honeypot anti-spam */}
+                  <input
+                    {...register("honeypot")}
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    aria-label="No llenar este campo"
+                    className="absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
+                  />
+
                   {/* PASO 1: TU ENTIDAD */}
                   {currentStep === 1 && (
                     <div className="space-y-5 animate-fadeIn">
