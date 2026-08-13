@@ -332,11 +332,52 @@ create policy "catalog_select" on public.service_variants
 -- Grant explícito por seguridad (refuerza default privileges de Supabase).
 grant select on public.categories, public.services, public.service_variants to anon, authenticated;
 
+-- Grants para service_role (Server Actions / webhooks / scripts):
+-- omiten RLS pero requieren privilege sobre las tablas.
+grant select, insert, update, delete on public.orders, public.order_payments, public.webhook_logs to service_role;
+grant select on public.categories, public.services, public.service_variants to service_role;
+
+-- ============================================================================
+-- 8b. VISTA: ESTUDIANTES QUE HAN PAGADO (operación de la academia)
+-- ============================================================================
+
+-- Lista de estudiantes con pago confirmado + detalle del servicio adquirido.
+-- Los datos viven en orders (snapshot inmutable); la vista solo la presenta.
+create or replace view public.v_students_paid as
+select
+  o.id                      as order_id,
+  o.student_first_name      as student_first_name,
+  o.student_last_name       as student_last_name,
+  o.student_age             as student_age,
+  o.student_notes           as student_notes,
+  o.service_title           as service_title,
+  o.variant_label           as variant_label,
+  o.amount_total            as amount_total,
+  o.currency                as currency,
+  o.payer_email             as payer_email,
+  o.payer_first_name        as payer_first_name,
+  o.payer_last_name         as payer_last_name,
+  o.payer_doc_type          as payer_doc_type,
+  o.payer_doc_number        as payer_doc_number,
+  o.payer_phone             as payer_phone,
+  o.mp_order_id             as mp_order_id,
+  o.mp_payment_method       as mp_payment_method,
+  o.mp_status_detail        as mp_status_detail,
+  o.paid_at                 as paid_at,
+  o.created_at              as created_at
+from public.orders o
+where o.status = 'paid';
+
+-- Acceso a la vista: solo service_role / postgres (contiene PII). Sin anon.
+grant select on public.v_students_paid to service_role;
+
 -- ============================================================================
 -- 9. NOTAS DE IMPLEMENTACIÓN
 -- ============================================================================
 --  - RLS implementado (sección 8). La UI lee el catálogo con anon key; la
 --    escritura de orders/order_payments/webhook_logs SOLO vía service-role.
+--  - Vista v_students_paid (sección 8b): estudiantes con pago confirmado +
+--    detalle del servicio. Acceso solo service_role (PII).
 --  - Implementado:
 --      * Trigger orders_set_updated_at (sección 7).
 --      * Jobs pg_cron → ver supabase/cron.sql:

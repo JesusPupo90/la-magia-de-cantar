@@ -132,7 +132,9 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 
 ### Formateo para Mercado Pago (Checkout API Orders)
 
-- **Los montos que espera la API son STRINGS con 2 decimales** (`"450000.00"`), no enteros. En el Server Action, partiendo del entero COP de la BD: `const amountStr = (servicePrice / 100).toFixed(2)` — *validar en sandbox la conversión exacta para COP (riesgo de off-by-100 según cómo MP interprete la moneda sin decimales).*
+- **Los montos que espera la API son STRINGS** y, para **COP (moneda sin decimales), deben enviarse como string de dígitos SIN decimales** (`"2299000"`), no como `"2299000.00"`.
+- ⚠️ **Hallazgo validado en sandbox (2026-08):** MP rechaza `"2299000.00"`, `"22990.00"`, `"2299000,00"` y números (`2299000`) con `400 property_value/property_type`. Solo acepta string entero (`"2299000"`). La documentación muestra `"50.00"` por ser moneda con decimales — **no copiar ese formato para COP**.
+- Conversión en el Server Action: `const amountStr = String(servicePrice);` (siempre partiendo del entero COP de la BD).
 - **Regla de consistencia de montos:** `total_amount` DEBE ser igual a la suma de `transactions.payments[].amount`. Ambos se derivan del mismo único origen: `service_variants.price`. 
   - ⚠️ **Trampa conocida:** los 3 ejemplos oficiales de la documentación (`POST /v1/orders`) traen `total_amount` ≠ `payments[].amount` (ej. `50.00` vs `100.00`). Enviarlos así produce `400 invalid_total_amount`. No copiar esos valores: siempre `total_amount == payments[].amount`.
 - El request debe incluir `X-Idempotency-Key` (uuid, 1–150 chars) y `external_reference = orders.id`.
@@ -301,3 +303,39 @@ Idempotencia de eventos (§2): `event_id UNIQUE`, `topic`, `resource_id`, `paylo
     - `purge-stale-drafts` (`0 3 * * *`): drafts > 48h → **DELETE físico** (PII, Ley 1581).
     - ⚠️ Requiere habilitar `pg_cron` en Supabase (Database → Extensions).
 - **Pendiente (futuro, no bloquea):** el modelo no contempla inventario/cupos limitados (la naturaleza del negocio lo permite difícilmente). Si algún día se presentara un evento/taller con cupo, se debe: (a) extender `expire-pending-orders` para liberar el cupo atómicamente, y (b) validar disponibilidad en el Server Action antes de crear la Order (§3).
+
+### 8.9 Credenciales y variables de entorno (Mercado Pago)
+
+Ubicación: `.env.local` (ignorado por git — las claves secretas NUNCA se commitean).
+
+| Variable | Uso | ¿Se expone al cliente? | Formato válido |
+| :--- | :--- | :--- | :--- |
+| `MP_ACCESS_TOKEN` | Backend → `POST /v1/orders` (crear Order en MP) | ❌ Solo servidor | `APP_USR-...` (producción) / `TEST-...` (pruebas) |
+| `MP_WEBHOOK_SECRET` | Backend → verificación de firma del webhook (§2) | ❌ Solo servidor | cadena secreta de MP |
+| `NEXT_PUBLIC_MP_PUBLIC_KEY` | Frontend → inicializar SDK de Bricks (`MpBricks.tsx`) | ✅ Pública por diseño | `APP_USR-...` (producción) / `TESTUSER...` (pruebas) |
+
+**Reglas de oro:**
+- Las 3 credenciales deben pertenecer al **mismo entorno** (producción o pruebas). Mezclar `APP_USR-...` (access token de producción) con una public key `TESTUSER...` (pruebas) rompe la inicialización de Bricks.
+- `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET` solo se leen desde el servidor (Server Actions / Route Handlers / scripts). `NEXT_PUBLIC_MP_PUBLIC_KEY` viaja al navegador (necesaria para el SDK).
+- La **Public Key NO es el Access Token ni el Webhook Secret**: son 3 valores distintos de "Credenciales" en el panel de Mercado Pago.
+- Validación: una public key no funciona como Bearer en la REST API (responde `400 invalid_token` en `identification_types`) — eso es normal; su validación real ocurre client-side al inicializar Bricks. Señal de entorno correcto: las Orders creadas en pruebas llevan prefijo `ORDTST...`.
+
+### 8.10 Vista `v_students_paid` (estudiantes que pagaron)
+
+En `supabase/schema.sql` (§8b) y migración `supabase/migration_v_students_paid.sql`.
+
+Presenta a los estudiantes con **pago confirmado** (`status = 'paid'`) junto con el detalle del servicio adquirido. Los datos viven en `orders` (snapshot inmutable §8.4); la vista solo los proyecta.
+
+| Columna | Fuente |
+| :--- | :--- |
+| `order_id` | `orders.id` |
+| `student_first_name` / `student_last_name` / `student_age` / `student_notes` | Bloque estudiante (§8.4) |
+| `service_title` / `variant_label` | Snapshot del producto |
+| `amount_total` / `currency` | Precio oficial al momento de compra |
+| `payer_email` / `payer_*` | Pagador / facturación |
+| `mp_order_id` / `mp_payment_method` / `mp_status_detail` | Datos de Mercado Pago |
+| `paid_at` / `created_at` | Timestamps |
+
+**Acceso:** solo `service_role` (contiene PII, §6). Sin políticas para `anon`.
+
+**Nota importante sobre el `client_token` de Bricks (validado en sandbox):** MP **NO devuelve `client_token`** si la Order se crea sin el objeto `payer`. El body de `POST /v1/orders` en `lib/orders/create-order.ts` DEBE incluir `payer` (email, nombres, `identification`). Sin esto, el checkout falla con *"la pasarela no devolvió un token de pago"*.

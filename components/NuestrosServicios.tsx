@@ -308,7 +308,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
                     href={
                       service.isCustomQuote
                         ? "#formulario-cotizacion"
-                        : `#formulario-compra?service=${service.id}&plan=${selectedPlan?.id || "mensual"}`
+                        : `/checkout?service=${service.id}&variant=${selectedPlan?.id || "mensual"}`
                     }
                     className="flex w-full items-center justify-center rounded-xl border-2 border-black bg-mint px-6 py-3.5 font-poppins text-sm font-black uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 hover:bg-mint/80 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-y-0"
                   >
