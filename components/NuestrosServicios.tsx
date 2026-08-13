@@ -13,12 +13,15 @@ import {
   Users,
   Calendar
 } from "lucide-react";
-import { SERVICES } from "@/data/services";
+import type { ServiceItem } from "@/data/services";
 import { formatCOP } from "@/utils/formatCurrency";
 
-const CATEGORIES = [...new Set(SERVICES.map(s => s.category))];
+interface NuestrosServiciosProps {
+  services: ServiceItem[];
+}
 
-export default function NuestrosServicios() {
+export default function NuestrosServicios({ services }: NuestrosServiciosProps) {
+  const CATEGORIES = [...new Set(services.map(s => s.category))];
   const [activeFilter, setActiveFilter] = useState(CATEGORIES[0]);
   const [selectedPlanIndexes, setSelectedPlanIndexes] = useState<{ [serviceId: string]: number }>({});
   const [expandedCards, setExpandedCards] = useState<{ [serviceId: string]: boolean }>({});
@@ -28,7 +31,7 @@ export default function NuestrosServicios() {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "");
       if (hash) {
-        const matchedService = SERVICES.find(s => s.id === hash);
+        const matchedService = services.find(s => s.id === hash);
         if (matchedService) {
           setActiveFilter(matchedService.category);
         }
@@ -38,7 +41,7 @@ export default function NuestrosServicios() {
     handleHashChange();
     window.addEventListener("hashchange", handleHashChange);
     return () => window.removeEventListener("hashchange", handleHashChange);
-  }, []);
+  }, [services]);
 
   useEffect(() => {
     const hash = window.location.hash.replace("#", "");
@@ -50,7 +53,7 @@ export default function NuestrosServicios() {
     }
   }, [activeFilter]);
 
-  const filteredServices = SERVICES.filter(s => s.category === activeFilter);
+  const filteredServices = services.filter(s => s.category === activeFilter);
 
   const handleSelectPlan = (serviceId: string, idx: number) => {
     setSelectedPlanIndexes(prev => ({ ...prev, [serviceId]: idx }));
