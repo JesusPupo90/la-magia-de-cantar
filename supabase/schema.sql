@@ -111,10 +111,11 @@ create table public.orders (
   rejected_at          timestamptz,
   refunded_at          timestamptz,
 
-  -- 💳 MERCADO PAGO (Checkout API Orders)
+  -- 💳 MERCADO PAGO (Checkout Pro — preferencias + Payment Brick)
   idempotency_key      uuid,                   -- header X-Idempotency-Key por intento
-  mp_order_id          text,                   -- id de la Order en MP (ORD...)
-  mp_status            text,                   -- status crudo MP (processed / action_required / ...)
+  preference_id        text,                   -- id de la Preferencia en MP (creada por intento)
+  mp_order_id          text,                   -- merchant_order_id de MP (si aplica)
+  mp_status            text,                   -- status crudo MP (approved / pending / rejected / ...)
   mp_status_detail     text,                   -- status_detail MP (accredited / pending_waiting_payment / ...)
   mp_payment_method    text,
   mp_raw               jsonb                   -- respuesta cruda de MP (auditoría)
@@ -125,6 +126,7 @@ create index orders_status_idx on public.orders (status);
 create index orders_expires_at_idx on public.orders (expires_at);
 create index orders_mp_order_id_idx on public.orders (mp_order_id);
 create index orders_external_reference_idx on public.orders (external_reference);
+create index orders_preference_id_idx on public.orders (preference_id);
 
 -- ============================================================================
 -- 4. PAGOS INDIVIDUALES (una Order puede tener varias transacciones)

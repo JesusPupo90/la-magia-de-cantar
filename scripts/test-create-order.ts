@@ -51,16 +51,16 @@ const baseInput = {
 async function checkOrderInDb(orderId: string) {
   const { data, error } = await supabase
     .from("orders")
-    .select("id, external_reference, variant_id, service_title, variant_label, amount_total, status, mp_order_id, mp_status, mp_status_detail, idempotency_key")
+    .select("id, external_reference, variant_id, service_title, variant_label, amount_total, status, preference_id, mp_status, idempotency_key")
     .eq("id", orderId)
     .maybeSingle();
   return { data, error };
 }
 
-async function runCase(name: string, input: unknown) {
+async function runCase(name: string, input: unknown, existingOrderId?: string) {
   console.log(`\n=== ${name} ===`);
   try {
-    const result = await createOrder(input as never);
+    const result = await createOrder(input as never, existingOrderId);
     console.log("result:", JSON.stringify(result, null, 2));
 
     if (result.success && result.orderId) {
@@ -79,8 +79,13 @@ async function main() {
   console.log("MP_ACCESS_TOKEN:", process.env.MP_ACCESS_TOKEN ? "presente" : "FALTA");
   console.log("SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ?? "FALTA");
 
-  // 1. Happy path
-  await runCase("1. Happy path (kids-grupales__trimestral)", baseInput);
+  // 1. Happy path (crea orden + preferencia en MP)
+  const first = await runCase("1. Happy path (kids-grupales__trimestral)", baseInput);
+
+  // 1b. Reintento: debe REUTILIZAR la misma orden (mismo order_id) y crear nueva preferencia.
+  if (first?.success && first.orderId) {
+    await runCase("1b. Reintento (reutiliza misma orden)", baseInput, first.orderId);
+  }
 
   // 2. Variante inexistente
   await runCase("2. Variante inexistente", {

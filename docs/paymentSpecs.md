@@ -15,8 +15,10 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 ### Precios Centralizados en el Servidor
 
 - **Regla de oro:** El cliente (frontend) NUNCA envía montos monetarios al servidor ni a la pasarela.
-- **Flujo:** El frontend solo envía el `service_id` y el `variant_id` (el CTA `#formulario-compra?service=...&plan=...` del UI ya los provee). El Server Action consulta el precio oficial (`service_variants.price`) directo desde Supabase y crea la **Order** en Mercado Pago (`POST /v1/orders`) con ese monto.
-- **Validación anti-manipulación:** El Server Action verifica que el `variant_id` pertenezca al `service_id` recibido (join en BD) y que `service.is_custom_quote = false`. El servicio `coaching-yanetsis` (`is_custom_quote = true`) NUNCA genera Order.
+- **Flujo:** El frontend solo envía el `service_id` y el `variant_id` (el CTA `#formulario-compra?service=...&plan=...` del UI ya los provee). El Server Action consulta el precio oficial (`service_variants.price`) directo desde Supabase y crea la **Preferencia** en Mercado Pago (`POST /checkout/preferences`) con ese monto (`items[].unit_price`) y `external_reference = orders.id`.
+- **Payment Brick:** se monta con `initialization.preferenceId` (Checkout Pro embebido). MP procesa el pago y redirige a los `back_urls` (`/checkout/success`, `/checkout/failure`) con `payment_id`, `status` y `external_reference`. El frontend NUNCA vuelve a tocar el monto ni crea pagos.
+- **Validación anti-manipulación:** El Server Action verifica que el `variant_id` pertenezca al `service_id` recibido (join en BD) y que `service.is_custom_quote = false`. El servicio `coaching-yanetsis` (`is_custom_quote = true`) NUNCA genera preferencia.
+- **Fix de reintentos (1 orden / N intentos):** `createOrder(input, orderId?)` reutiliza la misma fila `orders` si el `orderId` coincide en `variant_id` + `payer_email` y está en `draft|rejected|expired`. Cada intento genera una **nueva Preferencia** (se guarda en `orders.preference_id`) y el pago real queda en `order_payments`. El frontend guarda el `orderId` en `sessionStorage` y lo reenvía en los reintentos.
 
 ### Prevención de Doble Envío (Idempotencia en UI)
 
@@ -37,20 +39,21 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 
 ## 2. ⚡ Arquitectura de Webhooks y Manejo Asíncrono
 
-> **Integración:** Checkout API — Orders (`POST /v1/orders`). El webhook notifica eventos de la Order (topic `order`) y de sus pagos. Ante cualquier evento se **reconcilia contra `GET /v1/orders/{id}`** para confirmar el estado real.
+> **Integración:** Checkout Pro embebido (Payment Brick con `preferenceId`). El webhook recibe notificaciones **topic `payment`** y, opcionalmente, `merchant_order`. Ante cada evento se **reconcilia contra `GET /v1/payments/{id}`** para confirmar el estado real del pago.
 
 ### Verificación de Firma Criptográfica (HMAC / X-Signature)
 
 - La API Route que recibe el webhook (`/api/webhooks/mercadopago`) debe validar obligatoriamente la firma del header recibida desde Mercado Pago utilizando la clave secreta del webhook (`MP_WEBHOOK_SECRET`). Si la firma no es válida, la petición se rechaza con `401 Unauthorized`.
+- **Formato (implementado):** headers `x-signature: ts=...,v1=...` y `x-request-id`. El manifest a firmar es `id:{data.id};request-id:{x-request-id};ts:{ts};` → HMAC-SHA256 con `MP_WEBHOOK_SECRET` en hex, comparado con `v1` (comparación de tiempo constante).
 
 ### Idempotencia en Procesamiento de Eventos
 
-- Para evitar procesar eventos duplicados enviados por reintentos de la pasarela, se debe consultar/registrar el `event_id`/`resource_id` en una tabla `webhook_logs`. Si el ID ya fue procesado, se responde inmediatamente `200 OK` sin reejecutar lógica de negocio (no reenviar emails ni duplicar cupos).
-- **Idempotencia en la creación de la Order:** El Server Action genera un `X-Idempotency-Key` nuevo (uuid) por intento y lo guarda en `orders.idempotency_key`. MP devuelve `409 idempotency_key_already_used` si se reutiliza. Si la Order ya existe para la orden (¿`mp_order_id` presente?), se reutiliza sin crear otra.
+- Para evitar procesar eventos duplicados enviados por reintentos de la pasarela, se consulta/registra el `event_id`/`resource_id` en una tabla `webhook_logs`. Si el ID ya fue procesado, se responde inmediatamente `200 OK` sin reejecutar lógica de negocio.
+- **Idempotencia en la creación de la Preferencia:** El Server Action genera un `X-Idempotency-Key` nuevo (uuid) por intento y lo guarda en `orders.idempotency_key`. Si se reutiliza, MP responde `409`. Cada reintento reutiliza la misma fila `orders` y crea una preferencia nueva (intento histórico en `order_payments`).
 
 ### Reconciliación y Validación de Monto (Anti-Fraude)
 
-- Ante cada evento del webhook, consultar `GET /v1/orders/{id}` y comparar el `total_amount` devuelto contra `orders.amount_total`. Si difieren, **NO** marcar la orden como `paid`; registrar una alerta interna (email/panel) y dejar la orden para revisión manual.
+- Ante cada evento `payment`, consultar `GET /v1/payments/{id}` y comparar `transaction_amount` contra `orders.amount_total` (localizadas por `external_reference == orders.id`). Si difieren, **NO** marcar la orden como `paid`; registrar una alerta interna y dejar la orden para revisión manual.
 
 ### Gestión de Eventos Desordenados
 
@@ -130,23 +133,24 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 
 - Los precios en la base de datos de Supabase se almacenan como enteros puros (`integer` / `bigint`) en COP (ej. `450000`). Se evitan decimales en SQL para prevenir errores de redondeo en coma flotante.
 
-### Formateo para Mercado Pago (Checkout API Orders)
+### Formateo para Mercado Pago (Checkout Pro — Preferencias)
 
-- **Los montos que espera la API son STRINGS** y, para **COP (moneda sin decimales), deben enviarse como string de dígitos SIN decimales** (`"2299000"`), no como `"2299000.00"`.
-- ⚠️ **Hallazgo validado en sandbox (2026-08):** MP rechaza `"2299000.00"`, `"22990.00"`, `"2299000,00"` y números (`2299000`) con `400 property_value/property_type`. Solo acepta string entero (`"2299000"`). La documentación muestra `"50.00"` por ser moneda con decimales — **no copiar ese formato para COP**.
-- Conversión en el Server Action: `const amountStr = String(servicePrice);` (siempre partiendo del entero COP de la BD).
-- **Regla de consistencia de montos:** `total_amount` DEBE ser igual a la suma de `transactions.payments[].amount`. Ambos se derivan del mismo único origen: `service_variants.price`. 
-  - ⚠️ **Trampa conocida:** los 3 ejemplos oficiales de la documentación (`POST /v1/orders`) traen `total_amount` ≠ `payments[].amount` (ej. `50.00` vs `100.00`). Enviarlos así produce `400 invalid_total_amount`. No copiar esos valores: siempre `total_amount == payments[].amount`.
-- El request debe incluir `X-Idempotency-Key` (uuid, 1–150 chars) y `external_reference = orders.id`.
+- **`items[].unit_price` es NUMBER** en la unidad principal de la moneda. Para **COP (moneda sin decimales)** se envía el entero de la BD (`unit_price: 2299000`), igual que `transaction_amount` en `GET /v1/payments` (float, sin `.00`).
+- ⚠️ **Riesgo off-by-100 (validar en sandbox):** según el método de pago (PSE/efectivo), MP puede interpretar la moneda con decimales implícitos. Validar con tarjeta de prueba y con PSE que el monto cobrado coincida exactamente con `orders.amount_total`.
+- La preferencia incluye `external_reference = orders.id` (uuid ≤ 150 chars ✓) y `notification_url = <APP_URL>/api/webhooks/mercadopago`.
+- `back_urls`: `success` y `pending` → `/checkout/success`, `failure` → `/checkout/failure`. Con `auto_return: "approved"`, MP redirige automáticamente al aprobar. Las páginas de resultado son SOLO lectura (spec §4).
+- ⚠️ **Hallazgo validado (2026-08):** `auto_return: "approved"` exige `back_urls`/`notification_url` **HTTPS públicos**. Con `http://localhost:3000` MP responde `400 invalid_auto_return: "back_url.success must be defined"`. `NEXT_PUBLIC_APP_URL` debe ser **HTTPS** (en local: un túnel tipo ngrok). El `auto_return` se mantiene SIEMPRE en el código (no olvidarlo en producción); `create-order.ts` devuelve un error claro si la URL no es HTTPS.
+- ⚠️ **Payment Brick (`MpBricks.tsx`):** el SDK exige `initialization.amount` SIEMPRE, incluso con `preferenceId` (error *"Amount property is required"* si falta). Se envían juntos: `initialization: { preferenceId, amount }` (doc oficial: `amount` es REQUIRED).
+- ⚠️ **Contrato `onError` del Payment Brick:** `BrickError.type` es `"critical" | "non_critical"`. Solo los **critical** (falla de inicialización) deben mostrar un banner; los **non_critical** (p. ej. número de tarjeta inválido mientras se tipea, `no_payment_method_for_provided_bin`) los valida y recupera el propio brick inline → **no tocar estado** ni desmontar la UI. El contenedor `#payment-brick-container` nunca se desmonta/intercambia tras el montaje; los errores críticos viven en un banner separado ARRIBA del brick.
+- Los reintentos crean una **nueva preferencia** bajo la misma `orders` (nuevo `preference_id`); las anteriores quedan como intentos en `order_payments`.
 
 ### Mapeo de Estados Mercado Pago → `order_status`
 
-| MP `status` | MP `status_detail` | BD `order_status` |
+| MP `status` (payment) | MP `status_detail` | BD `order_status` |
 | :--- | :--- | :--- |
-| `processed` | `accredited` | `paid` |
-| `action_required` | `pending_waiting_payment` | `pending_payment` |
-| `rejected` | (cualquiera) | `rejected` |
-| `cancelled` / expirada | — | `expired` |
+| `approved` | `accredited` | `paid` |
+| `in_process` / `pending` | `pending_waiting_payment` / `pending_challenge` | `pending_payment` |
+| `rejected` / `cancelled` | (cualquiera) | `rejected` |
 | reembolso parcial | — | `partially_refunded` |
 | reembolso total / contracargo | — | `refunded` |
 
@@ -157,7 +161,7 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 ```sql
 -- Definición Enum en PostgreSQL
 create type order_status as enum (
-  'draft',             -- Formulario completado, Order creada en MP
+  'draft',             -- Formulario completado, Preferencia creada en MP
   'pending_payment',   -- Redirigido a la pasarela (esperando aprobación / PSE / Efecty)
   'paid',              -- Transacción aprobada y confirmada por Webhook + reconciliación
   'rejected',          -- Rechazado por el banco o fondos insuficientes
@@ -270,10 +274,11 @@ categories (1) ──── (N) services (1) ──── (N) service_variants (
 | `status` | `order_status` | Mapeo en §5 |
 | `expires_at` | `timestamptz` | TTL: reserva de cupo / expiración de la Order |
 | `paid_at` / `rejected_at` / `refunded_at` | `timestamptz` | Timestamps de estado |
-| `idempotency_key` | `uuid` | `X-Idempotency-Key` por intento |
-| `mp_order_id` | `text` | id Order MP (`ORD...`) |
-| `mp_status` / `mp_status_detail` | `text` | Estado crudo de MP |
-| `mp_payment_method` | `text` | |
+| `idempotency_key` | `uuid` | `X-Idempotency-Key` por intento de Preferencia |
+| `preference_id` | `text` | id de la Preferencia MP (recreada por intento) |
+| `mp_order_id` | `text` | `merchant_order_id` de MP (si aplica) |
+| `mp_status` / `mp_status_detail` | `text` | Estado crudo del pago (`approved` / `pending` / `rejected` / ...) |
+| `mp_payment_method` | `text` | `payment_method_id` del pago (auditoría) |
 | `mp_raw` | `jsonb` | Respuesta cruda de MP (auditoría) |
 
 ### 8.5 `order_payments`
@@ -298,11 +303,13 @@ Idempotencia de eventos (§2): `event_id UNIQUE`, `topic`, `resource_id`, `paylo
 - **Implementado:**
   - Trigger `orders_set_updated_at` (`set_updated_at()`) en `supabase/schema.sql` — auto-actualiza `orders.updated_at` en cada UPDATE.
   - RLS en `supabase/schema.sql` (§8.7) + cliente service-role `lib/supabase/admin.ts` (`SUPABASE_SERVICE_ROLE_KEY` en `.env.local`).
+  - **Flujo de pago (Checkout Pro + Payment Brick):** `lib/orders/create-order.ts` (`createOrder` con fix de reintentos + `POST /checkout/preferences`), `components/MpBricks.tsx` (brick con `preferenceId`), webhook `app/api/webhooks/mercadopago/route.ts` (X-Signature + idempotencia + reconciliación).
+  - Páginas de resultado `/checkout/success` y `/checkout/failure` (solo lectura, spec §4).
   - Jobs `pg_cron` en `supabase/cron.sql`:
     - `expire-pending-orders` (`*/5 * * * *`): `pending_payment` con `expires_at < now()` → `expired`.
     - `purge-stale-drafts` (`0 3 * * *`): drafts > 48h → **DELETE físico** (PII, Ley 1581).
     - ⚠️ Requiere habilitar `pg_cron` en Supabase (Database → Extensions).
-- **Pendiente (futuro, no bloquea):** el modelo no contempla inventario/cupos limitados (la naturaleza del negocio lo permite difícilmente). Si algún día se presentara un evento/taller con cupo, se debe: (a) extender `expire-pending-orders` para liberar el cupo atómicamente, y (b) validar disponibilidad en el Server Action antes de crear la Order (§3).
+- **Pendiente (futuro, no bloquea):** el modelo no contempla inventario/cupos limitados (la naturaleza del negocio lo permite difícilmente). Si algún día se presentara un evento/taller con cupo, se debe: (a) extender `expire-pending-orders` para liberar el cupo atómicamente, y (b) validar disponibilidad en el Server Action antes de crear la orden (§3).
 
 ### 8.9 Credenciales y variables de entorno (Mercado Pago)
 
@@ -310,15 +317,16 @@ Ubicación: `.env.local` (ignorado por git — las claves secretas NUNCA se comm
 
 | Variable | Uso | ¿Se expone al cliente? | Formato válido |
 | :--- | :--- | :--- | :--- |
-| `MP_ACCESS_TOKEN` | Backend → `POST /v1/orders` (crear Order en MP) | ❌ Solo servidor | `APP_USR-...` (producción) / `TEST-...` (pruebas) |
+| `MP_ACCESS_TOKEN` | Backend → `POST /checkout/preferences` y `GET /v1/payments/{id}` (webhook) | ❌ Solo servidor | `APP_USR-...` (producción) / `TEST-...` (pruebas) |
 | `MP_WEBHOOK_SECRET` | Backend → verificación de firma del webhook (§2) | ❌ Solo servidor | cadena secreta de MP |
 | `NEXT_PUBLIC_MP_PUBLIC_KEY` | Frontend → inicializar SDK de Bricks (`MpBricks.tsx`) | ✅ Pública por diseño | `APP_USR-...` (producción) / `TESTUSER...` (pruebas) |
+| `NEXT_PUBLIC_APP_URL` | Backend → construir `back_urls` y `notification_url` de la preferencia. **Debe ser HTTPS** (`auto_return` exige back_urls públicos HTTPS; en local usar túnel ngrok) | ⚠️ Pública (sin secretos) | `https://...` (dominio o túnel) |
 
 **Reglas de oro:**
 - Las 3 credenciales deben pertenecer al **mismo entorno** (producción o pruebas). Mezclar `APP_USR-...` (access token de producción) con una public key `TESTUSER...` (pruebas) rompe la inicialización de Bricks.
 - `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET` solo se leen desde el servidor (Server Actions / Route Handlers / scripts). `NEXT_PUBLIC_MP_PUBLIC_KEY` viaja al navegador (necesaria para el SDK).
 - La **Public Key NO es el Access Token ni el Webhook Secret**: son 3 valores distintos de "Credenciales" en el panel de Mercado Pago.
-- Validación: una public key no funciona como Bearer en la REST API (responde `400 invalid_token` en `identification_types`) — eso es normal; su validación real ocurre client-side al inicializar Bricks. Señal de entorno correcto: las Orders creadas en pruebas llevan prefijo `ORDTST...`.
+- Validación: una public key no funciona como Bearer en la REST API (responde `400 invalid_token` en `identification_types`) — eso es normal; su validación real ocurre client-side al inicializar Bricks. Señal de entorno correcto: en pruebas los pagos creados no mueven dinero real y el panel muestra el modo TEST.
 
 ### 8.10 Vista `v_students_paid` (estudiantes que pagaron)
 
@@ -333,9 +341,23 @@ Presenta a los estudiantes con **pago confirmado** (`status = 'paid'`) junto con
 | `service_title` / `variant_label` | Snapshot del producto |
 | `amount_total` / `currency` | Precio oficial al momento de compra |
 | `payer_email` / `payer_*` | Pagador / facturación |
-| `mp_order_id` / `mp_payment_method` / `mp_status_detail` | Datos de Mercado Pago |
+| `preference_id` / `mp_order_id` / `mp_payment_method` / `mp_status_detail` | Datos de Mercado Pago |
 | `paid_at` / `created_at` | Timestamps |
 
 **Acceso:** solo `service_role` (contiene PII, §6). Sin políticas para `anon`.
 
-**Nota importante sobre el `client_token` de Bricks (validado en sandbox):** MP **NO devuelve `client_token`** si la Order se crea sin el objeto `payer`. El body de `POST /v1/orders` en `lib/orders/create-order.ts` DEBE incluir `payer` (email, nombres, `identification`). Sin esto, el checkout falla con *"la pasarela no devolvió un token de pago"*.
+**Nota de reconciliación:** la vista localiza las órdenes por `external_reference == orders.id` (que MP conserva del preference flow). El pago de MP llega como `payment` con `external_reference`; el webhook lo cruza contra la vista/orden y valida el monto antes de marcar `paid`.
+
+### 8.11 Brand Brick (banner de marca / confianza) — RETIRADO
+
+Referencia: `docs/MPBrand.md` (extractos crudos de la doc oficial).
+
+**Estado (2026-08):** **NO disponible en esta cuenta/región.** El SDK respondió *"Bricks Brand Brick: Brick not enabled in your site. Coming soon..."* al intentar crearlo. Se **eliminó** del checkout (`components/MpBrandBrick.tsx` y su uso en `CheckoutForm.tsx`) porque no aporta y ensucia la consola con errores.
+
+Si algún día MP lo habilite en la cuenta, la integración es simple (resumen de la doc que quedó en `docs/MPBrand.md`):
+- No necesita `initialization` ni credenciales nuevas: solo `NEXT_PUBLIC_MP_PUBLIC_KEY`.
+- Creación: `mp.bricks().create("brand", "brand-brick-container", { customization, callbacks })`. Único callback: `onReady`.
+- `valueProp`: `payment_methods` (default), `payment_methods_logos`, `installments`, `security`, `credits`.
+- `customization.paymentMethods`: `excludedPaymentMethods`, `excludedPaymentTypes`, `maxInstallments`, `interestFreeInstallments`.
+- `customization.visual`: `backgroundColor`, `border`/`borderColor`/`borderWidth`/`borderRadius`, `verticalPadding`/`horizontalPadding` (máx 40px), `hideMercadoPagoLogo`, `contentAlign`.
+- `customization.text`: `valueProp`, `align`, `useCustomFont`, `size`, `fontWeight`, `color`.
