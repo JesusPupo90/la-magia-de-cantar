@@ -135,32 +135,32 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2.5 text-xs text-neutral-400 font-poppins">
               <li>
-                <Link href="#inicio" className="hover:text-white transition-colors">
+                <Link href="/#inicio" className="hover:text-white transition-colors">
                   Inicio
                 </Link>
               </li>
               <li>
-                <Link href="#la-magia-de-cantar" className="hover:text-white transition-colors">
+                <Link href="/#la-magia-de-cantar" className="hover:text-white transition-colors">
                   La Magia de Cantar
                 </Link>
               </li>
               <li>
-                <Link href="#voice-evolution" className="hover:text-white transition-colors">
+                <Link href="/#voice-evolution" className="hover:text-white transition-colors">
                   Voice Evolution
                 </Link>
               </li>
               <li>
-                <Link href="#nuestros-servicios" className="hover:text-white transition-colors">
+                <Link href="/#nuestros-servicios" className="hover:text-white transition-colors">
                   Nuestros Servicios
                 </Link>
               </li>
               <li>
-                <Link href="#empresas-e-instituciones" className="hover:text-white transition-colors">
+                <Link href="/#empresas-e-instituciones" className="hover:text-white transition-colors">
                   Empresas e Instituciones
                 </Link>
               </li>
               <li>
-                <Link href="#testimonios" className="hover:text-white transition-colors">
+                <Link href="/#testimonios" className="hover:text-white transition-colors">
                   Testimonios
                 </Link>
               </li>

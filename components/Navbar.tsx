@@ -1,15 +1,18 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- native anchors required so the browser fires hashchange for same-page section scrolling */
 "use client";
 
 import Image from "next/image";
 import { useState } from "react";
 
+// Hash ABSOLUTO (/#...) para que los enlaces funcionen desde cualquier página
+// (p. ej. /checkout), no solo desde la home donde existen las secciones.
 const navLinks = [
-  { href: "#inicio", label: "Inicio" },
-  { href: "#la-magia-de-cantar", label: "La magia de cantar" },
-  { href: "#metodo-yanetsis", label: "Método Yanetsis" },
-  { href: "#nuestros-servicios", label: "Nuestros servicios" },
-  { href: "#empresas-o-instituciones", label: "Empresas e instituciones" },
-  { href: "#testimonios", label: "Testimonios" },
+  { href: "/#inicio", label: "Inicio" },
+  { href: "/#la-magia-de-cantar", label: "La magia de cantar" },
+  { href: "/#metodo-yanetsis", label: "Método Yanetsis" },
+  { href: "/#nuestros-servicios", label: "Nuestros servicios" },
+  { href: "/#empresas-o-instituciones", label: "Empresas e instituciones" },
+  { href: "/#testimonios", label: "Testimonios" },
 ];
 
 export default function Navbar() {
@@ -20,7 +23,7 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 sm:px-8 lg:px-8">
         
         {/* 1. LOGO */}
-        <a href="#inicio" className="flex shrink-0 items-center" aria-label="Ir al inicio">
+        <a href="/#inicio" className="flex shrink-0 items-center" aria-label="Ir al inicio">
           <Image
             src="/assets/dark-logo.png"
             alt="Yanetsis + La magia de cantar"

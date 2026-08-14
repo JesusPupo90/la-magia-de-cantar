@@ -39,6 +39,7 @@ interface CategoryRow {
 interface ServiceRow {
   id: string;
   category_id: string;
+  position: number;
   micro_title: string;
   title: string;
   description: string;
@@ -84,7 +85,23 @@ export async function getCatalog(): Promise<ServiceItem[]> {
 
   const labelByCategoryId = new Map(categories.map((c) => [c.id, c.label]));
 
-  return services.map((svc) => {
+  // Orden determinístico del catálogo: agrupar por categoría en el orden de
+  // categories.position (Kids = 'Canto para niños' primero) y dentro de cada
+  // categoría ordenar por services.position. Así las pestañas de la UI siguen
+  // el orden de negocio y 'kids-grupales' queda antes que 'teens-grupales',
+  // independientemente del orden físico de la tabla.
+  const servicesByCategory = new Map<string, ServiceRow[]>();
+  for (const svc of services) {
+    const arr = servicesByCategory.get(svc.category_id) ?? [];
+    arr.push(svc);
+    servicesByCategory.set(svc.category_id, arr);
+  }
+
+  const orderedServices = categories.flatMap((cat) =>
+    (servicesByCategory.get(cat.id) ?? []).sort((a, b) => a.position - b.position)
+  );
+
+  return orderedServices.map((svc) => {
     const plans: Plan[] = variants
       .filter((v) => v.service_id === svc.id)
       .map((v) => ({

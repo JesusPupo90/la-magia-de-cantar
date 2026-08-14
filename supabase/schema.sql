@@ -345,17 +345,27 @@ grant select on public.categories, public.services, public.service_variants to s
 
 -- Lista de estudiantes con pago confirmado + detalle del servicio adquirido.
 -- Los datos viven en orders (snapshot inmutable); la vista solo la presenta.
-create or replace view public.v_students_paid as
+-- JOINs al catálogo para agrupar/reportar por tipo de servicio (Kids vs Teens)
+-- sin parsear títulos. Acceso solo service_role (PII).
+-- DROP + CREATE para permitir re-aplicación (CREATE OR REPLACE no reordena
+-- columnas de una vista existente — error 42P16).
+drop view if exists public.v_students_paid;
+
+create view public.v_students_paid as
 select
   o.id                      as order_id,
-  o.student_first_name      as student_first_name,
-  o.student_last_name       as student_last_name,
-  o.student_age             as student_age,
-  o.student_notes           as student_notes,
+  o.variant_id              as variant_id,      -- kids-grupales__mensual / teens-grupales__...
+  sv.service_id             as service_id,      -- kids-grupales / teens-grupales
+  s.category_id             as category_id,
+  c.label                   as category_label,  -- 'Canto para niños' / 'Canto para jóvenes'
   o.service_title           as service_title,
   o.variant_label           as variant_label,
   o.amount_total            as amount_total,
   o.currency                as currency,
+  o.student_first_name      as student_first_name,
+  o.student_last_name       as student_last_name,
+  o.student_age             as student_age,
+  o.student_notes           as student_notes,
   o.payer_email             as payer_email,
   o.payer_first_name        as payer_first_name,
   o.payer_last_name         as payer_last_name,
@@ -368,6 +378,9 @@ select
   o.paid_at                 as paid_at,
   o.created_at              as created_at
 from public.orders o
+left join public.service_variants sv on sv.id = o.variant_id
+left join public.services s        on s.id = sv.service_id
+left join public.categories c      on c.id = s.category_id
 where o.status = 'paid';
 
 -- Acceso a la vista: solo service_role / postgres (contiene PII). Sin anon.

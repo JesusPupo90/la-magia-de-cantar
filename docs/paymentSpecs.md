@@ -337,6 +337,7 @@ Presenta a los estudiantes con **pago confirmado** (`status = 'paid'`) junto con
 | Columna | Fuente |
 | :--- | :--- |
 | `order_id` | `orders.id` |
+| `variant_id` / `service_id` / `category_id` / `category_label` | JOIN al catálogo (agrupar por tipo de servicio, p. ej. Kids vs Teens) |
 | `student_first_name` / `student_last_name` / `student_age` / `student_notes` | Bloque estudiante (§8.4) |
 | `service_title` / `variant_label` | Snapshot del producto |
 | `amount_total` / `currency` | Precio oficial al momento de compra |
