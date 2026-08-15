@@ -16,7 +16,8 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 
 - **Regla de oro:** El cliente (frontend) NUNCA envía montos monetarios al servidor ni a la pasarela.
 - **Flujo:** El frontend solo envía el `service_id` y el `variant_id` (el CTA `#formulario-compra?service=...&plan=...` del UI ya los provee). El Server Action consulta el precio oficial (`service_variants.price`) directo desde Supabase y crea la **Preferencia** en Mercado Pago (`POST /checkout/preferences`) con ese monto (`items[].unit_price`) y `external_reference = orders.id`.
-- **Payment Brick:** se monta con `initialization.preferenceId` (Checkout Pro embebido). MP procesa el pago y redirige a los `back_urls` (`/checkout/success`, `/checkout/failure`) con `payment_id`, `status` y `external_reference`. El frontend NUNCA vuelve a tocar el monto ni crea pagos.
+- **Payment Brick:** se monta con `initialization.preferenceId` (habilita la opción "Mercado Pago"/wallet) + `amount` (obligatorio). Para tarjeta, PSE o efectivo, el brick **solo tokeniza el medio de pago y entrega el `formData` (con el token) al callback `onSubmit`**; nuestro **backend** crea el pago con `POST /v1/payments` (`lib/orders/process-payment.ts`) usando el monto oficial de la BD. El frontend NUNCA envía montos ni crea pagos.
+- **Dos rutas de cobro:** (a) tarjeta/PSE/efectivo → `POST /v1/payments` con `external_reference = orders.id`; (b) opción wallet "Mercado Pago" → preferencia (`preference_id`) + `back_urls`. Ambas rutas se reconcilian por webhook.
 - **Validación anti-manipulación:** El Server Action verifica que el `variant_id` pertenezca al `service_id` recibido (join en BD) y que `service.is_custom_quote = false`. El servicio `coaching-yanetsis` (`is_custom_quote = true`) NUNCA genera preferencia.
 - **Fix de reintentos (1 orden / N intentos):** `createOrder(input, orderId?)` reutiliza la misma fila `orders` si el `orderId` coincide en `variant_id` + `payer_email` y está en `draft|rejected|expired`. Cada intento genera una **nueva Preferencia** (se guarda en `orders.preference_id`) y el pago real queda en `order_payments`. El frontend guarda el `orderId` en `sessionStorage` y lo reenvía en los reintentos.
 
@@ -39,7 +40,7 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 
 ## 2. ⚡ Arquitectura de Webhooks y Manejo Asíncrono
 
-> **Integración:** Checkout Pro embebido (Payment Brick con `preferenceId`). El webhook recibe notificaciones **topic `payment`** y, opcionalmente, `merchant_order`. Ante cada evento se **reconcilia contra `GET /v1/payments/{id}`** para confirmar el estado real del pago.
+> **Integración:** Payment Brick — el backend crea el pago con `POST /v1/payments` para tarjeta/PSE/efectivo; la opción wallet usa la preferencia. El webhook recibe notificaciones **topic `payment`** y, opcionalmente, `merchant_order`. Ante cada evento se **reconcilia contra `GET /v1/payments/{id}`** para confirmar el estado real del pago.
 
 ### Verificación de Firma Criptográfica (HMAC / X-Signature)
 
@@ -86,6 +87,7 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 
 - **Regla de oro:** La página de retorno (`/checkout/result`) NUNCA actualiza la base de datos a `paid`. Es una vista de solo lectura que consulta el estado real confirmado previamente por el Webhook.
 - Previene fraudes cuando el usuario manipula la URL de retorno o abandona la pestaña antes de la redirección.
+- **Quién redirige hoy:** para tarjeta/PSE/efectivo, el redirect lo hace `onSubmit` del brick (`window.location`) según el `status` que devuelve nuestro backend; la página de resultado sigue siendo SOLO lectura. La opción wallet redirige por `back_urls` en su propia pestaña.
 
 ### Persistencia en Navegadores In-App (Instagram, TikTok, WhatsApp)
 
@@ -138,8 +140,8 @@ Este documento centraliza todos los requerimientos técnicos, consideraciones de
 - **`items[].unit_price` es NUMBER** en la unidad principal de la moneda. Para **COP (moneda sin decimales)** se envía el entero de la BD (`unit_price: 2299000`), igual que `transaction_amount` en `GET /v1/payments` (float, sin `.00`).
 - ⚠️ **Riesgo off-by-100 (validar en sandbox):** según el método de pago (PSE/efectivo), MP puede interpretar la moneda con decimales implícitos. Validar con tarjeta de prueba y con PSE que el monto cobrado coincida exactamente con `orders.amount_total`.
 - La preferencia incluye `external_reference = orders.id` (uuid ≤ 150 chars ✓) y `notification_url = <APP_URL>/api/webhooks/mercadopago`.
-- `back_urls`: `success` y `pending` → `/checkout/success`, `failure` → `/checkout/failure`. Con `auto_return: "approved"`, MP redirige automáticamente al aprobar. Las páginas de resultado son SOLO lectura (spec §4).
-- ⚠️ **Hallazgo validado (2026-08):** `auto_return: "approved"` exige `back_urls`/`notification_url` **HTTPS públicos**. Con `http://localhost:3000` MP responde `400 invalid_auto_return: "back_url.success must be defined"`. `NEXT_PUBLIC_APP_URL` debe ser **HTTPS** (en local: un túnel tipo ngrok). El `auto_return` se mantiene SIEMPRE en el código (no olvidarlo en producción); `create-order.ts` devuelve un error claro si la URL no es HTTPS.
+- `back_urls`: `success` y `pending` → `/checkout/success`, `failure` → `/checkout/failure`. Con `auto_return: "approved"`, MP redirige automáticamente al aprobar **solo en la opción wallet / Checkout Pro** (pestaña nueva del brick). Para tarjeta/PSE/efectivo la redirección la hace el propio `onSubmit` según el `status` devuelto por `POST /v1/payments`. Las páginas de resultado son SOLO lectura (spec §4).
+- ⚠️ **Hallazgo validado (2026-08):** `auto_return: "approved"` exige `back_urls`/`notification_url` **HTTPS públicos** (aplica a la preferencia, que sirve a la opción wallet). Con `http://localhost:3000` MP responde `400 invalid_auto_return: "back_url.success must be defined"`. `NEXT_PUBLIC_APP_URL` debe ser **HTTPS** (en local: un túnel tipo ngrok). El `auto_return` se mantiene SIEMPRE en el código; `create-order.ts` devuelve un error claro si la URL no es HTTPS.
 - ⚠️ **Payment Brick (`MpBricks.tsx`):** el SDK exige `initialization.amount` SIEMPRE, incluso con `preferenceId` (error *"Amount property is required"* si falta). Se envían juntos: `initialization: { preferenceId, amount }` (doc oficial: `amount` es REQUIRED).
 - ⚠️ **Contrato `onError` del Payment Brick:** `BrickError.type` es `"critical" | "non_critical"`. Solo los **critical** (falla de inicialización) deben mostrar un banner; los **non_critical** (p. ej. número de tarjeta inválido mientras se tipea, `no_payment_method_for_provided_bin`) los valida y recupera el propio brick inline → **no tocar estado** ni desmontar la UI. El contenedor `#payment-brick-container` nunca se desmonta/intercambia tras el montaje; los errores críticos viven en un banner separado ARRIBA del brick.
 - Los reintentos crean una **nueva preferencia** bajo la misma `orders` (nuevo `preference_id`); las anteriores quedan como intentos en `order_payments`.
@@ -303,7 +305,7 @@ Idempotencia de eventos (§2): `event_id UNIQUE`, `topic`, `resource_id`, `paylo
 - **Implementado:**
   - Trigger `orders_set_updated_at` (`set_updated_at()`) en `supabase/schema.sql` — auto-actualiza `orders.updated_at` en cada UPDATE.
   - RLS en `supabase/schema.sql` (§8.7) + cliente service-role `lib/supabase/admin.ts` (`SUPABASE_SERVICE_ROLE_KEY` en `.env.local`).
-  - **Flujo de pago (Checkout Pro + Payment Brick):** `lib/orders/create-order.ts` (`createOrder` con fix de reintentos + `POST /checkout/preferences`), `components/MpBricks.tsx` (brick con `preferenceId`), webhook `app/api/webhooks/mercadopago/route.ts` (X-Signature + idempotencia + reconciliación).
+  - **Flujo de pago (Payment Brick + backend):** `lib/orders/create-order.ts` (`createOrder`: orden `draft` + `POST /checkout/preferences` para la opción wallet), `components/MpBricks.tsx` (brick con `preferenceId` + `amount`; `onSubmit` llama al backend y redirige según el status), `lib/orders/process-payment.ts` (`processCardPayment`: `POST /v1/payments` con monto oficial desde BD), `app/actions/payments.ts` (Server Action), `lib/orders/mp-status.ts` (mapeo de estados compartido), webhook `app/api/webhooks/mercadopago/route.ts` (X-Signature + idempotencia + reconciliación).
   - Páginas de resultado `/checkout/success` y `/checkout/failure` (solo lectura, spec §4).
   - Jobs `pg_cron` en `supabase/cron.sql`:
     - `expire-pending-orders` (`*/5 * * * *`): `pending_payment` con `expires_at < now()` → `expired`.
@@ -327,6 +329,7 @@ Ubicación: `.env.local` (ignorado por git — las claves secretas NUNCA se comm
 - `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET` solo se leen desde el servidor (Server Actions / Route Handlers / scripts). `NEXT_PUBLIC_MP_PUBLIC_KEY` viaja al navegador (necesaria para el SDK).
 - La **Public Key NO es el Access Token ni el Webhook Secret**: son 3 valores distintos de "Credenciales" en el panel de Mercado Pago.
 - Validación: una public key no funciona como Bearer en la REST API (responde `400 invalid_token` en `identification_types`) — eso es normal; su validación real ocurre client-side al inicializar Bricks. Señal de entorno correcto: en pruebas los pagos creados no mueven dinero real y el panel muestra el modo TEST.
+- ⚠️ **Pruebas con tarjeta de prueba (hallazgo 2026-08):** las tarjetas de prueba de MP (p. ej. `5254 1336 7440 3564`) SOLO funcionan con credenciales **TEST** (`TEST-...` en access token y public key) de la MISMA aplicación. Con credenciales LIVE (`APP_USR-...`) el backend recibe `Unauthorized use of live credentials` en `POST /v1/payments`. Para probar: activar "Modo de pruebas" en el panel y copiar ambas credenciales TEST; al pasar a producción revertir a `APP_USR-...` con tarjeta real.
 
 ### 8.10 Vista `v_students_paid` (estudiantes que pagaron)
 

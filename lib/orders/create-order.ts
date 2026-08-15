@@ -6,6 +6,7 @@
 import { randomUUID } from "crypto";
 import { ordenCompraSchema, type OrdenCompraInput } from "../schemas/orden.schema";
 import { createAdminClient } from "../supabase/admin";
+import { MP_DOC_TYPES } from "./mp-status";
 
 export interface CreateOrderResult {
   success: boolean;
@@ -35,14 +36,8 @@ interface VariantWithService {
   } | null;
 }
 
-// Mapeo de tipos de documento del form → valores que MP acepta (MCO/Colombia).
-// MP: CC, CE, NIT, Otro. "PASAPORTE" no existe → va como "Otro".
-const MP_DOC_TYPES: Record<string, string> = {
-  CC: "CC",
-  CE: "CE",
-  NIT: "NIT",
-  PASAPORTE: "Otro",
-};
+// Mapeo de tipos de documento del form → valores que MP acepta (MCO/Colombia):
+// ver MP_DOC_TYPES en ./mp-status (compartido con el procesamiento de pagos).
 
 function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_APP_URL ?? "https://pocket-proposed-rarely-recorded.trycloudflare.com" //"http://localhost:3000";

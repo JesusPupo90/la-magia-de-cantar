@@ -1,0 +1,46 @@
+%% Módulo de pagos — La Magia de Cantar · Flujo del proceso
+%% Cada mensaje = un paso. Formato: qué se hace (referencia técnica).
+%% Flechas sólidas = petición · flechas punteadas = respuesta / aviso asíncrono.
+%% Para verlo: Ctrl+Shift+P → "Mermaid Preview: Preview Diagram".
+
+sequenceDiagram
+    autonumber
+    actor U as Usuario (navegador)
+    participant UI as React (frontend)
+    participant S as Servidor Next.js (App Router / Server Actions)
+    participant DB as Supabase (service-role para escribir)
+    participant MP as Mercado Pago
+
+    Note over UI,S: Elige servicio y plan — NuestrosServicios.tsx · CTA
+    U->>UI: Explora el catálogo y pulsa el botón
+    UI->>S: GET /checkout?service=...&variant=...
+    S->>DB: SELECT del catálogo (anon key) — categories · services · service_variants
+    S->>UI: Renderiza el formulario — app/checkout/page.tsx → CheckoutForm.tsx
+    Note over UI,S: El formulario se autoguarda en sessionStorage mientras escribe
+    U->>UI: Llena datos del estudiante y del pagador (+ habeas data)
+    UI->>S: submitOrder(input, orderId) — app/actions/ordenes.ts
+    S->>S: Valida zod + honeypot + plan pertenece al servicio — lib/orders/create-order.ts
+    S->>DB: INSERT/UPDATE orders (status 'draft') — external_reference = orders.id
+    S->>MP: POST /checkout/preferences — crea la preferencia (solo para la opción "Mercado Pago"/wallet)
+    MP-->>S: Devuelve preference_id (la llave de la opción wallet)
+    S->>DB: Guarda el preference_id en orders
+    S-->>UI: preferenceId + amount (para montar el brick)
+    UI->>MP: Monta Payment Brick (initialization.preferenceId + amount) — MpBricks.tsx
+    U->>UI: Elige método (tarjeta / PSE / efectivo) y llena los datos
+    UI->>MP: El brick tokeniza la tarjeta y entrega el formData (token) a onSubmit
+    UI->>S: onSubmit → processPayment(orderId, formData) — app/actions/payments.ts
+    S->>S: Extrae el token y valida la orden (monto NUNCA del cliente) — lib/orders/process-payment.ts
+    S->>MP: POST /v1/payments — token + transaction_amount oficial + notification_url
+    MP-->>S: Devuelve el pago (id, status: approved / pending / rejected)
+    S->>DB: UPDATE orders status + order_payments (no retrocede de 'paid')
+    S-->>UI: status del pago
+    UI-->>U: approved/pending → /checkout/success · rejected → error en línea (solo lectura)
+    Note over UI,MP: Opción "Mercado Pago" (wallet): el brick abre el checkout de MP en una pestaña nueva con la preferencia (back_urls)
+    Note over MP,S: Aviso asíncrono por webhook (todos los métodos)
+    MP->>S: POST /api/webhooks/mercadopago (x-signature) — aviso del pago
+    S->>S: Verifica firma HMAC + idempotencia — webhook_logs
+    S->>MP: GET /v1/payments/{id} — estado real del pago
+    MP-->>S: Detalle (transaction_amount, status)
+    S->>S: Reconciliación anti-fraude: monto == orders.amount_total
+    S->>DB: UPDATE orders (re-confirma, idempotente) + order_payments
+    Note over DB,MP: pg_cron — expira pendientes (30 min) · purga drafts (>48 h) — cron.sql

@@ -1,0 +1,74 @@
+%%{init: {"flowchart": {"defaultRenderer": "elk"}}}%%
+%% Módulo de pagos — La Magia de Cantar · Vista de arquitectura (sistemas)
+%% Cada nodo: Línea 1 = qué hace (lenguaje humano) · Línea 2 (cursiva) = tabla/campo/función.
+%% Renderer Elk (menos cruces). Para verlo: Ctrl+Shift+P → "Mermaid Preview: Preview Diagram".
+
+graph TD
+    subgraph CLIENTE["Cliente (navegador / React)"]
+        A1["El usuario elige un servicio y un plan"<br/><i>NuestrosServicios.tsx · CTA</i>]
+        B1["Página de pago con el formulario de datos"<br/><i>app/checkout/page.tsx → CheckoutForm.tsx</i>]
+        C1["Formulario con datos del estudiante y del pagador"<br/><i>submitOrder&lpar;input, orderId&rpar;</i>]
+        D1["Brick de pago: tokeniza la tarjeta y entrega el formData (token)"<br/><i>MpBricks.tsx · payment-brick-container</i>]
+        D3["Redirige según el status del pago"<br/><i>onSubmit → /checkout/success · /checkout/failure</i>]
+        E1["Página de resultado (solo lectura)"<br/><i>back_urls · /checkout/success · /checkout/failure</i>]
+    end
+
+    subgraph NEXT_SERVER["Servidor Next.js (App Router / Server Actions)"]
+        A2["Lee el catálogo de la BD para la web"<br/><i>data/services.ts: getCatalog&lpar;&rpar;</i>]
+        B2["Valida servicio + plan de la URL"<br/><i>app/checkout/page.tsx</i>]
+        B3["404 si no existe o es solo cotización"<br/><i>notFound&lpar;&rpar;</i>]
+        C2["Recibe los datos del formulario"<br/><i>app/actions/ordenes.ts</i>]
+        C3["Valida zod + honeypot + plan↔servicio"<br/><i>lib/orders/create-order.ts</i>]
+        C4["Crea o reutiliza la orden en 'draft'"<br/><i>orders · status 'draft'</i>]
+        C5["Crea la preferencia (solo para la opción 'Mercado Pago' / wallet)"<br/><i>POST /checkout/preferences</i>]
+        C6["Guarda y envía el preference_id (habilita la wallet)"<br/><i>orders.preference_id</i>]
+        D2["Cobra con el token: crea el pago real en MP"<br/><i>lib/orders/process-payment.ts · POST /v1/payments</i>]
+        F1["Recibe el aviso de pago de MP"<br/><i>POST /api/webhooks/mercadopago</i>]
+        F2["Valida firma + idempotencia"<br/><i>x-signature HMAC · webhook_logs</i>]
+        F3["Consulta el estado real del pago"<br/><i>GET /v1/payments/&lbrace;id&rbrace;</i>]
+        F4["Reconciliación del monto pagado"<br/><i>order_payments.amount vs orders.amount_total</i>]
+        F5["Actualiza estado y registra el pago"<br/><i>orders.status · order_payments</i>]
+    end
+
+    subgraph MP["Mercado Pago (API)"]
+        MP1["API Preferences — crea la preferencia (wallet) y devuelve preference_id"<br/><i>POST /checkout/preferences</i>]
+        MP2["API Payments — crea el pago con el token y devuelve su estado"<br/><i>POST /v1/payments · GET /v1/payments/&lbrace;id&rbrace;</i>]
+    end
+
+    subgraph SUPABASE["Base de datos (Supabase)"]
+        A3[("Catálogo: categorías, servicios y planes con precio COP — categories · services · service_variants")]
+        C7[("Órdenes: intención de compra con datos, precio y estado — orders (solo service-role)")]
+        F6[("Log de avisos y pagos por orden — webhook_logs · order_payments")]
+        G1[("Mantenimiento automático — pg_cron (cron.sql)")]
+    end
+
+    A2 -->|"lee el catálogo"| A1
+    B2 -->|"válido"| B1
+    B2 -->|"inválido / solo cotización"| B3
+    B1 -->|"el usuario completa y envía"| C1
+    C1 --> C2
+    C2 --> C3
+    C3 --> C4
+    C4 -->|"INSERT / UPDATE"| C7
+    C4 --> C5
+    C5 --> MP1
+    MP1 -->|"devuelve preference_id"| C6
+    C5 -->|"guarda preference_id"| C7
+    C6 -->|"preferenceId + amount"| D1
+    D1 -->|"entrega el token vía onSubmit"| D2
+    D2 -->|"POST /v1/payments"| MP2
+    MP2 -.->|"devuelve estado del pago"| D2
+    D2 -->|"UPDATE status + order_payments"| C7
+    D2 -->|"resultado del pago"| D3
+    D3 -->|"redirige al navegador"| E1
+    MP2 -.->|"aviso webhook (todos los métodos)"| F1
+    F1 --> F2
+    F2 --> F3
+    F3 --> MP2
+    MP2 -.->|"detalle del pago"| F4
+    F4 --> F5
+    F5 -->|"UPDATE status"| C7
+    F5 -->|"UPSERT pago"| F6
+    G1 --> C7
+    A2 -->|"SELECT (anon key)"| A3
+    B2 -->|"SELECT (anon key)"| A3

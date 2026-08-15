@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { AlertCircle, Loader2, RotateCcw } from "lucide-react";
+import { processPayment } from "@/app/actions/payments";
 
 interface MpBricksProps {
   preferenceId: string;
@@ -35,12 +36,14 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
   const containerRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [error, setError] = useState("");
+  const [paymentError, setPaymentError] = useState("");
   const createdRef = useRef(false);
   const [retryKey, setRetryKey] = useState(0);
 
   // Inicializar el brick una vez que el SDK esté cargado.
-  // Con preferenceId (Checkout Pro embebido) MP procesa el pago y redirige a los
-  // back_urls (success/failure) con payment_id, status y external_reference.
+  // Con preferenceId se habilita la opción "Mercado Pago" (wallet). Para tarjetas
+  // y otros métodos, el brick tokeniza y entrega el formData a onSubmit; nuestro
+  // backend crea el pago (POST /v1/payments) y redirige según el resultado.
   useEffect(() => {
     if (!sdkReady || createdRef.current || !containerRef.current) return;
     const mp = window.MercadoPago;
@@ -70,21 +73,64 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
           onReady: () => {
             console.log("PaymentBrick listo, order:", orderId, "preference:", preferenceId);
           },
-          onSubmit: () => {
-            // Con preferenceId el pago lo procesa MP; el redirect lo hacen los
-            // back_urls de la preferencia (auto_return). Aquí no hay que hacer nada.
+          onSubmit: async (formData: unknown, additionalData: unknown) => {
+            console.log("PaymentBrick onSubmit, order:", orderId, "data:", formData, "extra:", additionalData);
+            setPaymentError("");
+
+            const selected = (formData as { selectedPaymentMethod?: string } | null)
+              ?.selectedPaymentMethod;
+
+            // La opción "Mercado Pago" (wallet) abre su propio checkout de MP en una
+            // pestaña nueva (window.open con la preferencia); el redirect a back_urls
+            // lo maneja MP en esa pestaña. No hay nada que hacer aquí.
+            if (selected === "wallet_purchase") {
+              console.log("PaymentBrick: flujo wallet, MP redirige en su pestaña.");
+              return;
+            }
+
+            try {
+              const result = await processPayment(orderId, formData);
+              console.log("PaymentBrick: resultado del pago:", result);
+
+              if (!result.success) {
+                setPaymentError(result.message || "Ocurrió un error al procesar el pago.");
+                return;
+              }
+
+              const status = result.status ?? "";
+              const query = new URLSearchParams({
+                payment_id: result.paymentId ?? "",
+                status,
+                external_reference: result.orderId ?? orderId,
+              });
+
+              if (status === "approved") {
+                window.location.href = `/checkout/success?${query.toString()}`;
+              } else if (status === "pending" || status === "in_process") {
+                // PSE / efectivo / pagos diferidos: la página de éxito muestra "Pago en proceso".
+                window.location.href = `/checkout/success?${query.toString()}`;
+              } else {
+                // rejected / cancelled: mostramos el error en línea para reintentar sin recargar.
+                setPaymentError(
+                  "El pago fue rechazado. Verifica los datos del medio de pago e inténtalo de nuevo."
+                );
+              }
+            } catch (err) {
+              console.error("PaymentBrick: error en onSubmit:", err);
+              setPaymentError("Ocurrió un error al procesar el pago. Inténtalo de nuevo.");
+            }
           },
           onError: (brickError: unknown) => {
             // Contrato del SDK: BrickError.type === "critical" es la única falla
             // terminal. Los errores "non_critical" (p. ej. tarjeta inválida mientras
             // se tipea) los muestra el propio brick con validación inline y se
-            // recupera solo: NO deben tocar nuestro estado ni desmontar la UI.
-            const type = (brickError as { type?: string })?.type;
-            if (type === "critical") {
-              console.error("Error PaymentBrick (critical):", brickError);
+            // recupera solo. Logueamos TODOS para poder diagnosticar.
+            const e = brickError as { type?: string; cause?: string; message?: string };
+            if (e?.type === "critical") {
+              console.error("PaymentBrick (critical):", brickError);
               setError("Ocurrió un error al mostrar el método de pago.");
             } else {
-              console.warn("PaymentBrick (non-critical):", brickError);
+              console.warn("PaymentBrick (non-critical):", e);
             }
           },
         },
@@ -141,6 +187,15 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
               <RotateCcw className="h-3 w-3" /> Reintentar
             </button>
           )}
+        </div>
+      )}
+
+      {/* Error de PAGO (rechazo o fallo al cobrar): NO desmonta el brick; el
+          usuario puede corregir los datos y reintentar sin recargar la página. */}
+      {paymentError && (
+        <div className="flex w-full items-start gap-2 rounded-xl border-2 border-black bg-pink-soft p-3 text-xs font-extrabold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+          <span className="flex-1">{paymentError}</span>
         </div>
       )}
 

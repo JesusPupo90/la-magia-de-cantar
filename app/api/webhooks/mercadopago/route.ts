@@ -6,6 +6,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mapPaymentStatus } from "@/lib/orders/mp-status";
 
 export const dynamic = "force-dynamic";
 
@@ -46,25 +47,6 @@ async function verifySignature(rawBody: string, xSignature: string | null, xRequ
   if (expectedBuf.length !== v1Buf.length) return false;
 
   return timingSafeEqual(expectedBuf, v1Buf);
-}
-
-function mapPaymentStatus(status: string): { dbStatus: string; detail?: string } | null {
-  switch (status) {
-    case "approved":
-      return { dbStatus: "paid" };
-    case "in_process":
-    case "pending":
-      return { dbStatus: "pending_payment" };
-    case "rejected":
-    case "cancelled":
-      return { dbStatus: "rejected" };
-    case "refunded":
-      return { dbStatus: "refunded" };
-    case "partially_refunded":
-      return { dbStatus: "partially_refunded" };
-    default:
-      return null;
-  }
 }
 
 export async function POST(request: Request) {

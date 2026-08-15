@@ -45,9 +45,9 @@ export default function Hero() {
         </div>
 
         {/* 📍 FLECHA ABSOLUTE */}
-        <div className="pointer-events-none absolute left-[0%] top-[35%] z-20 hidden h-28 w-28 -rotate-12 text-pink sm:h-32 sm:w-32 md:h-48 md:w-48 lg:block">
+        {/* <div className="pointer-events-none absolute left-[0%] top-[35%] z-20 hidden h-28 w-28 -rotate-12 text-pink sm:h-32 sm:w-32 md:h-48 md:w-48 lg:block">
           <CurlyArrow className="h-full w-full stroke-[2.5]" />
-        </div>
+        </div> */}
 
         <div className="relative z-10 mx-auto max-w-7xl sm:px-6">
           
