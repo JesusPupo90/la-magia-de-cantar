@@ -39,7 +39,7 @@ graph TD
         A3[("Catálogo: categorías, servicios y planes con precio COP — categories · services · service_variants")]
         C7[("Órdenes: intención de compra con datos, precio y estado — orders (solo service-role)")]
         F6[("Log de avisos y pagos por orden — webhook_logs · order_payments")]
-        G1[("Mantenimiento automático — pg_cron (cron.sql)")]
+        G1[("Mantenimiento: expira drafts y pendientes; purga órdenes sin actividad — pg_cron (cron.sql)")]
     end
 
     A2 -->|"lee el catálogo"| A1

@@ -308,8 +308,8 @@ Idempotencia de eventos (§2): `event_id UNIQUE`, `topic`, `resource_id`, `paylo
   - **Flujo de pago (Payment Brick + backend):** `lib/orders/create-order.ts` (`createOrder`: orden `draft` + `POST /checkout/preferences` para la opción wallet), `components/MpBricks.tsx` (brick con `preferenceId` + `amount`; `onSubmit` llama al backend y redirige según el status), `lib/orders/process-payment.ts` (`processCardPayment`: `POST /v1/payments` con monto oficial desde BD), `app/actions/payments.ts` (Server Action), `lib/orders/mp-status.ts` (mapeo de estados compartido), webhook `app/api/webhooks/mercadopago/route.ts` (X-Signature + idempotencia + reconciliación).
   - Páginas de resultado `/checkout/success` y `/checkout/failure` (solo lectura, spec §4).
   - Jobs `pg_cron` en `supabase/cron.sql`:
-    - `expire-pending-orders` (`*/5 * * * *`): `pending_payment` con `expires_at < now()` → `expired`.
-    - `purge-stale-drafts` (`0 3 * * *`): drafts > 48h → **DELETE físico** (PII, Ley 1581).
+    - `expire-pending-orders` (`*/5 * * * *`): `draft` y `pending_payment` con `expires_at < now()` → `expired`.
+    - `purge-stale-drafts` (`0 3 * * *`): órdenes `draft`/`expired` > 48h **sin intentos de pago** (`NOT EXISTS` en `order_payments`) → **DELETE físico** (PII, Ley 1581). Política de retención: se conserva TODO orden con actividad de pago (pagos exitosos/rechazados y su historial en `order_payments`).
     - ⚠️ Requiere habilitar `pg_cron` en Supabase (Database → Extensions).
 - **Pendiente (futuro, no bloquea):** el modelo no contempla inventario/cupos limitados (la naturaleza del negocio lo permite difícilmente). Si algún día se presentara un evento/taller con cupo, se debe: (a) extender `expire-pending-orders` para liberar el cupo atómicamente, y (b) validar disponibilidad en el Server Action antes de crear la orden (§3).
 

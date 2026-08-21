@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import { AlertCircle, Loader2, RotateCcw } from "lucide-react";
 import { processPayment } from "@/app/actions/payments";
+import { clearOrderId } from "@/lib/checkout-storage";
 
 interface MpBricksProps {
   preferenceId: string;
@@ -106,9 +107,11 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
               });
 
               if (status === "approved") {
+                clearOrderId();
                 window.location.href = `/checkout/success?${query.toString()}`;
               } else if (status === "pending" || status === "in_process") {
                 // PSE / efectivo / pagos diferidos: la página de éxito muestra "Pago en proceso".
+                clearOrderId();
                 window.location.href = `/checkout/success?${query.toString()}`;
               } else {
                 // rejected / cancelled: mostramos el error en línea para reintentar sin recargar.

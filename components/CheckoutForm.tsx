@@ -21,8 +21,13 @@ import { submitOrder } from "@/app/actions/ordenes";
 import { formatCOP } from "@/utils/formatCurrency";
 import type { ServiceItem, Plan } from "@/data/services";
 import MpBricks from "@/components/MpBricks";
-
-const STORAGE_KEY = "lmdc_checkout_draft";
+import {
+  clearDraft,
+  loadDraft,
+  loadOrderId,
+  saveDraft,
+  saveOrderId,
+} from "@/lib/checkout-storage";
 
 interface CheckoutFormProps {
   service: ServiceItem;
@@ -45,7 +50,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
 
   // 🍯 Honeypot + rellenado de pagador → estudiante
   const defaultValues = useMemo<OrdenCompraInput>(() => {
-    const stored = loadDraft();
+    const stored = loadDraft<Partial<OrdenCompraInput>>();
     return {
       serviceId: service.id,
       variantId: variant.id,
@@ -78,16 +83,18 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
 
   const values = watch();
 
-  // 🗃️ Auto-guardado en sessionStorage
+  // 🗃️ Auto-guardado en sessionStorage (solo mientras se está llenando el formulario;
+  //     tras enviar y pasar al brick ya no debe re-guardarse el borrador).
   const firstRun = useRef(true);
   useEffect(() => {
+    if (step !== "form") return;
     if (firstRun.current) {
       firstRun.current = false;
       return;
     }
     const t = setTimeout(() => saveDraft(values), 400);
     return () => clearTimeout(t);
-  }, [values]);
+  }, [values, step]);
 
   // ⚖️ Toggle "el estudiante es el pagador"
   const handleStudentIsPayer = useCallback((checked: boolean) => {
@@ -527,58 +534,4 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
       </aside>
     </div>
   );
-}
-
-// 🗃️ Helpers de sessionStorage (Sin cambios)
-function loadDraft(): Partial<OrdenCompraInput> | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.sessionStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Partial<OrdenCompraInput>) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveDraft(values: OrdenCompraInput) {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(STORAGE_KEY, JSON.stringify(values));
-  } catch {
-    // storage lleno o bloqueado
-  }
-}
-
-function clearDraft() {
-  if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.removeItem(STORAGE_KEY);
-  } catch {
-    // noop
-  }
-}
-
-// 🗃️ Orden de compra reutilizable (fix: 1 orden / N intentos de pago)
-const ORDER_KEY = "lmdc_checkout_order";
-
-function loadOrderId(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return window.sessionStorage.getItem(ORDER_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function saveOrderId(orderId: string | null) {
-  if (typeof window === "undefined") return;
-  try {
-    if (orderId) {
-      window.sessionStorage.setItem(ORDER_KEY, orderId);
-    } else {
-      window.sessionStorage.removeItem(ORDER_KEY);
-    }
-  } catch {
-    // noop
-  }
 }

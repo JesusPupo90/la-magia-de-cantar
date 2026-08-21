@@ -150,12 +150,23 @@ export async function createOrder(
       .eq("id", orderId)
       .maybeSingle<{ id: string; variant_id: string; payer_email: string; status: string; external_reference: string | null }>();
 
-    const reusable =
+    const sameIntent =
       !existingError &&
-      existing &&
+      !!existing &&
       existing.variant_id === data.variantId &&
-      existing.payer_email.toLowerCase() === data.payerEmail.toLowerCase() &&
-      ["draft", "rejected", "expired"].includes(existing.status);
+      existing.payer_email.toLowerCase() === data.payerEmail.toLowerCase();
+
+    // Si ya hay un pago en proceso (p. ej. PSE/efectivo sin confirmar) para esta
+    // misma intención, NO se abre otra orden: evita el doble cobro (blindaje §3).
+    if (sameIntent && existing!.status === "pending_payment") {
+      return {
+        success: false,
+        message:
+          "Ya hay un pago en proceso de confirmación para esta compra. Espera el resultado antes de intentarlo de nuevo.",
+      };
+    }
+
+    const reusable = sameIntent && ["draft", "rejected", "expired"].includes(existing!.status);
 
     if (reusable) {
       const { error: updateError } = await supabase

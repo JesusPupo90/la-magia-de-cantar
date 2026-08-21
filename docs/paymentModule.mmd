@@ -43,4 +43,4 @@ sequenceDiagram
     MP-->>S: Detalle (transaction_amount, status)
     S->>S: Reconciliación anti-fraude: monto == orders.amount_total
     S->>DB: UPDATE orders (re-confirma, idempotente) + order_payments
-    Note over DB,MP: pg_cron — expira pendientes (30 min) · purga drafts (>48 h) — cron.sql
+    Note over DB,MP: pg_cron — expira drafts y pagos pendientes (30 min) · purga órdenes sin actividad (>48 h) — cron.sql

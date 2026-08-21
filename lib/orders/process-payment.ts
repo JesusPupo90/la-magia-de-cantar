@@ -25,6 +25,7 @@ interface OrderRow {
   variant_label: string;
   amount_total: number;
   status: string;
+  expires_at: string | null;
   payer_email: string;
   payer_first_name: string;
   payer_last_name: string;
@@ -102,7 +103,7 @@ export async function processCardPayment(
   const { data: order, error: orderError } = await supabase
     .from("orders")
     .select(
-      "id, external_reference, service_title, variant_label, amount_total, status, payer_email, payer_first_name, payer_last_name, payer_doc_type, payer_doc_number"
+      "id, external_reference, service_title, variant_label, amount_total, status, expires_at, payer_email, payer_first_name, payer_last_name, payer_doc_type, payer_doc_number"
     )
     .eq("id", cleanOrderId)
     .maybeSingle<OrderRow>();
@@ -111,10 +112,26 @@ export async function processCardPayment(
     return { success: false, message: "La intención de pago no existe." };
   }
 
+  // 3b. GUARDAS DE ESTADO (blinda el cobro: no pagar dos veces ni pagar vencido)
   if (order.status === "paid") {
     return { success: true, status: "approved", orderId: cleanOrderId, message: "El pago ya fue confirmado." };
   }
-  if (order.status === "expired") {
+  if (order.status === "pending_payment") {
+    return {
+      success: false,
+      message: "El pago ya está en proceso de confirmación. Espera el resultado antes de reintentar.",
+    };
+  }
+
+  // draft con expires_at vencido (o ya marcado expired por el cron) → expirado.
+  const isExpired =
+    order.status === "expired" ||
+    (order.status === "draft" && !!order.expires_at && new Date(order.expires_at).getTime() < Date.now());
+
+  if (isExpired) {
+    if (order.status !== "expired") {
+      await supabase.from("orders").update({ status: "expired" }).eq("id", cleanOrderId);
+    }
     return {
       success: false,
       message: "La intención de pago expiró. Vuelve a intentar desde el inicio.",
