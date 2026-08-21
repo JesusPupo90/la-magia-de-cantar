@@ -15,6 +15,7 @@ export interface ProcessPaymentResult {
   orderId?: string;
   paymentId?: string;
   message?: string;
+  warning?: string;
 }
 
 interface OrderRow {
@@ -228,7 +229,7 @@ export async function processCardPayment(
     { onConflict: "mp_payment_id" }
   );
   if (paymentUpsertError) {
-    console.error("Error en order_payments:", paymentUpsertError);
+    console.error(`Error en order_payments (order ${cleanOrderId}, payment ${paymentId}):`, paymentUpsertError);
   }
 
   return {
@@ -237,5 +238,8 @@ export async function processCardPayment(
     statusDetail: mpBody.status_detail ?? null,
     orderId: cleanOrderId,
     paymentId,
+    warning: paymentUpsertError
+      ? `El pago se aprobó pero no se pudo registrar en order_payments: ${paymentUpsertError.message}`
+      : undefined,
   };
 }

@@ -91,6 +91,7 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
             try {
               const result = await processPayment(orderId, formData);
               console.log("PaymentBrick: resultado del pago:", result);
+              if (result.warning) console.warn("PaymentBrick: warning:", result.warning);
 
               if (!result.success) {
                 setPaymentError(result.message || "Ocurrió un error al procesar el pago.");

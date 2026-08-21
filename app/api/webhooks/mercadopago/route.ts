@@ -190,7 +190,7 @@ export async function POST(request: Request) {
     { onConflict: "mp_payment_id" }
   );
   if (paymentUpsertError) {
-    console.error("Error en order_payments:", paymentUpsertError);
+    console.error(`Error en order_payments (order ${order.id}, payment ${resourceId}):`, paymentUpsertError);
   }
 
   await supabase.from("webhook_logs").update({ processed: true }).eq("event_id", eventId);
