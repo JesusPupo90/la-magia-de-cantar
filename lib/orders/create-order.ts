@@ -40,8 +40,16 @@ interface VariantWithService {
 // Mapeo de tipos de documento del form → valores que MP acepta (MCO/Colombia):
 // ver MP_DOC_TYPES en ./mp-status (compartido con el procesamiento de pagos).
 
-function getBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "https://pocket-proposed-rarely-recorded.trycloudflare.com" //"http://localhost:3000";
+function getBaseUrl(): string | null {
+  const url = process.env.NEXT_PUBLIC_APP_URL;
+  if (url) return url;
+  // En dev se mantiene un túnel local de respaldo. En producción NO hay fallback:
+  // si falta NEXT_PUBLIC_APP_URL el pago se bloquea con un error claro (el
+  // notification_url/back_urls jamás deben apuntar a una URL muerta).
+  if (process.env.NODE_ENV !== "production") {
+    return "https://pocket-proposed-rarely-recorded.trycloudflare.com";
+  }
+  return null;
 }
 
 function amountForMp(price: number): number {
@@ -75,7 +83,7 @@ export async function createOrder(
   //     Mantenemos auto_return SIEMPRE (no olvidarlo en producción) y solo exigimos
   //     que NEXT_PUBLIC_APP_URL sea HTTPS (en local: un túnel tipo ngrok).
   const baseUrl = getBaseUrl();
-  if (!baseUrl.startsWith("https://")) {
+  if (!baseUrl || !baseUrl.startsWith("https://")) {
     return {
       success: false,
       message:

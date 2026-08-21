@@ -36,8 +36,16 @@ interface OrderRow {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-function getBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_APP_URL ?? "https://pocket-proposed-rarely-recorded.trycloudflare.com";
+function getBaseUrl(): string | null {
+  const url = process.env.NEXT_PUBLIC_APP_URL;
+  if (url) return url;
+  // En dev se mantiene un túnel local de respaldo. En producción NO hay fallback:
+  // si falta NEXT_PUBLIC_APP_URL el cobro se bloquea (jamás un pago sin
+  // notification_url hacia una URL muerta).
+  if (process.env.NODE_ENV !== "production") {
+    return "https://pocket-proposed-rarely-recorded.trycloudflare.com";
+  }
+  return null;
 }
 
 // El SDK v3 (3.16.0) llama a onSubmit(formData, additionalData) donde formData
@@ -143,6 +151,13 @@ export async function processCardPayment(
   // 4. CREAR EL PAGO EN MERCADO PAGO (POST /v1/payments)
   const idempotencyKey = randomUUID();
   const baseUrl = getBaseUrl();
+  if (!baseUrl) {
+    return {
+      success: false,
+      message:
+        "El cobro requiere una URL pública HTTPS configurada (NEXT_PUBLIC_APP_URL) para poder notificar a la pasarela.",
+    };
+  }
 
   const body: Record<string, unknown> = {
     transaction_amount: order.amount_total, // NUNCA confiar en el monto del cliente
