@@ -10,6 +10,7 @@ interface MpBricksProps {
   preferenceId: string;
   orderId: string;
   amount: number;
+  onToast?: (message: string) => void;
 }
 
 interface MpBrick {
@@ -33,7 +34,7 @@ declare global {
   }
 }
 
-export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProps) {
+export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpBricksProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = useState(false);
   const [error, setError] = useState("");
@@ -95,7 +96,12 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
               if (result.warning) console.warn("PaymentBrick: warning:", result.warning);
 
               if (!result.success) {
-                setPaymentError(result.message || "Ocurrió un error al procesar el pago.");
+                // Ya hay un pago en proceso para esta intención → aviso rápido centrado.
+                if (result.code === "PENDING_PAYMENT") {
+                  onToast?.(result.message || "El pago ya está en proceso de confirmación.");
+                } else {
+                  setPaymentError(result.message || "Ocurrió un error al procesar el pago.");
+                }
                 return;
               }
 
@@ -144,7 +150,7 @@ export default function MpBricks({ preferenceId, orderId, amount }: MpBricksProp
         createdRef.current = false; // permitir reintento
         setError("No se pudo iniciar el pago. Inténtalo de nuevo.");
       });
-  }, [sdkReady, preferenceId, orderId, amount, retryKey]);
+  }, [sdkReady, preferenceId, orderId, amount, retryKey, onToast]);
 
   const mpMissing = sdkReady && typeof window !== "undefined" && !window.MercadoPago;
 

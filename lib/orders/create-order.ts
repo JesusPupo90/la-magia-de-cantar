@@ -19,6 +19,7 @@ export interface CreateOrderResult {
     lastName: string;
   };
   message?: string;
+  code?: string;
   errors?: Record<string, string[]>;
 }
 
@@ -161,6 +162,7 @@ export async function createOrder(
     if (sameIntent && existing!.status === "pending_payment") {
       return {
         success: false,
+        code: "PENDING_PAYMENT",
         message:
           "Ya hay un pago en proceso de confirmación para esta compra. Espera el resultado antes de intentarlo de nuevo.",
       };

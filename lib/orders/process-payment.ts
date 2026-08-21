@@ -15,6 +15,7 @@ export interface ProcessPaymentResult {
   orderId?: string;
   paymentId?: string;
   message?: string;
+  code?: string;
   warning?: string;
 }
 
@@ -119,6 +120,7 @@ export async function processCardPayment(
   if (order.status === "pending_payment") {
     return {
       success: false,
+      code: "PENDING_PAYMENT",
       message: "El pago ya está en proceso de confirmación. Espera el resultado antes de reintentar.",
     };
   }

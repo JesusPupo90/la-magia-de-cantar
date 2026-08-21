@@ -44,9 +44,17 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
   const schema = useMemo(() => buildOrdenSchema({ requiresAge }), [requiresAge]);
   const [step, setStep] = useState<PaymentStep>("form");
   const [submitError, setSubmitError] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [studentIsPayer, setStudentIsPayer] = useState(false);
+
+  // 🔔 Notificación rápida centrada (p. ej. "pago en proceso"). Auto-cierre ~5s.
+  useEffect(() => {
+    if (!toast) return;
+    const t = setTimeout(() => setToast(null), 5000);
+    return () => clearTimeout(t);
+  }, [toast]);
 
   // 🍯 Honeypot + rellenado de pagador → estudiante
   const defaultValues = useMemo<OrdenCompraInput>(() => {
@@ -64,7 +72,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
       payerDocType: stored?.payerDocType ?? "CC",
       payerDocNumber: stored?.payerDocNumber ?? "",
       payerPhone: stored?.payerPhone ?? "",
-      habeasDataAccepted: true as const,
+      habeasDataAccepted: stored?.habeasDataAccepted ?? false,
       honeypot: "",
     };
   }, [service.id, variant.id]);
@@ -128,6 +136,13 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
 
     // Reutilizamos la misma orden (intención de compra) en los reintentos.
     const result = await submitOrder(payload, loadOrderId() ?? undefined);
+
+    // ⚠️ Ya existe un pago en proceso para esta intención → aviso rápido centrado.
+    if (result.code === "PENDING_PAYMENT") {
+      setToast(result.message || "El pago ya está en proceso de confirmación.");
+      setStep("form");
+      return;
+    }
 
     if (!result.success) {
       setSubmitError(result.message || "Ocurrió un error al iniciar el pago. Inténtalo de nuevo.");
@@ -388,7 +403,6 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
               <label className="flex cursor-pointer items-start gap-2.5">
                 <input
                   type="checkbox"
-                  defaultChecked
                   {...register("habeasDataAccepted")}
                   className="mt-0.5 h-4 w-4 accent-purple"
                 />
@@ -487,6 +501,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
             preferenceId={preferenceId}
             orderId={orderId ?? ""}
             amount={variant.price}
+            onToast={setToast}
           />
         )}
       </div>
@@ -532,6 +547,23 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
           <p className="mt-4 font-jakarta text-[11px] italic text-gray-500 leading-relaxed">* {service.note}</p>
         )}
       </aside>
+
+      {/* 🔔 Notificación rápida centrada (se cierra al hacer clic o a los ~3s) */}
+      {toast && (
+        <div
+          role="status"
+          aria-live="polite"
+          onClick={() => setToast(null)}
+          className="fixed inset-0 z-50 flex cursor-pointer items-center justify-center bg-black/30 p-4"
+        >
+          <div className="flex max-w-sm items-start gap-3 rounded-2xl border-[3px] border-black bg-yellow p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-black" />
+            <p className="font-poppins text-xs font-black uppercase leading-relaxed text-black">
+              {toast}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

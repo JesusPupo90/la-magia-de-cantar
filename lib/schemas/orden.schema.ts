@@ -87,8 +87,8 @@ export function buildOrdenSchema(opts?: { requiresAge?: boolean }) {
       .regex(/^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/, "IP inválida")
       .optional(),
 
-    // ⚖️ HABEAS DATA (Ley 1581)
-    habeasDataAccepted: z.literal(true, {
+    // ⚖️ HABEAS DATA (Ley 1581) — checkbox desmarcado por defecto; se exige true
+    habeasDataAccepted: z.boolean().refine((v) => v === true, {
       message: "Debes autorizar el tratamiento de tus datos personales",
     }),
 
