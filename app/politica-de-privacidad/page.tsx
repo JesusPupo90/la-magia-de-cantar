@@ -83,6 +83,9 @@ export default function PoliticaPrivacidadPage() {
                 Con tu consentimiento, utilizamos el <strong>Meta Pixel (Facebook/Meta)</strong>, una herramienta de medición de publicidad de Meta Platforms que nos ayuda a analizar el rendimiento de nuestras campañas de marketing, medir conversiones (como compras o solicitudes de cotización) y ofrecer anuncios relevantes. El Meta Pixel recopila información anónima de navegación (p. ej. páginas visitadas, compras realizadas) mediante cookies de terceros.
               </p>
               <p>
+                Con tu consentimiento también utilizamos <strong>Google Tag Manager</strong>, que administra etiquetas de medición y análisis de Google, y <strong>Microsoft Clarity</strong>, que nos permite analizar el comportamiento de navegación (mapas de calor y grabaciones de sesiones) para mejorar la experiencia del sitio. Estas herramientas se activan únicamente si aceptas las cookies.
+              </p>
+              <p>
                 Puedes aceptar o rechazar estas cookies desde el aviso mostrado al cargar el sitio, o configurar/desactivar las cookies desde las opciones de tu navegador en cualquier momento. Al rechazarlas, el Meta Pixel no se carga ni recopila información.
               </p>
             </section>

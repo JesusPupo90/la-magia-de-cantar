@@ -10,6 +10,8 @@ import "./globals.css";
 import Footer from "@/components/Footer";
 import MetaPixel from "@/components/MetaPixel";
 import CookieNotice from "@/components/CookieNotice";
+import GtmTracker from "@/components/GtmTracker";
+import ClarityTracker from "@/components/ClarityTracker";
 import { Analytics } from "@vercel/analytics/next"
 
 const bebasNeue = Bebas_Neue({
@@ -56,6 +58,8 @@ export default function RootLayout({
         <Footer />
         <Analytics />
         <MetaPixel />
+        <GtmTracker />
+        <ClarityTracker />
         <CookieNotice />
       </body>
     </html>
