@@ -10,6 +10,7 @@ sequenceDiagram
     participant S as Servidor Next.js (App Router / Server Actions)
     participant DB as Supabase (service-role para escribir)
     participant MP as Mercado Pago
+    participant R as Resend (email)
 
     Note over UI,S: Elige servicio y plan — NuestrosServicios.tsx · CTA
     U->>UI: Explora el catálogo y pulsa el botón
@@ -33,6 +34,9 @@ sequenceDiagram
     S->>MP: POST /v1/payments — token + transaction_amount oficial + notification_url
     MP-->>S: Devuelve el pago (id, status: approved / pending / rejected)
     S->>DB: UPDATE orders status + order_payments (no retrocede de 'paid')
+    S->>R: Envía confirmación de pago (bienvenida + expectativas) — lib/orders/send-confirmation.ts
+    R-->>U: Email al comprador (no-reply@lamagiadecantar.co)
+    Note over S,R: Guarda anti-duplicados — orders.confirmation_sent_at (también se dispara desde el webhook al confirmar pagos pendientes)
     S-->>UI: status del pago
     UI-->>U: approved/pending → /checkout/success · rejected → error en línea (solo lectura)
     Note over UI,MP: Opción "Mercado Pago" (wallet): el brick abre el checkout de MP en una pestaña nueva con la preferencia (back_urls)

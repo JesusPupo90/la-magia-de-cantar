@@ -7,6 +7,7 @@ import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { mapPaymentStatus } from "@/lib/orders/mp-status";
+import { maybeSendConfirmation } from "@/lib/orders/send-confirmation";
 
 export const dynamic = "force-dynamic";
 
@@ -194,6 +195,13 @@ export async function POST(request: Request) {
   }
 
   await supabase.from("webhook_logs").update({ processed: true }).eq("event_id", eventId);
+
+  // Email de confirmación si la orden quedó pagada (guarda anti-duplicados interna).
+  if (mapped?.dbStatus === "paid") {
+    void maybeSendConfirmation(order.id).catch((err) =>
+      console.error("[email] Error en maybeSendConfirmation:", err)
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

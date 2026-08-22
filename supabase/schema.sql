@@ -110,6 +110,7 @@ create table public.orders (
   paid_at              timestamptz,
   rejected_at          timestamptz,
   refunded_at          timestamptz,
+  confirmation_sent_at timestamptz,           -- guarda anti-duplicados: email de confirmación de pago enviado
 
   -- 💳 MERCADO PAGO (Checkout Pro — preferencias + Payment Brick)
   idempotency_key      uuid,                   -- header X-Idempotency-Key por intento

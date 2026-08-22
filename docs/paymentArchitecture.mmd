@@ -28,11 +28,16 @@ graph TD
         F3["Consulta el estado real del pago"<br/><i>GET /v1/payments/&lbrace;id&rbrace;</i>]
         F4["Reconciliación del monto pagado"<br/><i>order_payments.amount vs orders.amount_total</i>]
         F5["Actualiza estado y registra el pago"<br/><i>orders.status · order_payments</i>]
+        E2["Envía el email de confirmación de pago (bienvenida + expectativas)"<br/><i>lib/orders/send-confirmation.ts · orders.confirmation_sent_at</i>]
     end
 
     subgraph MP["Mercado Pago (API)"]
         MP1["API Preferences — crea la preferencia (wallet) y devuelve preference_id"<br/><i>POST /checkout/preferences</i>]
         MP2["API Payments — crea el pago con el token y devuelve su estado"<br/><i>POST /v1/payments · GET /v1/payments/&lbrace;id&rbrace;</i>]
+    end
+
+    subgraph RESEND["Resend (email transaccional)"]
+        R1["Envía la confirmación al comprador"<br/><i>sendPaymentConfirmation · no-reply@lamagiadecantar.co</i>]
     end
 
     subgraph SUPABASE["Base de datos (Supabase)"]
@@ -59,6 +64,9 @@ graph TD
     D2 -->|"POST /v1/payments"| MP2
     MP2 -.->|"devuelve estado del pago"| D2
     D2 -->|"UPDATE status + order_payments"| C7
+    D2 -->|"pago aprobado → envía email"| E2
+    F5 -->|"transición a paid → envía email"| E2
+    E2 --> R1
     D2 -->|"resultado del pago"| D3
     D3 -->|"redirige al navegador"| E1
     MP2 -.->|"aviso webhook (todos los métodos)"| F1

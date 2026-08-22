@@ -7,6 +7,7 @@
 import { randomUUID } from "crypto";
 import { createAdminClient } from "../supabase/admin";
 import { mapPaymentStatus, MP_DOC_TYPES } from "./mp-status";
+import { maybeSendConfirmation } from "./send-confirmation";
 
 export interface ProcessPaymentResult {
   success: boolean;
@@ -264,6 +265,13 @@ export async function processCardPayment(
   );
   if (paymentUpsertError) {
     console.error(`Error en order_payments (order ${cleanOrderId}, payment ${paymentId}):`, paymentUpsertError);
+  }
+
+  // 7. EMAIL DE CONFIRMACIÓN (solo si quedó pagado; guarda anti-duplicados interna).
+  if (mapped?.dbStatus === "paid") {
+    void maybeSendConfirmation(cleanOrderId).catch((err) =>
+      console.error("[email] Error en maybeSendConfirmation:", err)
+    );
   }
 
   return {
