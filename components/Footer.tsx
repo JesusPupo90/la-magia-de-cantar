@@ -71,7 +71,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="mailto:Lamagiadecantar08@gmail.com"
+                href="mailto:contacto@lamagiadecantar.co"
                 className="flex items-center gap-2.5 text-neutral-300 hover:text-white transition-colors font-poppins"
               >
                 <Mail className="h-4 w-4 text-yellow shrink-0" />

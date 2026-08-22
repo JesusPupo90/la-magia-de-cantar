@@ -50,7 +50,7 @@ export default function PoliticaPrivacidadPage() {
               <ul className="list-disc pl-5 space-y-1">
                 <li><strong>Razón Social / Titular:</strong> Yanetsis Alfonso / La Magia de Cantar</li>
                 <li><strong>Domicilio:</strong> Calle 121 No. 11A-23, Bogotá, Colombia</li>
-                <li><strong>Correo electrónico:</strong> Lamagiadecantar08@gmail.com</li>
+                <li><strong>Correo electrónico:</strong> contacto@lamagiadecantar.co</li>
                 <li><strong>Teléfono de contacto:</strong> +57 305 3678742</li>
               </ul>
             </section>

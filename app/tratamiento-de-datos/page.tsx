@@ -83,7 +83,7 @@ export default function TratamientoDatosPage() {
                 4. Canales para el Ejercicio de Derechos
               </h2>
               <p>
-                Para ejercer sus derechos de consulta, actualización, rectificación o supresión, el titular puede enviar un correo formal a <strong>Lamagiadecantar08@gmail.com</strong> o comunicarse vía WhatsApp al <strong>+57 305 3678742</strong>. Las solicitudes serán respondidas en un plazo máximo de diez (10) días hábiles.
+                Para ejercer sus derechos de consulta, actualización, rectificación o supresión, el titular puede enviar un correo formal a <strong>contacto@lamagiadecantar.co</strong> o comunicarse vía WhatsApp al <strong>+57 305 3678742</strong>. Las solicitudes serán respondidas en un plazo máximo de diez (10) días hábiles.
               </p>
             </section>
           </div>

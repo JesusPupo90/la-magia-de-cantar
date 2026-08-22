@@ -48,7 +48,7 @@ export default function PoliticaPagosPage() {
                 De acuerdo con el Estatuto del Consumidor en Colombia (Ley 1480 de 2011, Art. 47), el comprador tiene derecho a ejercer el Derecho de Retracto dentro de los <strong>cinco (5) días hábiles</strong> siguientes a la fecha de la compra en línea, siempre y cuando la prestación del servicio formativo contratado no haya iniciado.
               </p>
               <ul className="list-disc pl-5 space-y-1">
-                <li>Para solicitar el retracto, se debe enviar una comunicación formal al correo <strong>Lamagiadecantar08@gmail.com</strong>.</li>
+                <li>Para solicitar el retracto, se debe enviar una comunicación formal al correo <strong>contacto@lamagiadecantar.co</strong>.</li>
                 <li>La devolución del dinero se realizará a través del mismo medio de pago utilizado dentro de los treinta (30) días calendario siguientes a la solicitud.</li>
               </ul>
             </section>
