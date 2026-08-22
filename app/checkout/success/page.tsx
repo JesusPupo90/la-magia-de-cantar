@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { CheckCircle2, Music, Mail, MessageCircle, ArrowRight, Receipt } from "lucide-react";
+import MetaPurchaseEvent from "@/components/MetaPurchaseEvent";
 
 interface SuccessPageProps {
   searchParams: Promise<{
     payment_id?: string;
     status?: string;
     external_reference?: string;
+    amount?: string;
   }>;
 }
 
@@ -16,9 +18,11 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
   const orderId = params.external_reference;
   const paymentId = params.payment_id;
   const isPending = params.status === "in_process" || params.status === "pending";
+  const amount = Number(params.amount);
 
   return (
     <main className="flex min-h-[80vh] flex-col items-center justify-center bg-[#FFFBEB] px-4 py-16 sm:px-6 lg:px-8">
+      <MetaPurchaseEvent value={amount} orderId={orderId ?? ""} status={params.status} />
       <div className="w-full max-w-2xl">
         
         {/* TARJETA PRINCIPAL */}

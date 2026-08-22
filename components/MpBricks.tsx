@@ -5,6 +5,7 @@ import Script from "next/script";
 import { AlertCircle, Loader2, RotateCcw } from "lucide-react";
 import { processPayment } from "@/app/actions/payments";
 import { clearOrderId } from "@/lib/checkout-storage";
+import { fireEvent } from "@/lib/meta";
 
 interface MpBricksProps {
   preferenceId: string;
@@ -74,6 +75,8 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
         callbacks: {
           onReady: () => {
             console.log("PaymentBrick listo, order:", orderId, "preference:", preferenceId);
+            // 📊 Meta Pixel: inició el flujo de pago (funnel).
+            fireEvent("InitiateCheckout", { value: amount, currency: "COP" });
           },
           onSubmit: async (formData: unknown, additionalData: unknown) => {
             console.log("PaymentBrick onSubmit, order:", orderId, "data:", formData, "extra:", additionalData);
@@ -110,6 +113,7 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
                 payment_id: result.paymentId ?? "",
                 status,
                 external_reference: result.orderId ?? orderId,
+                amount: String(amount),
               });
 
               if (status === "approved") {

@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, Send, Briefcase, ChevronRight, ChevronLeft, AlertCircle, Loader2 } from "lucide-react";
 import { cotizacionEmpresaSchema, type CotizacionEmpresaInput } from "@/lib/schemas/cotizacion.schema";
 import { submitCompanyQuote } from "@/app/actions/cotizaciones";
+import { fireEvent } from "@/lib/meta";
 
 const WORK_AREAS = [
   {
@@ -143,6 +144,8 @@ export default function EmpresasEInstituciones() {
       return;
     }
     setIsSubmitted(true);
+    // 📊 Meta Pixel: lead B2B capturado (funnel).
+    fireEvent("Lead");
   };
 
   return (

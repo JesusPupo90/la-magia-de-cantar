@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getCatalog } from "@/data/services";
 import type { ServiceItem } from "@/data/services";
 import CheckoutForm from "@/components/CheckoutForm";
+import MetaViewContent from "@/components/MetaViewContent";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 
 interface CheckoutPageProps {
@@ -35,6 +36,12 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
 
   return (
     <main className="flex flex-1 flex-col bg-[#FFFBEB]">
+      <MetaViewContent
+        title={service.title}
+        category={service.category}
+        price={variant.price}
+        variantId={variant.id}
+      />
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         {/* Volver */}
         <Link

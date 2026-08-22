@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { ServiceItem } from "@/data/services";
 import { formatCOP } from "@/utils/formatCurrency";
+import { fireEvent } from "@/lib/meta";
 
 interface NuestrosServiciosProps {
   services: ServiceItem[];
@@ -57,6 +58,19 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
 
   const handleSelectPlan = (serviceId: string, idx: number) => {
     setSelectedPlanIndexes(prev => ({ ...prev, [serviceId]: idx }));
+
+    // 📊 Meta Pixel: ViewContent al elegir un plan (funnel).
+    const svc = services.find((s) => s.id === serviceId);
+    const plan = svc?.plans[idx] ?? svc?.plans[0];
+    if (svc && plan) {
+      fireEvent("ViewContent", {
+        content_name: svc.title,
+        content_category: svc.category,
+        content_ids: [plan.id],
+        value: plan.price,
+        currency: "COP",
+      });
+    }
   };
 
   const toggleExpandCard = (serviceId: string) => {
