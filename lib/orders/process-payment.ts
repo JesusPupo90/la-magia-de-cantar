@@ -135,7 +135,8 @@ function extractBankTransferData(input: unknown): {
 
 export async function processCardPayment(
   orderId: string,
-  paymentFormData: unknown
+  paymentFormData: unknown,
+  ipAddress?: string
 ): Promise<ProcessPaymentResult> {
   // 1. VALIDAR orderId (uuid generado en el servidor)
   const cleanOrderId = (orderId ?? "").trim();
@@ -222,6 +223,9 @@ export async function processCardPayment(
       type: MP_DOC_TYPES[order.payer_doc_type] ?? "Otro",
       number: order.payer_doc_number,
     },
+    // PSE (Colombia) exige entity_type: "individual" (persona natural) o
+    // "association" (persona jurídica). Derivado del tipo de documento.
+    ...(isPse ? { entity_type: order.payer_doc_type === "NIT" ? "association" : "individual" } : {}),
   };
 
   const body: Record<string, unknown> = {
@@ -236,11 +240,28 @@ export async function processCardPayment(
     // PSE: sin token de tarjeta; se indica el banco (financial_institution).
     body.payment_method_id = bankTransfer.paymentMethodId;
     body.transaction_details = { financial_institution: bankTransfer.financialInstitution };
+    // URL de retorno tras completar la transferencia en el banco (requerida por MP).
+    body.callback_url = `${baseUrl}/checkout/success`;
   } else if (card) {
     body.token = card.token;
     body.payment_method_id = card.paymentMethodId;
     body.installments = card.installments;
     if (card.issuerId) body.issuer_id = card.issuerId;
+  }
+
+  // PSE (Colombia) exige additional_info.ip_address + payer con identificación.
+  const additionalInfo: Record<string, unknown> = {};
+  if (ipAddress) additionalInfo.ip_address = ipAddress;
+  if (isPse) {
+    // La identificación del pagador va a nivel payer (top-level), NO aquí
+    // (MP rechaza additional_info.payer.identification).
+    additionalInfo.payer = {
+      first_name: order.payer_first_name,
+      last_name: order.payer_last_name,
+    };
+  }
+  if (Object.keys(additionalInfo).length > 0) {
+    body.additional_info = additionalInfo;
   }
 
   let res: Response;
@@ -309,6 +330,7 @@ export async function processCardPayment(
     .update({
       ...patch,
       idempotency_key: idempotencyKey,
+      payer_ip_address: ipAddress,
       mp_status: mpBody.status ?? null,
       mp_status_detail: mpBody.status_detail ?? null,
       mp_payment_method: mpBody.payment_method_id ?? null,
