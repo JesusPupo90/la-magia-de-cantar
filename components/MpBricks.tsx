@@ -67,7 +67,10 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
           paymentMethods: {
             creditCard: "all",
             debitCard: "all",
-            bankTransfer: "all",
+            // PSE oculto temporalmente: MP devuelve 9032 (BankTransfers Api fail)
+            // con payload correcto e IP pública real, en pruebas y producción.
+            // Re-activar (cambiar a "all") cuando MP resuelva el servicio PSE.
+            bankTransfer: "none",
             ticket: "all",
             mercadoPago: "all",
           },
