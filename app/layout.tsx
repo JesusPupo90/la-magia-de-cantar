@@ -8,6 +8,7 @@ import {
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import { Analytics } from "@vercel/analytics/next"
 
 const bebasNeue = Bebas_Neue({
   weight: "400",
@@ -51,6 +52,7 @@ export default function RootLayout({
         <Navbar />
         {children}
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
