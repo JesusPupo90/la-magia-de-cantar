@@ -264,6 +264,22 @@ export async function processCardPayment(
     body.additional_info = additionalInfo;
   }
 
+  // Diagnóstico PSE (MP): registrar los campos del request justo antes del POST.
+  if (isPse) {
+    const institution = (body.transaction_details as { financial_institution?: unknown } | undefined)
+      ?.financial_institution;
+    console.log(
+      "[PSE-diagnostico] request:",
+      JSON.stringify({
+        ip_selected: ipAddress ?? "(ninguna)",
+        financial_institution: institution,
+        transaction_amount: body.transaction_amount,
+        payment_method_id: body.payment_method_id,
+        installments: body.installments ?? null,
+      })
+    );
+  }
+
   let res: Response;
   try {
     res = await fetch("https://api.mercadopago.com/v1/payments", {
@@ -297,6 +313,14 @@ export async function processCardPayment(
 
   if (!res.ok || !mpBody || !mpBody.id) {
     console.error("MP rechazó el pago:", res.status, JSON.stringify(mpBody), "| order:", cleanOrderId);
+    // Diagnóstico PSE (MP): correlación interna (cause[0].data) del fallo.
+    const cause = (mpBody as { cause?: Array<{ code?: number | string; description?: string; data?: string }> } | null)?.cause;
+    if (isPse && cause?.[0]) {
+      console.error(
+        "[PSE-diagnostico] failure:",
+        JSON.stringify({ status: res.status, cause_code: cause[0].code, cause_data: cause[0].data })
+      );
+    }
     const mpMessage = (mpBody as { message?: string } | null)?.message;
     if (mpMessage) {
       return { success: false, message: String(mpMessage) };

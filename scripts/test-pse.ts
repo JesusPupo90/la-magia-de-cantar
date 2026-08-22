@@ -27,7 +27,17 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://example.com";
 const PSE_AMOUNT = 100000;
 const PAYER_EMAIL = "comprador.test@example.com";
 
-type PseVariant = { name: string; bank: string; topNames: boolean; extraPayer: boolean; amount?: number };
+type PseVariant = {
+  name: string;
+  bank: string;
+  topNames: boolean;
+  extraPayer: boolean;
+  amount?: number;
+  institutionNumber?: boolean;
+  minimalPayer?: boolean;
+  installments?: number;
+  withIp?: boolean;
+};
 
 const VARIANTS: PseVariant[] = [
   { name: "V1 sin nombres en payer top, payer en additional_info", bank: "1007", topNames: false, extraPayer: true },
@@ -36,6 +46,10 @@ const VARIANTS: PseVariant[] = [
   { name: "V4 sin additional_info.payer, solo ip", bank: "1007", topNames: true, extraPayer: false },
   { name: "V5 nequi (otro bank_transfer sin banco)", bank: "nequi", topNames: true, extraPayer: true },
   { name: "V6 PSE monto 1000", bank: "1007", topNames: false, extraPayer: true, amount: 1000 },
+  { name: "V7 institution como NÚMERO (1007)", bank: "1007", topNames: false, extraPayer: true, amount: 100000, institutionNumber: true },
+  { name: "V8 payer mínimo (sin nombres en ningún lado)", bank: "1007", topNames: false, extraPayer: false, amount: 100000, minimalPayer: true },
+  { name: "V9 payload MP exacto (institution num + installments:1 + sin additional_info)", bank: "1007", topNames: true, extraPayer: false, amount: 100000, institutionNumber: true, installments: 1, withIp: false },
+  { name: "V10 V9 + additional_info.ip_address", bank: "1007", topNames: true, extraPayer: false, amount: 100000, institutionNumber: true, installments: 1, withIp: true },
 ];
 
 function makeBody(v: PseVariant): Record<string, unknown> {
@@ -49,23 +63,34 @@ function makeBody(v: PseVariant): Record<string, unknown> {
     payer.last_name = "Pérez";
   }
 
-  const additionalInfo: Record<string, unknown> = { ip_address: "190.0.0.1" };
+  const additionalInfo: Record<string, unknown> = { ip_address: "181.49.87.2" };
   if (v.extraPayer) {
     additionalInfo.payer = { first_name: "Camila", last_name: "Pérez" };
   }
 
   const isNequi = v.bank === "nequi";
-  return {
+  const body: Record<string, unknown> = {
     transaction_amount: v.amount ?? PSE_AMOUNT,
     description: "Pago de prueba PSE",
     payment_method_id: isNequi ? "nequi" : "pse",
-    ...(isNequi ? {} : { transaction_details: { financial_institution: v.bank } }),
+    ...(isNequi ? {} : { transaction_details: { financial_institution: v.institutionNumber ? Number(v.bank) : v.bank } }),
     callback_url: `${baseUrl}/checkout/success`,
     additional_info: additionalInfo,
     payer,
     external_reference: `test-pse-${v.bank}-${Date.now()}`,
     notification_url: `${baseUrl}/api/webhooks/mercadopago`,
   };
+  if (v.minimalPayer) {
+    body.additional_info = { ip_address: "181.49.87.2" };
+    body.payer = {
+      email: PAYER_EMAIL,
+      entity_type: "individual",
+      identification: { type: "CC", number: "1012345678" },
+    };
+  }
+  if (v.installments) body.installments = v.installments;
+  if (v.withIp !== undefined && !v.withIp) delete body.additional_info;
+  return body;
 }
 
 async function run() {
