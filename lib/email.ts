@@ -67,9 +67,9 @@ function buildQuoteHtml(data: CotizacionEmpresaInput) {
   return `
     <div style="font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;padding:24px 12px;">
       <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-        <div style="background:#111827;padding:18px 24px;">
-          <div style="color:#ffffff;font-size:13px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">La Magia de Cantar</div>
-          <div style="color:#f3f4f6;font-size:15px;font-weight:bold;margin-top:4px;">Nueva solicitud de cotización</div>
+        <div style="background:#ffffff;border-bottom:1px solid #e5e7eb;padding:18px 24px;text-align:center;">
+          <img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="180" style="width:180px;height:auto;max-width:100%;" />
+          <div style="margin-top:10px;font-size:13px;font-weight:bold;color:#374151;text-transform:uppercase;letter-spacing:1px;">Nueva solicitud de cotización</div>
         </div>
         <div style="padding:24px;">
           <p style="margin:0 0 16px;color:#374151;font-size:13px;line-height:1.6;">Se recibió una nueva solicitud desde el formulario de Empresas e Instituciones.</p>
@@ -123,8 +123,8 @@ function buildQuoteConfirmationHtml(data: CotizacionEmpresaInput) {
   return `
     <div style="font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;padding:24px 12px;">
       <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-        <div style="background:#111827;padding:18px 24px;text-align:center;">
-          <div style="color:#ffffff;font-size:14px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;">La Magia de Cantar</div>
+        <div style="background:#ffffff;border-bottom:1px solid #e5e7eb;padding:18px 24px;text-align:center;">
+          <img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="180" style="width:180px;height:auto;max-width:100%;" />
         </div>
         <div style="padding:24px;">
           <p style="margin:0 0 12px;font-size:15px;color:#111;font-weight:bold;">Hemos recibido tu solicitud de cotización</p>
@@ -194,9 +194,9 @@ function buildPaymentConfirmationHtml(data: PaymentConfirmationData) {
   return `
     <div style="font-family:Arial,Helvetica,sans-serif;background-color:#FFFBEB;padding:32px 16px;">
       <div style="max-width:600px;margin:0 auto;background:#ffffff;border:3px solid #000000;border-radius:16px;overflow:hidden;box-shadow:6px 6px 0 rgba(0,0,0,1);">
-        <div style="background:#FDE68A;border-bottom:3px solid #000000;padding:28px 24px;text-align:center;">
-          <div style="font-size:22px;font-weight:900;letter-spacing:1px;color:#000;text-transform:uppercase;">La Magia de Cantar</div>
-          <div style="font-size:14px;color:#000;margin-top:8px;font-weight:bold;text-transform:uppercase;letter-spacing:0.5px;">¡Gracias por tu compra!</div>
+        <div style="background:#ffffff;border-bottom:3px solid #000000;padding:28px 24px;text-align:center;">
+          <img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="200" style="width:200px;height:auto;max-width:100%;" />
+          <div style="margin:14px auto 0;display:inline-block;background:#FDE68A;border:2px solid #000000;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">¡Gracias por tu compra!</div>
         </div>
         <div style="padding:28px 24px;">
           <p style="margin:0 0 14px;font-size:15px;color:#111;font-weight:bold;">Hola ${esc(fullName)},</p>
