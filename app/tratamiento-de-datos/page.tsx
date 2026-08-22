@@ -52,6 +52,7 @@ export default function TratamientoDatosPage() {
                 <li>Enviar confirmaciones de compra, recordatorios de horarios y comprobantes transaccionales vía correo electrónico o WhatsApp.</li>
                 <li>Suministrar información sobre nuevos programas, talleres, eventos y servicios.</li>
                 <li>Dar cumplimiento a las obligaciones legales y contables aplicables.</li>
+                <li>Analizar el tráfico del sitio y medir campañas de marketing mediante cookies propias y de terceros (Meta Pixel), siempre con el consentimiento del usuario según la <Link href="/politica-de-privacidad" className="font-bold text-purple underline">Política de Privacidad</Link>.</li>
               </ul>
             </section>
 

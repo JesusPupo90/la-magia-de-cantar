@@ -77,7 +77,13 @@ export default function PoliticaPrivacidadPage() {
                 3. Uso de Cookies y Rastreo
               </h2>
               <p>
-                Nuestro sitio web utiliza cookies técnicas y analíticas para optimizar la experiencia de navegación, recordar preferencias de sesión y analizar el tráfico web. El usuario puede configurar o desactivar las cookies desde las opciones de su navegador en cualquier momento.
+                Nuestro sitio web utiliza cookies técnicas y analíticas para optimizar la experiencia de navegación, recordar preferencias de sesión y analizar el tráfico web. Al ingresar al sitio se muestra un aviso que permite <strong>aceptar o rechazar</strong> el uso de cookies.
+              </p>
+              <p>
+                Con tu consentimiento, utilizamos el <strong>Meta Pixel (Facebook/Meta)</strong>, una herramienta de medición de publicidad de Meta Platforms que nos ayuda a analizar el rendimiento de nuestras campañas de marketing, medir conversiones (como compras o solicitudes de cotización) y ofrecer anuncios relevantes. El Meta Pixel recopila información anónima de navegación (p. ej. páginas visitadas, compras realizadas) mediante cookies de terceros.
+              </p>
+              <p>
+                Puedes aceptar o rechazar estas cookies desde el aviso mostrado al cargar el sitio, o configurar/desactivar las cookies desde las opciones de tu navegador en cualquier momento. Al rechazarlas, el Meta Pixel no se carga ni recopila información.
               </p>
             </section>
 

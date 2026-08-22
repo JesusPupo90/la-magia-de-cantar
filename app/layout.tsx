@@ -8,6 +8,8 @@ import {
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import MetaPixel from "@/components/MetaPixel";
+import CookieNotice from "@/components/CookieNotice";
 import { Analytics } from "@vercel/analytics/next"
 
 const bebasNeue = Bebas_Neue({
@@ -53,6 +55,8 @@ export default function RootLayout({
         {children}
         <Footer />
         <Analytics />
+        <MetaPixel />
+        <CookieNotice />
       </body>
     </html>
   );
