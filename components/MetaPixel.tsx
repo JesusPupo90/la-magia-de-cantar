@@ -3,7 +3,7 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import Script from "next/script";
 import { usePathname } from "next/navigation";
-import { metaPixelId, consentState, subscribeConsent } from "@/lib/meta";
+import { metaPixelId, consentState, subscribeConsent, flushPending } from "@/lib/meta";
 
 declare global {
   interface Window {
@@ -21,17 +21,15 @@ export default function MetaPixel() {
   const pathname = usePathname();
   const initialized = useRef(false);
 
-  // Init + PageView por cambio de ruta (SPA). El PageView inicial lo hace onLoad.
+  // PageView por cambio de ruta (SPA). El PageView inicial lo emite el snippet base.
   useEffect(() => {
     if (!pixelId || !consent) return;
-    const fbq = window.fbq;
-    if (typeof fbq !== "function") return;
-    if (!initialized.current) {
+    if (initialized.current) {
+      window.fbq?.("track", "PageView");
+    } else {
       initialized.current = true;
-      fbq("init", pixelId);
     }
-    fbq("track", "PageView");
-  }, [consent, pathname, pixelId]);
+  }, [pathname, pixelId, consent]);
 
   if (!pixelId || !consent) return null;
 
@@ -40,16 +38,18 @@ export default function MetaPixel() {
       <Script
         id="meta-pixel-base"
         strategy="afterInteractive"
-        src="https://connect.facebook.net/en_US/fbevents.js"
-        onLoad={() => {
-          const fbq = window.fbq;
-          if (typeof fbq !== "function") return;
-          if (!initialized.current) {
-            initialized.current = true;
-            fbq("init", pixelId);
-          }
-          fbq("track", "PageView");
+        dangerouslySetInnerHTML={{
+          __html: `
+            !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+            n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+            n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+            t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+            document,'script','https://connect.facebook.net/en_US/fbevents.js');
+            fbq('init', '${pixelId}');
+            fbq('track', 'PageView');
+          `,
         }}
+        onLoad={() => flushPending()}
       />
       <noscript
         dangerouslySetInnerHTML={{

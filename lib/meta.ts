@@ -31,11 +31,38 @@ export function subscribeConsent(cb: () => void): () => void {
   return () => window.removeEventListener("storage", cb);
 }
 
+// Buffer de eventos que llegan antes de que window.fbq exista (el snippet base
+// de Meta se inyecta con afterInteractive). Se drenan en flushPending() tras el
+// init del Pixel, para no perder ViewContent/InitiateCheckout/etc. por timing.
+interface QueuedEvent {
+  name: string;
+  data?: Record<string, unknown>;
+}
+const pending: QueuedEvent[] = [];
+
+function getFbq(): ((...args: unknown[]) => void) | undefined {
+  return (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
+}
+
+export function flushPending() {
+  if (typeof window === "undefined") return;
+  const fbq = getFbq();
+  if (typeof fbq !== "function") return;
+  while (pending.length) {
+    const e = pending.shift()!;
+    if (e.data) fbq("track", e.name, e.data);
+    else fbq("track", e.name);
+  }
+}
+
 export function fireEvent(name: string, data?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
   if (!metaPixelId() || !hasConsent()) return;
-  const fbq = (window as unknown as { fbq?: (...args: unknown[]) => void }).fbq;
-  if (typeof fbq !== "function") return;
+  const fbq = getFbq();
+  if (typeof fbq !== "function") {
+    pending.push({ name, data });
+    return;
+  }
   if (data) fbq("track", name, data);
   else fbq("track", name);
 }
