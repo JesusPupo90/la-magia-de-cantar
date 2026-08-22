@@ -116,6 +116,13 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
                 amount: String(amount),
               });
 
+              // PSE: MP devuelve la URL del banco (simulado en TEST) para completar
+              // la transferencia. Se abre en pestaña nueva; esta pestaña sigue a la
+              // página de "Pago en proceso".
+              if (result.redirectUrl) {
+                window.open(result.redirectUrl, "_blank");
+              }
+
               if (status === "approved") {
                 clearOrderId();
                 window.location.href = `/checkout/success?${query.toString()}`;

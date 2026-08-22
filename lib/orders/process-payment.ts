@@ -15,6 +15,7 @@ export interface ProcessPaymentResult {
   statusDetail?: string | null;
   orderId?: string;
   paymentId?: string;
+  redirectUrl?: string;
   message?: string;
   code?: string;
   warning?: string;
@@ -92,6 +93,46 @@ function extractCardData(input: unknown): {
   return { token, paymentMethodId, issuerId, installments };
 }
 
+// PSE (bank_transfer): no trae token de tarjeta; trae payment_method_id ("pse")
+// y el banco (financial_institution). Se extrae defensivamente.
+function extractBankTransferData(input: unknown): {
+  paymentMethodId?: string;
+  financialInstitution?: string;
+} | null {
+  let data = input as Record<string, unknown> | null;
+  if (!data || typeof data !== "object") return null;
+
+  const inner = data.formData;
+  if (Array.isArray(inner)) {
+    data = (inner[0] as Record<string, unknown>) ?? null;
+  } else if (inner && typeof inner === "object") {
+    data = inner as Record<string, unknown>;
+  }
+
+  if (!data || typeof data !== "object") return null;
+
+  const pm =
+    data.payment_method && typeof data.payment_method === "object"
+      ? (data.payment_method as Record<string, unknown>)
+      : {};
+
+  const paymentMethodId =
+    (typeof data.payment_method_id === "string" && data.payment_method_id) ||
+    (typeof pm.id === "string" && pm.id) ||
+    (typeof pm.payment_method_id === "string" && pm.payment_method_id) ||
+    undefined;
+
+  const details = data.transaction_details as Record<string, unknown> | undefined;
+  const rawBank =
+    data.financial_institution ??
+    pm.financial_institution ??
+    details?.financial_institution;
+  const financialInstitution =
+    typeof rawBank === "string" ? rawBank : typeof rawBank === "number" ? String(rawBank) : undefined;
+
+  return { paymentMethodId, financialInstitution };
+}
+
 export async function processCardPayment(
   orderId: string,
   paymentFormData: unknown
@@ -102,10 +143,23 @@ export async function processCardPayment(
     return { success: false, message: "La intención de pago no es válida." };
   }
 
-  // 2. EXTRAER TOKEN / MÉTODO / CUOTAS del formData del brick
-  const card = extractCardData(paymentFormData);
-  if (!card) {
-    return { success: false, message: "No se recibió el token del medio de pago." };
+  // 2. DETECTAR MÉTODO Y EXTRAER DATOS del formData del brick
+  const selectedMethod = (paymentFormData as { selectedPaymentMethod?: string } | null)?.selectedPaymentMethod;
+  const isPse = selectedMethod === "bank_transfer";
+
+  let card: ReturnType<typeof extractCardData> = null;
+  let bankTransfer: ReturnType<typeof extractBankTransferData> = null;
+
+  if (isPse) {
+    bankTransfer = extractBankTransferData(paymentFormData);
+    if (!bankTransfer?.paymentMethodId || !bankTransfer.financialInstitution) {
+      return { success: false, message: "No se recibieron los datos del banco (PSE). Inténtalo de nuevo." };
+    }
+  } else {
+    card = extractCardData(paymentFormData);
+    if (!card) {
+      return { success: false, message: "No se recibió el token del medio de pago." };
+    }
   }
 
   // 3. CARGAR LA ORDEN (service-role) — fuente de verdad del monto y del pagador.
@@ -160,25 +214,34 @@ export async function processCardPayment(
     };
   }
 
+  const payer = {
+    email: order.payer_email,
+    first_name: order.payer_first_name,
+    last_name: order.payer_last_name,
+    identification: {
+      type: MP_DOC_TYPES[order.payer_doc_type] ?? "Otro",
+      number: order.payer_doc_number,
+    },
+  };
+
   const body: Record<string, unknown> = {
     transaction_amount: order.amount_total, // NUNCA confiar en el monto del cliente
-    token: card.token,
     description: `${order.service_title} · ${order.variant_label}`,
-    installments: card.installments,
-    payment_method_id: card.paymentMethodId,
-    payer: {
-      email: order.payer_email,
-      first_name: order.payer_first_name,
-      last_name: order.payer_last_name,
-      identification: {
-        type: MP_DOC_TYPES[order.payer_doc_type] ?? "Otro",
-        number: order.payer_doc_number,
-      },
-    },
+    payer,
     external_reference: order.external_reference ?? cleanOrderId,
     notification_url: `${baseUrl}/api/webhooks/mercadopago`,
   };
-  if (card.issuerId) body.issuer_id = card.issuerId;
+
+  if (isPse && bankTransfer) {
+    // PSE: sin token de tarjeta; se indica el banco (financial_institution).
+    body.payment_method_id = bankTransfer.paymentMethodId;
+    body.transaction_details = { financial_institution: bankTransfer.financialInstitution };
+  } else if (card) {
+    body.token = card.token;
+    body.payment_method_id = card.paymentMethodId;
+    body.installments = card.installments;
+    if (card.issuerId) body.issuer_id = card.issuerId;
+  }
 
   let res: Response;
   try {
@@ -205,6 +268,9 @@ export async function processCardPayment(
         payment_method_id?: string;
         payment_type_id?: string;
         message?: string;
+        payment_method?: { redirect_url?: string; data?: { redirect_url?: string } };
+        point_of_interaction?: { transaction_data?: { ticket_url?: string } };
+        transaction_details?: { external_resource_url?: string };
       }
     | null;
 
@@ -219,6 +285,14 @@ export async function processCardPayment(
 
   const paymentId = String(mpBody.id);
   const mapped = mapPaymentStatus(mpBody.status ?? "");
+
+  // URL de PSE (banco simulado) para completar la transferencia, si aplica.
+  const redirectUrl =
+    mpBody.payment_method?.data?.redirect_url ??
+    mpBody.payment_method?.redirect_url ??
+    mpBody.transaction_details?.external_resource_url ??
+    mpBody.point_of_interaction?.transaction_data?.ticket_url ??
+    undefined;
 
   // 5. ACTUALIZAR LA ORDEN (la orden NO retrocede desde 'paid'; §5).
   const now = new Date().toISOString();
@@ -280,6 +354,7 @@ export async function processCardPayment(
     statusDetail: mpBody.status_detail ?? null,
     orderId: cleanOrderId,
     paymentId,
+    redirectUrl,
     warning: paymentUpsertError
       ? `El pago se aprobó pero no se pudo registrar en order_payments: ${paymentUpsertError.message}`
       : undefined,
