@@ -24,6 +24,10 @@ function esc(v: string | undefined | null): string {
   return (v ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Logo oficial del sitio (oscuro → legible sobre fondo blanco).
+const BRAND_LOGO =
+  '<img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="200" height="113" style="display:block;border:0;width:200px;height:113px;margin:0 auto;" />';
+
 function detailRow(label: string, value: string) {
   return `
     <tr>
@@ -33,7 +37,7 @@ function detailRow(label: string, value: string) {
 }
 
 // ============================================================================
-// B2B — NOTIFICACIÓN INTERNA (para el equipo/la clienta). Diseño sobrio/formal.
+// B2B — NOTIFICACIÓN INTERNA (para el equipo/la clienta). Sobrio/formal, blanco.
 // ============================================================================
 
 function buildQuoteHtml(data: CotizacionEmpresaInput) {
@@ -65,23 +69,33 @@ function buildQuoteHtml(data: CotizacionEmpresaInput) {
     .join("");
 
   return `
-    <div style="font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;padding:24px 12px;">
-      <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-        <div style="background:#ffffff;border-bottom:1px solid #e5e7eb;padding:18px 24px;text-align:center;">
-          <img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="180" style="width:180px;height:auto;max-width:100%;" />
-          <div style="margin-top:10px;font-size:13px;font-weight:bold;color:#374151;text-transform:uppercase;letter-spacing:1px;">Nueva solicitud de cotización</div>
-        </div>
-        <div style="padding:24px;">
-          <p style="margin:0 0 16px;color:#374151;font-size:13px;line-height:1.6;">Se recibió una nueva solicitud desde el formulario de Empresas e Instituciones.</p>
-          <table style="width:100%;border-collapse:collapse;">
-            <tbody>${body}</tbody>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;font-family:Arial,Helvetica,sans-serif;">
+      <tr>
+        <td align="center" style="padding:24px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;border:1px solid #e5e7eb;border-radius:12px;">
+            <tr>
+              <td style="border-bottom:1px solid #e5e7eb;text-align:center;padding:20px 24px;">
+                ${BRAND_LOGO}
+                <div style="margin-top:10px;font-size:13px;font-weight:bold;color:#374151;text-transform:uppercase;letter-spacing:1px;">Nueva solicitud de cotización</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px;">
+                <p style="margin:0 0 16px;color:#374151;font-size:13px;line-height:1.6;">Se recibió una nueva solicitud desde el formulario de Empresas e Instituciones.</p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
+                  <tbody>${body}</tbody>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-top:1px solid #e5e7eb;padding:14px 24px;font-size:11px;color:#9ca3af;">
+                La Magia de Cantar · Bogotá, Colombia · cotizaciones@lamagiadecantar.co
+              </td>
+            </tr>
           </table>
-        </div>
-        <div style="border-top:1px solid #e5e7eb;padding:14px 24px;font-size:11px;color:#9ca3af;">
-          La Magia de Cantar · Bogotá, Colombia · cotizaciones@lamagiadecantar.co
-        </div>
-      </div>
-    </div>`;
+        </td>
+      </tr>
+    </table>`;
 }
 
 export async function sendQuoteNotification(data: CotizacionEmpresaInput, toOverride?: string | string[]) {
@@ -121,25 +135,35 @@ export async function sendQuoteNotification(data: CotizacionEmpresaInput, toOver
 
 function buildQuoteConfirmationHtml(data: CotizacionEmpresaInput) {
   return `
-    <div style="font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;padding:24px 12px;">
-      <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;">
-        <div style="background:#ffffff;border-bottom:1px solid #e5e7eb;padding:18px 24px;text-align:center;">
-          <img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="180" style="width:180px;height:auto;max-width:100%;" />
-        </div>
-        <div style="padding:24px;">
-          <p style="margin:0 0 12px;font-size:15px;color:#111;font-weight:bold;">Hemos recibido tu solicitud de cotización</p>
-          <p style="margin:0 0 12px;font-size:14px;color:#374151;line-height:1.6;">
-            Gracias por escribirnos${data.contactName ? `, ${esc(data.contactName)}` : ""}. Recibimos tu solicitud${data.companyName ? ` de <strong>${esc(data.companyName)}</strong>` : ""} y uno de nuestros asesores te contactará en un plazo de <strong>hasta 3 días hábiles</strong>.
-          </p>
-          <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
-            Si tu solicitud es urgente, puedes escribirnos por WhatsApp al +57 305 3678742 o al correo contacto@lamagiadecantar.co.
-          </p>
-        </div>
-        <div style="border-top:1px solid #e5e7eb;padding:14px 24px;text-align:center;font-size:11px;color:#9ca3af;">
-          La Magia de Cantar · Bogotá, Colombia
-        </div>
-      </div>
-    </div>`;
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;font-family:Arial,Helvetica,sans-serif;">
+      <tr>
+        <td align="center" style="padding:24px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;border:1px solid #e5e7eb;border-radius:12px;">
+            <tr>
+              <td style="border-bottom:1px solid #e5e7eb;text-align:center;padding:20px 24px;">
+                ${BRAND_LOGO}
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px;">
+                <p style="margin:0 0 12px;font-size:15px;color:#111;font-weight:bold;">Hemos recibido tu solicitud de cotización</p>
+                <p style="margin:0 0 12px;font-size:14px;color:#374151;line-height:1.6;">
+                  Gracias por escribirnos${data.contactName ? `, ${esc(data.contactName)}` : ""}. Recibimos tu solicitud${data.companyName ? ` de <strong>${esc(data.companyName)}</strong>` : ""} y uno de nuestros asesores te contactará en un plazo de <strong>hasta 3 días hábiles</strong>.
+                </p>
+                <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
+                  Si tu solicitud es urgente, puedes escribirnos por WhatsApp al +57 305 3678742 o al correo contacto@lamagiadecantar.co.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="border-top:1px solid #e5e7eb;text-align:center;padding:14px 24px;font-size:11px;color:#9ca3af;">
+                La Magia de Cantar · Bogotá, Colombia
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>`;
 }
 
 export async function sendQuoteConfirmation(data: CotizacionEmpresaInput, toOverride?: string | string[]) {
@@ -174,7 +198,7 @@ export async function sendQuoteConfirmation(data: CotizacionEmpresaInput, toOver
 }
 
 // ============================================================================
-// PAGO — CONFIRMACIÓN AL COMPRADOR (diseño de marca).
+// PAGO — CONFIRMACIÓN AL COMPRADOR (diseño de marca, fondo blanco).
 // ============================================================================
 
 export interface PaymentConfirmationData {
@@ -192,43 +216,57 @@ function buildPaymentConfirmationHtml(data: PaymentConfirmationData) {
   const amount = (data.amount ?? 0).toLocaleString("es-CO");
   const fullName = [data.payerFirstName, data.payerLastName].filter(Boolean).join(" ");
   return `
-    <div style="font-family:Arial,Helvetica,sans-serif;background-color:#FFFBEB;padding:32px 16px;">
-      <div style="max-width:600px;margin:0 auto;background:#ffffff;border:3px solid #000000;border-radius:16px;overflow:hidden;box-shadow:6px 6px 0 rgba(0,0,0,1);">
-        <div style="background:#ffffff;border-bottom:3px solid #000000;padding:28px 24px;text-align:center;">
-          <img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="200" style="width:200px;height:auto;max-width:100%;" />
-          <div style="margin:14px auto 0;display:inline-block;background:#FDE68A;border:2px solid #000000;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">¡Gracias por tu compra!</div>
-        </div>
-        <div style="padding:28px 24px;">
-          <p style="margin:0 0 14px;font-size:15px;color:#111;font-weight:bold;">Hola ${esc(fullName)},</p>
-          <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.6;">
-            Hemos recibido tu pago correctamente. Tu cupo está asegurado en <strong>La Magia de Cantar</strong>. ¡Estamos felices de que empieces este camino!
-          </p>
-          <table style="width:100%;border-collapse:collapse;border:2px solid #111827;border-radius:12px;overflow:hidden;">
-            <tbody>
-              ${detailRow("Servicio", data.serviceTitle)}
-              ${detailRow("Plan", data.variantLabel)}
-              ${detailRow("Monto", `$${amount} COP`)}
-              ${detailRow("Número de orden", data.orderId)}
-              ${data.paymentId ? detailRow("ID de pago", data.paymentId) : ""}
-            </tbody>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;font-family:Arial,Helvetica,sans-serif;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;border:3px solid #000000;border-radius:16px;">
+            <tr>
+              <td style="border-bottom:3px solid #000000;text-align:center;padding:28px 24px;">
+                ${BRAND_LOGO}
+                <div style="margin:14px auto 0;display:inline-block;background:#FDE68A;border:2px solid #000000;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">¡Gracias por tu compra!</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:28px 24px;">
+                <p style="margin:0 0 14px;font-size:15px;color:#111;font-weight:bold;">Hola ${esc(fullName)},</p>
+                <p style="margin:0 0 18px;font-size:14px;color:#374151;line-height:1.6;">
+                  Hemos recibido tu pago correctamente. Tu cupo está asegurado en <strong>La Magia de Cantar</strong>. ¡Estamos felices de que empieces este camino!
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:2px solid #111827;border-collapse:collapse;border-radius:12px;">
+                  <tbody>
+                    ${detailRow("Servicio", data.serviceTitle)}
+                    ${detailRow("Plan", data.variantLabel)}
+                    ${detailRow("Monto", `$${amount} COP`)}
+                    ${detailRow("Número de orden", data.orderId)}
+                    ${data.paymentId ? detailRow("ID de pago", data.paymentId) : ""}
+                  </tbody>
+                </table>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;background:#ECFDF5;border:2px solid #000000;border-radius:12px;">
+                  <tr>
+                    <td style="padding:16px 18px;">
+                      <div style="font-size:13px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">¿Qué sigue ahora?</div>
+                      <ul style="margin:10px 0 0;padding-left:18px;font-size:13px;color:#374151;line-height:1.8;">
+                        <li><strong>Nuestro equipo te contactará</strong> en las próximas horas para darte la bienvenida.</li>
+                        <li><strong>Coordinarás tu agenda</strong> para tu primera sesión o punto de inicio.</li>
+                        <li><strong>Prepárate para cantar:</strong> revisa tu correo y WhatsApp para las instrucciones.</li>
+                      </ul>
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:18px 0 0;font-size:13px;color:#6b7280;">
+                  Si tienes dudas, escríbenos por WhatsApp o a <a href="mailto:contacto@lamagiadecantar.co" style="color:#7C3AED;font-weight:bold;">contacto@lamagiadecantar.co</a>.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#FDE68A;border-top:3px solid #000000;text-align:center;padding:16px 24px;font-size:11px;color:#111;">
+                La Magia de Cantar · Bogotá, Colombia · <a href="mailto:contacto@lamagiadecantar.co" style="color:#111;">contacto@lamagiadecantar.co</a>
+              </td>
+            </tr>
           </table>
-          <div style="margin:24px 0 0;background:#ECFDF5;border:2px solid #000000;border-radius:12px;padding:16px 18px;">
-            <div style="font-size:13px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:0.5px;">¿Qué sigue ahora?</div>
-            <ul style="margin:10px 0 0;padding-left:18px;font-size:13px;color:#374151;line-height:1.8;">
-              <li><strong>Nuestro equipo te contactará</strong> en las próximas horas para darte la bienvenida.</li>
-              <li><strong>Coordinarás tu agenda</strong> para tu primera sesión o punto de inicio.</li>
-              <li><strong>Prepárate para cantar:</strong> revisa tu correo y WhatsApp para las instrucciones.</li>
-            </ul>
-          </div>
-          <p style="margin:18px 0 0;font-size:13px;color:#6b7280;">
-            Si tienes dudas, escríbenos por WhatsApp o a <a href="mailto:contacto@lamagiadecantar.co" style="color:#7C3AED;font-weight:bold;">contacto@lamagiadecantar.co</a>.
-          </p>
-        </div>
-        <div style="background:#FDE68A;border-top:3px solid #000000;padding:16px 24px;text-align:center;font-size:11px;color:#111;">
-          La Magia de Cantar · Bogotá, Colombia · <a href="mailto:contacto@lamagiadecantar.co" style="color:#111;">contacto@lamagiadecantar.co</a>
-        </div>
-      </div>
-    </div>`;
+        </td>
+      </tr>
+    </table>`;
 }
 
 export async function sendPaymentConfirmation(data: PaymentConfirmationData, toOverride?: string | string[]) {
