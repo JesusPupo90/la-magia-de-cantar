@@ -3,7 +3,7 @@
 
 import { cotizacionEmpresaSchema, CotizacionEmpresaInput } from "@/lib/schemas/cotizacion.schema";
 import { createClient } from "@/lib/supabase/server";
-import { sendQuoteNotification } from "@/lib/email";
+import { sendQuoteNotification, sendQuoteConfirmation } from "@/lib/email";
 
 export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
   const validation = cotizacionEmpresaSchema.safeParse(formData);
@@ -64,6 +64,11 @@ export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
 
   // 📧 Notificación al dueño (inactiva hasta configurar las claves en .env.local)
   await sendQuoteNotification(data);
+
+  // 📧 Confirmación transaccional al solicitante (plazo de respuesta ≤3 días hábiles)
+  await sendQuoteConfirmation(data).catch((err) =>
+    console.error("[email] Error enviando confirmación al solicitante:", err)
+  );
 
   return {
     success: true,

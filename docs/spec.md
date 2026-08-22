@@ -122,7 +122,7 @@ WEBSITE MAIN NAV
 #### 📩 REQUERIMIENTO ESPECIAL DE FORMULARIO B2B (Empresas e Instituciones)
 El formulario de esta sección tiene una lógica de negocio y procesamiento técnica diferenciada:
 1. **Comportamiento del CTA:** Al hacer clic en el botón de envío (*"Solicitar Propuesta Comercial"* / *"Enviar Cotización"*), el sistema procesa el formulario y gatilla un correo electrónico directo de cotización B2B.
-2. **Destinatario de Correo:** `yanetsisvoz@gmail.com`
+2. **Destinatario de Correo:** `contacto@lamagiadecantar.co`
 3. **Asunto sugerido del Email:** `[COTIZACIÓN B2B] Solicitud Institucional de {Nombre de la Empresa/Institución}`
 4. **Campos Requeridos del Formulario - Sugerido, puede cambiar conforme se desarrolla el proyecto:**
    - `nombre_entidad` (Texto, obligatorio): Nombre de la empresa o institución educativa.
@@ -155,7 +155,7 @@ El formulario de esta sección tiene una lógica de negocio y procesamiento téc
   - **Columna 1 - Marca & Info:** Logo de YANETSIS + La Magia de Cantar, breve síntesis de la propuesta.
   - **Columna 2 - Links Rápidos:** Navegación interna directas a cada sección.
   - **Columna 3 - Contacto Directo:**
-    - Correo general / reservas: `yanetsisvoz@gmail.com`
+    - Correo general / reservas: `contacto@lamagiadecantar.co`
     - WhatsApp Business (Enlace directo con mensaje prellenado).
     - Ubicación física (Bogotá, Colombia) + mapa modal o embebido.
     - Horarios de atención.
@@ -172,7 +172,7 @@ El formulario de esta sección tiene una lógica de negocio y procesamiento téc
 
 | Identificador Formulario | Ubicación / Sección | Destino de los datos | Mecanismo Técnico / CTA |
 | :--- | :--- | :--- | :--- |
-| **`form-b2b-institucional`** | Sección "Empresas o instituciones" | **Email directo a `yanetsisvoz@gmail.com`** + Copia en BD/CRM | Envío de correo vía Serverless API / Nodemailer / Resend / Formspree + Mensaje de confirmación en pantalla ("Página de Gracias"). |
+| **`form-b2b-institucional`** | Sección "Empresas o instituciones" | **Email directo a `cotizaciones@lamagiadecantar.co`** + Copia en BD/CRM | Envío de correo vía Serverless API / Nodemailer / Resend / Formspree + Mensaje de confirmación en pantalla ("Página de Gracias"). |
 | **`form-general-servicios`** | Sección "Nuestros servicios" / Modales | Base de Datos (Supabase / CRM) + Notificación Email | Captura de lead por nivel (Kids, Adultos, Artistas) con redirección a WhatsApp o Mercado Pago. |
 | **`form-contacto-footer`** | Pie de Página | Email + Base de datos | Mensaje directo de consulta general. |
 
@@ -186,7 +186,7 @@ El formulario de esta sección tiene una lógica de negocio y procesamiento téc
 2. **WhatsApp Business Integration:**
    - Botón flotante persistente con UTM tracking o detección de sección actual para personalizar el mensaje prellenado (ej: *"Hola, estoy viendo la sección de Clases para Adultos y quiero más información"*).
 3. **Mailing Engine (para Formulario B2B):**
-   - Configuración de SDK o API de envío de emails (Resend, Nodemailer, SendGrid, o Formspree) autenticado con dominio propio para evitar bandeja de SPAM al enviar a `yanetsisvoz@gmail.com`.
+   - Configuración de SDK o API de envío de emails (Resend, Nodemailer, SendGrid, o Formspree) autenticado con dominio propio para evitar bandeja de SPAM al enviar a `contacto@lamagiadecantar.co`.
 4. **Analítica & Tracking:**
    - Google Tag Manager (GTM)
    - Google Analytics 4 (GA4) con eventos configurados: `click_cta_quiero_la_magia`, `submit_form_b2b`, `initiate_checkout_mercadopago`, `click_whatsapp`.

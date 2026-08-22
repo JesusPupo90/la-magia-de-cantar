@@ -27,14 +27,14 @@ No es una academia tradicional: es un proceso integral que une técnica vocal, c
 
 - Ubicación física en Bogotá, Colombia, con modalidad presencial y virtual.
 - Pagos directos vía Mercado Pago Colombia (PSE, tarjetas, Nequi/Daviplata) para servicios estandarizados; cotización personalizada para servicios B2B y coaching directo.
-- Contacto principal por WhatsApp Business y correo `yanetsisvoz@gmail.com`. El número de WhatsApp aún es un placeholder (`wa.me/573000000000`); reemplazar por el real antes de publicar.
+- Contacto principal por WhatsApp Business y correo `contacto@lamagiadecantar.co`. El número de WhatsApp aún es un placeholder (`wa.me/573000000000`); reemplazar por el real antes de publicar.
 - Regulaciones locales: tratamiento de datos personales (Habeas Data, Ley 1581), términos y condiciones y política de cancelación.
 
 ## Capabilities and Constraints
 
 - Estructura de 6 secciones: Inicio, La magia de cantar, Método Yanetsis, Nuestros servicios, Empresas o instituciones, Testimonios + Footer/Contacto.
 - CTA global obligatorio: "Quiero tener la magia".
-- Formularios: B2B institucional (envío de correo a `yanetsisvoz@gmail.com`), captura de leads por nivel de servicio y contacto general.
+- Formularios: B2B institucional (envío de correo a `cotizaciones@lamagiadecantar.co`), captura de leads por nivel de servicio y contacto general.
 - Integraciones previstas: Mercado Pago, WhatsApp Business, motor de mailing y analítica (GTM/GA4, Meta Pixel).
 - SEO local e internacional con datos estructurados JSON-LD (Organization, LocalBusiness, Person, Service, FAQPage).
 - El sitio actual cuenta con Navbar, Hero y banner de cifras (AchievementsBanner); el resto de las secciones está pendiente de construir.
@@ -44,7 +44,7 @@ No es una academia tradicional: es un proceso integral que une técnica vocal, c
 
 - Nombre de marca: "Yanetsis + La Magia de Cantar".
 - CTA obligatorio: "Quiero tener la magia".
-- Correo oficial: `yanetsisvoz@gmail.com`.
+- Correo oficial: `contacto@lamagiadecantar.co`.
 - Referencia de identidad visual: `docs/design.md` (estilo Pop Minimal Elegante & Vibrant).
 
 ## Evidence on Hand
