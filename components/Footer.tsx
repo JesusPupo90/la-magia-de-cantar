@@ -242,6 +242,11 @@ export default function Footer() {
                   Política de pagos y cancelaciones
                 </Link>
               </li>
+              <li>
+                <Link href="/preguntas-frecuentes" className="hover:text-white transition-colors">
+                  Preguntas frecuentes
+                </Link>
+              </li>
             </ul>
           </div>
 
