@@ -51,7 +51,7 @@ export default function Navbar() {
         {/* 3. BOTÓN DERECHA: WhatsApp Directo (Desktop) */}
         <div className="hidden items-center lg:flex">
           <a
-            href="https://wa.me/573000000000?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
+            href="https://wa.me/573053678742?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-2xl border-2 border-brown bg-mint px-5 py-2 font-poppins text-xs font-bold uppercase tracking-wider text-black shadow-soft-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange hover:shadow-soft-md"
