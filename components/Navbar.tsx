@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/#nuestros-servicios", label: "Nuestros servicios" },
   { href: "/#empresas-o-instituciones", label: "Empresas e instituciones" },
   { href: "/#testimonios", label: "Testimonios" },
+  { href: "/prueba-de-voz", label: "Prueba tu voz" },
 ];
 
 export default function Navbar() {

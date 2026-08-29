@@ -204,3 +204,85 @@ El formulario de esta sección tiene una lógica de negocio y procesamiento téc
   - `Person` (para Yanetsis como figura de autoridad/Coach).
   - `Service` (para programas y B2B).
   - `FAQPage` (para resolver dudas frecuentes).
+
+---
+
+## 7. Funcionalidad de Marketing: Prueba de Voz IA
+
+> **Ruta:** `/prueba-de-voz`
+> **Objetivo:** Lead-magnet que capta prospectos grabando su voz en el navegador (10 segundos), calcula métricas locales de afinación y estabilidad y las envía a un modelo de Anthropic (Claude) que genera un veredicto en la voz de Yanetsis, cerrando con un CTA a WhatsApp.
+
+### 7.1 Flujo de Estados (UI)
+
+| Estado | Descripción |
+| :--- | :--- |
+| `idle` | Pantalla inicial esperando el clic en "Grabar mi voz". |
+| `recording` | Grabación activa durante **10 segundos** (con temporizador visible). |
+| `processing` | Procesando métricas y consultando la IA ("Procesando IA..."). |
+| `result` | Muestra las 3 métricas (Puntaje, Afinación, Estabilidad) y el veredicto. |
+| `error` | Micrófono denegado o no se detectó voz (RMS < 0.01 / sin muestras válidas). |
+
+**Requisitos de audio:**
+- `AudioContext` y `getUserMedia` deben dispararse únicamente dentro del evento de **click** del botón "Grabar mi voz" para funcionar en navegadores estrictos (iOS/Safari).
+- Captura con `ScriptProcessorNode` (bufferSize 4096, 1 entrada); cada chunk se analiza con `detectPitch` (autocorrelación) y los pitches válidos se acumulan en un array de muestras durante los 10 segundos.
+
+### 7.2 Contrato de la API — `POST /api/veredicto`
+
+**Request body:**
+```json
+{ "pitchAcc": 87, "stab": 72, "total": 81 }
+```
+- `pitchAcc`, `stab`, `total`: números finitos entre `0` y `100`.
+- Si algún valor no es un número finito o está fuera de `[0, 100]` → **400** `{ error: "invalid metrics" }`.
+
+**Response success (200):**
+```json
+{ "veredicto": "Texto del veredicto generado por Claude..." }
+```
+
+**Fallback crítico (SIEMPRE status 200, NUNCA 500):**
+```json
+{ "error": "fallback" }
+```
+Se devuelve si: no existe `process.env.ANTHROPIC_API_KEY`, el `fetch` a Anthropic falla, la respuesta no es `ok`, o el cuerpo no contiene texto. El frontend usa entonces su texto local (`localVeredicto`) sin que el usuario note la falla.
+
+**Consumo de Anthropic:**
+- Endpoint: `https://api.anthropic.com/v1/messages` (fetch nativo).
+- Modelo: `claude-haiku-4-5`.
+- Headers: `x-api-key`, `anthropic-version: 2023-06-01`, `content-type: application/json`.
+- Body: `{ model, max_tokens, messages: [{ role: "user", content: PROMPT }] }`.
+- Extraer el texto de `data.content[0].text`.
+
+### 7.3 Prompt para la IA (con métricas interpoladas)
+
+> Eres el asistente de redacción de Yanetsis Alfonso, coach vocal de televisión y fundadora de La Magia de Cantar. Alguien acaba de hacer una prueba de voz en la página web. Estas son las únicas métricas reales que tienes sobre esa grabación: afinación {pitchAcc}%, estabilidad de la respiración {stab}%, puntaje total {total}/100. Escribe un veredicto breve (entre 80 y 120 palabras), en español, en primera persona como si lo dijera Yanetsis: cálido, cercano, profesional, nunca condescendiente. Menciona un aspecto fuerte y un aspecto a mejorar, basados únicamente en las métricas dadas. No inventes datos que no estén en las métricas (no menciones rango vocal, tono de voz, género musical, ni nada que no puedas saber de estos tres números). No uses lenguaje técnico de ingeniería de audio. Cierra invitando, de forma natural, a dar el siguiente paso con una clase de prueba. Responde solo con el texto del veredicto, sin título ni comillas.
+
+### 7.4 Lógica de Métricas (Exacta, NO modificar)
+
+- **`detectPitch(data, sampleRate)`**: autocorrelación (cortes por umbral `0.2`, búsqueda de lag del máximo; retorna `-1` si RMS < 0.01).
+- **`stab`**: `mean` y `variance` de las muestras de pitch → `sd = sqrt(variance)` → `cv = sd / mean` → `stab = clamp(round(100 - cv * 300), 0, 100)`.
+- **`pitchAcc`**: saltos de semitonos `st = abs(12 * log2(s[i]/s[i-1]))`; si `st < 2` suma uno; `pitchAcc = clamp(round(semitoneJumps / (len-1) * 100), 0, 100)`.
+- **`total`**: `round(pitchAcc * 0.6 + stab * 0.4)`.
+
+**Veredicto local de respaldo (`localVeredicto(pitchAcc, stab, total)`):**
+```js
+const open = total >= 80 ? "Se nota una base sólida en tu voz." : total >= 55 ? "Hay una base para trabajar, y eso es justo el punto de partida." : "Este es apenas el comienzo, y ahí está lo interesante.";
+const pitchLine = pitchAcc >= 75 ? "Tu afinación se mantiene firme en la mayor parte del pasaje." : pitchAcc >= 50 ? "Tu afinación es irregular: hay tramos precisos y otros que se desvían." : "La afinación todavía varía bastante, algo muy normal antes de entrenar el oído.";
+const stabLine = stab >= 75 ? "El control de la respiración sostiene bien la nota." : stab >= 50 ? "El aire se agota antes de tiempo en algunos tramos." : "La respiración necesita trabajo para sostener la nota sin temblor.";
+const close = total >= 80 ? "Con técnica de resonancia y escena, esto se proyecta a otro nivel." : total >= 55 ? "Con un plan de técnica vocal enfocado, esto avanza rápido." : "Con una guía desde el inicio, esta base se convierte en una voz segura.";
+// Devuelve: `${open} ${pitchLine} ${stabLine} ${close}`
+```
+
+### 7.5 Diseño (Neo-Brutalista, igual al resto del sitio)
+
+- **Fondo:** crema `bg-[#FFFBEB]`.
+- **Hero:** titular llamativo "Prueba con IA tu voz" con `font-poppins font-extrabold`.
+- **Tarjeta principal:** contenedor blanco `rounded-3xl border-[3px] border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]`.
+- **Stats (resultado):** 3 cajas pequeñas individuales neo-brutalistas (Puntaje, Afinación, Estabilidad).
+- **Veredicto:** bloque destacado `bg-pink-soft` (o `bg-mint/30`).
+- **CTA final:** botón grande `bg-yellow` con texto "Quiero tener la magia" → `https://wa.me/573053678742?text=...`.
+- Tipografías `font-poppins` / `font-jakarta`; iconos de `lucide-react`. Sin CSS en línea.
+
+### 7.6 Variables de Entorno
+
+- `ANTHROPIC_API_KEY` — clave de la API de Anthropic. Si no existe, el endpoint responde `{ error: "fallback" }` con 200 y la página usa el veredicto local.

@@ -122,6 +122,26 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
           </div>
         </div>
 
+        {/* 1.5 BANNER CTA: PRUEBA DE VOZ IA */}
+        <div className="mt-8 mx-auto max-w-3xl rounded-2xl border-[3px] border-black bg-yellow p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
+          <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="text-center sm:text-left">
+              <p className="font-poppins text-sm font-black uppercase tracking-wide text-black sm:text-base">
+                ¿No sabes por dónde empezar?
+              </p>
+              <p className="mt-1 font-jakarta text-xs font-medium text-gray-800 sm:text-sm">
+                Prueba tu voz gratis con IA y recibe el veredicto personalizado de Yanetsis.
+              </p>
+            </div>
+            <a
+              href="/prueba-de-voz"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl border-[3px] border-black bg-pink px-5 py-3 font-poppins text-xs font-black uppercase tracking-wide text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
+            >
+              <Sparkles className="h-4 w-4" /> Probar mi voz con IA
+            </a>
+          </div>
+        </div>
+
         {/* 2. NAVEGACIÓN DE CATEGORÍAS */}
         <div className="mt-8 sm:hidden sticky top-4 z-20 px-2">
   <div className="rounded-2xl border-2 border-black bg-yellow p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
