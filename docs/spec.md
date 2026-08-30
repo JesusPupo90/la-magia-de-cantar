@@ -250,12 +250,19 @@ Se devuelve si: no existe `process.env.ANTHROPIC_API_KEY`, el `fetch` a Anthropi
 - Endpoint: `https://api.anthropic.com/v1/messages` (fetch nativo).
 - Modelo: `claude-haiku-4-5`.
 - Headers: `x-api-key`, `anthropic-version: 2023-06-01`, `content-type: application/json`.
-- Body: `{ model, max_tokens, messages: [{ role: "user", content: PROMPT }] }`.
+- Body: `{ model, max_tokens, system, metadata, messages: [{ role: "user", content: MÉTRICAS }] }`.
+- **Stateless por diseño:** la API es sin estado; cada `POST` es una sesión nueva e independiente. El prompt de instrucciones va en `system` y el mensaje de `user` contiene **solo** las métricas de esa grabación, por lo que nunca hay contaminación entre usuarios.
+- `metadata.user_id`: hash opaco (SHA-256 de IP + user-agent, sin PII) para el tracking de abuso de Anthropic.
+- `sessionId` aleatorio (`crypto.randomUUID()`): solo para correlacionar logs del servidor.
 - Extraer el texto de `data.content[0].text`.
 
 ### 7.3 Prompt para la IA (con métricas interpoladas)
 
-> Eres el asistente de redacción de Yanetsis Alfonso, coach vocal de televisión y fundadora de La Magia de Cantar. Alguien acaba de hacer una prueba de voz en la página web. Estas son las únicas métricas reales que tienes sobre esa grabación: afinación {pitchAcc}%, estabilidad de la respiración {stab}%, puntaje total {total}/100. Escribe un veredicto breve (entre 80 y 120 palabras), en español, en primera persona como si lo dijera Yanetsis: cálido, cercano, profesional, nunca condescendiente. Menciona un aspecto fuerte y un aspecto a mejorar, basados únicamente en las métricas dadas. No inventes datos que no estén en las métricas (no menciones rango vocal, tono de voz, género musical, ni nada que no puedas saber de estos tres números). No uses lenguaje técnico de ingeniería de audio. Cierra invitando, de forma natural, a dar el siguiente paso con una clase de prueba. Responde solo con el texto del veredicto, sin título ni comillas.
+**`system` (instrucciones/rol — fijas):**
+> Eres el asistente de redacción de Yanetsis Alfonso, coach vocal de televisión y fundadora de La Magia de Cantar. Escribe veredictos breves (entre 80 y 120 palabras), en español, en primera persona como si los dijera Yanetsis: cálidos, cercanos, profesionales, nunca condescendientes. Menciona un aspecto fuerte y un aspecto a mejorar, basados únicamente en las métricas dadas. No inventes datos que no estén en las métricas (no menciones rango vocal, tono de voz, género musical, ni nada que no puedas saber de esos tres números). No uses lenguaje técnico de ingeniería de audio. Cierra invitando, de forma natural, a dar el siguiente paso con una clase de prueba. Responde solo con el texto del veredicto, sin título ni comillas.
+
+**`user` (datos de esta grabación — variables):**
+> Alguien acaba de hacer una prueba de voz en la página web. Estas son las únicas métricas reales que tienes sobre esa grabación: afinación {pitchAcc}%, estabilidad de la respiración {stab}%, puntaje total {total}/100.
 
 ### 7.4 Lógica de Métricas (Exacta, NO modificar)
 
