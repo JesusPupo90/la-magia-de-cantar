@@ -267,8 +267,9 @@ Se devuelve si: no existe `process.env.ANTHROPIC_API_KEY`, el `fetch` a Anthropi
 ### 7.4 Lógica de Métricas (Exacta, NO modificar)
 
 - **`detectPitch(data, sampleRate)`**: autocorrelación (cortes por umbral `0.2`, búsqueda de lag del máximo; retorna `-1` si RMS < 0.01).
-- **`stab`**: `mean` y `variance` de las muestras de pitch → `sd = sqrt(variance)` → `cv = sd / mean` → `stab = clamp(round(100 - cv * 300), 0, 100)`.
-- **`pitchAcc`**: saltos de semitonos `st = abs(12 * log2(s[i]/s[i-1]))`; si `st < 2` suma uno; `pitchAcc = clamp(round(semitoneJumps / (len-1) * 100), 0, 100)`.
+- **Preprocesado de outliers (solo para `stab`):** se calcula la **mediana** de las frecuencias y se descartan los frames fuera de **±2 semitonos** de la mediana (`2^(2/12)`). Evita que ruido ambiente, respiraciones o errores de octava (frames espurios) hundan la estabilidad a 0%. Si quedan menos de 2 frames limpios, se usa el conjunto original como best-effort.
+- **`stab`**: con las muestras limpias, `mean` y `variance` → `sd = sqrt(variance)` → `cv = sd / mean` → `stab = clamp(round(100 - cv * 300), 0, 100)`.
+- **`pitchAcc`**: (sobre las muestras originales, sin filtro) saltos de semitonos `st = abs(12 * log2(s[i]/s[i-1]))`; si `st < 2` suma uno; `pitchAcc = clamp(round(semitoneJumps / (len-1) * 100), 0, 100)`.
 - **`total`**: `round(pitchAcc * 0.6 + stab * 0.4)`.
 
 **Veredicto local de respaldo (`localVeredicto(pitchAcc, stab, total)`):**

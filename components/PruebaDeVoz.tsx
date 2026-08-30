@@ -245,8 +245,20 @@ export default function PruebaDeVoz() {
       return;
     }
 
-    const mean = samples.reduce((a, b) => a + b, 0) / samples.length;
-    const variance = samples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / samples.length;
+    // Filtro de outliers: descarta frames de pitch espurios (ruido, respiraciones,
+    // errores de octava) conservando solo los que están dentro de ±2 semitonos de
+    // la mediana. La fórmula de estabilidad no cambia; solo opera sobre datos limpios.
+    const sorted = [...samples].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    const median =
+      sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    const stRatio = Math.pow(2, 2 / 12);
+    const clean = samples.filter((p) => p >= median / stRatio && p <= median * stRatio);
+    const stabSamples = clean.length >= 2 ? clean : samples;
+
+    const mean = stabSamples.reduce((a, b) => a + b, 0) / stabSamples.length;
+    const variance =
+      stabSamples.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / stabSamples.length;
     const sd = Math.sqrt(variance);
     const cv = sd / mean;
     const stab = Math.max(0, Math.min(100, Math.round(100 - cv * 300)));
