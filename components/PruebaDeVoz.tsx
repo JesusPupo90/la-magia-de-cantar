@@ -13,7 +13,7 @@ import {
   Wind,
 } from "lucide-react";
 
-type Status = "idle" | "recording" | "processing" | "result" | "error";
+type Status = "idle" | "countdown" | "recording" | "processing" | "result" | "error";
 
 interface Result {
   pitchAcc: number;
@@ -23,6 +23,7 @@ interface Result {
 }
 
 const RECORD_SECONDS = 10;
+const COUNTDOWN_WORDS = ["Respira", "Afina", "¡Ya!"];
 const WHATSAPP_URL =
   "https://wa.me/573053678742?text=Hola%20Yanetsis%2C%20hice%20mi%20prueba%20de%20voz%20con%20IA%20y%20quiero%20dar%20el%20siguiente%20paso%20con%20una%20clase%20de%20prueba";
 
@@ -101,6 +102,7 @@ function detectPitch(data: Float32Array, sampleRate: number): number {
 export default function PruebaDeVoz() {
   const [status, setStatus] = useState<Status>("idle");
   const [elapsed, setElapsed] = useState(0);
+  const [countdownIdx, setCountdownIdx] = useState(0);
   const [result, setResult] = useState<Result | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -111,10 +113,13 @@ export default function PruebaDeVoz() {
     stream: MediaStream;
   } | null>(null);
   const samplesRef = useRef<number[]>([]);
+  const collectingRef = useRef(false);
+  const countdownTimerRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
+      if (countdownTimerRef.current) window.clearInterval(countdownTimerRef.current);
       if (timerRef.current) window.clearInterval(timerRef.current);
       const audio = audioRef.current;
       if (audio) {
@@ -127,10 +132,15 @@ export default function PruebaDeVoz() {
   }, []);
 
   const cleanup = () => {
+    if (countdownTimerRef.current) {
+      window.clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
+    collectingRef.current = false;
     const audio = audioRef.current;
     if (audio) {
       audio.processor.disconnect();
@@ -146,6 +156,9 @@ export default function PruebaDeVoz() {
     setResult(null);
     setElapsed(0);
     samplesRef.current = [];
+    collectingRef.current = false;
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     let stream: MediaStream;
     try {
@@ -170,11 +183,13 @@ export default function PruebaDeVoz() {
     }
 
     const ctx = new AudioCtor();
+    if (ctx.state === "suspended") void ctx.resume();
     const source = ctx.createMediaStreamSource(stream);
     const processor = ctx.createScriptProcessor(4096, 1, 1);
     const sampleRate = ctx.sampleRate;
 
     processor.onaudioprocess = (event) => {
+      if (!collectingRef.current) return;
       const data = event.inputBuffer.getChannelData(0);
       const pitch = detectPitch(data, sampleRate);
       if (pitch > 0 && Number.isFinite(pitch)) {
@@ -187,6 +202,25 @@ export default function PruebaDeVoz() {
 
     audioRef.current = { ctx, source, processor, stream };
 
+    setStatus("countdown");
+    setCountdownIdx(0);
+    let word = 0;
+    countdownTimerRef.current = window.setInterval(() => {
+      word++;
+      if (word < COUNTDOWN_WORDS.length) {
+        setCountdownIdx(word);
+      } else {
+        if (countdownTimerRef.current) {
+          window.clearInterval(countdownTimerRef.current);
+          countdownTimerRef.current = null;
+        }
+        startSampling();
+      }
+    }, 1000);
+  };
+
+  const startSampling = () => {
+    collectingRef.current = true;
     let seconds = 0;
     timerRef.current = window.setInterval(() => {
       seconds++;
@@ -195,7 +229,6 @@ export default function PruebaDeVoz() {
         computeAndAnalyze();
       }
     }, 1000);
-
     setStatus("recording");
   };
 
@@ -301,6 +334,35 @@ export default function PruebaDeVoz() {
                 <AlertCircle className="h-3.5 w-3.5" /> El audio se procesa en tu dispositivo y no
                 se guarda en ningún servidor.
               </p>
+            </div>
+          )}
+
+          {status === "countdown" && (
+            <div className="flex flex-col items-center py-6 text-center sm:py-10">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border-[3px] border-black bg-mint/30">
+                <Mic className="h-8 w-8 animate-pulse text-black" />
+              </div>
+              <h2
+                key={countdownIdx}
+                className="mt-5 animate-fadeIn font-poppins text-4xl font-extrabold tracking-tight text-black sm:text-5xl"
+              >
+                {COUNTDOWN_WORDS[countdownIdx]}
+              </h2>
+              <p className="mt-3 max-w-md font-jakarta text-sm font-medium text-gray-600">
+                {countdownIdx < COUNTDOWN_WORDS.length - 1
+                  ? "Prepárate: acerca el micrófono y respira con calma."
+                  : "Empieza a cantar una nota sostenida, con tu voz firme."}
+              </p>
+              <div className="mt-6 flex items-center gap-2">
+                {COUNTDOWN_WORDS.map((_, i) => (
+                  <span
+                    key={i}
+                    className={`h-2.5 w-2.5 rounded-full border-2 border-black transition-colors ${
+                      i <= countdownIdx ? "bg-pink" : "bg-gray-200"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
