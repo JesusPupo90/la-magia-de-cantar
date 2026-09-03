@@ -67,7 +67,7 @@ export default function LaMagiaDeCantar() {
         
         {/* BLOQUE SUPERIOR: Título, Filosofía, Descripción y CTA */}
         <div className="mx-auto max-w-3xl text-center">
-          <p className="inline-flex items-center gap-2 rounded-full border border-pink/30 bg-pink-soft/80 px-4 py-1.5 font-poppins text-xs font-bold uppercase tracking-wider text-purple shadow-sm">
+          <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-pink-soft px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             ✦ Nuestra Filosofía
           </p>
 
