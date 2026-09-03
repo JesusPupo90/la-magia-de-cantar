@@ -5,7 +5,7 @@ import { CurlyArrow } from "@/lib/iconsLibrary";
 import Cta from "./Cta";
 
 const subtitle =
-  "Prepara tu voz y domina el escenario con Yanetsis Alfonso, coach vocal de TV. Un entrenamiento integral para quienes sueñan en grande.";
+  "Prepara tu voz y domina el escenario con Yanetsis Alfonso, coach vocal cubana de TV. Un entrenamiento integral para quienes sueñan en grande.";
 
 const tvShows = [
   "La Voz Kids",
