@@ -97,7 +97,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@yanetsisalfonso3992"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
@@ -107,7 +107,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://tiktok.com/@lamagiadeantar_"
+                href="https://tiktok.com/@lamagiadecantar_"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="TikTok"
@@ -117,7 +117,7 @@ export default function Footer() {
               </a>
 
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/p/La-Magia-de-Cantar-61578028251719/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"

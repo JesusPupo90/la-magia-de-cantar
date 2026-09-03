@@ -151,7 +151,7 @@ function buildQuoteConfirmationHtml(data: CotizacionEmpresaInput) {
                   Gracias por escribirnos${data.contactName ? `, ${esc(data.contactName)}` : ""}. Recibimos tu solicitud${data.companyName ? ` de <strong>${esc(data.companyName)}</strong>` : ""} y uno de nuestros asesores te contactará en un plazo de <strong>hasta 3 días hábiles</strong>.
                 </p>
                 <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.6;">
-                  Si tu solicitud es urgente, puedes escribirnos por WhatsApp al +57 305 3678742 o al correo contacto@lamagiadecantar.co.
+                  Si tu solicitud es urgente, puedes escribirnos por <a href="https://wa.me/573053678742" style="color:#7C3AED;font-weight:bold;">WhatsApp al +57 305 3678742</a> o al correo contacto@lamagiadecantar.co.
                 </p>
               </td>
             </tr>
@@ -254,7 +254,7 @@ function buildPaymentConfirmationHtml(data: PaymentConfirmationData) {
                   </tr>
                 </table>
                 <p style="margin:18px 0 0;font-size:13px;color:#6b7280;">
-                  Si tienes dudas, escríbenos por WhatsApp o a <a href="mailto:contacto@lamagiadecantar.co" style="color:#7C3AED;font-weight:bold;">contacto@lamagiadecantar.co</a>.
+                  Si tienes dudas, escríbenos por <a href="https://wa.me/573053678742" style="color:#7C3AED;font-weight:bold;">WhatsApp</a> o a <a href="mailto:contacto@lamagiadecantar.co" style="color:#7C3AED;font-weight:bold;">contacto@lamagiadecantar.co</a>.
                 </p>
               </td>
             </tr>

@@ -27,7 +27,7 @@ No es una academia tradicional: es un proceso integral que une técnica vocal, c
 
 - Ubicación física en Bogotá, Colombia, con modalidad presencial y virtual.
 - Pagos directos vía Mercado Pago Colombia (PSE, tarjetas, Nequi/Daviplata) para servicios estandarizados; cotización personalizada para servicios B2B y coaching directo.
-- Contacto principal por WhatsApp Business y correo `contacto@lamagiadecantar.co`. El número de WhatsApp aún es un placeholder (`wa.me/573000000000`); reemplazar por el real antes de publicar.
+- Contacto principal por WhatsApp Business (`wa.me/573053678742`, +57 305 3678742) y correo `contacto@lamagiadecantar.co`.
 - Regulaciones locales: tratamiento de datos personales (Habeas Data, Ley 1581), términos y condiciones y política de cancelación.
 
 ## Capabilities and Constraints

@@ -86,7 +86,7 @@ export default async function FailurePage({ searchParams }: FailurePageProps) {
               </Link>
               
               <a
-                href="https://wa.me/573000000000" 
+                href="https://wa.me/573053678742"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl border-[3px] border-black bg-white px-6 py-4 font-poppins text-sm font-black uppercase text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"

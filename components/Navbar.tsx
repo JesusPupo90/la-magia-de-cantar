@@ -112,7 +112,7 @@ export default function Navbar() {
 
           <div className="mt-6 border-t border-gray-100 pt-6">
             <a
-              href="https://wa.me/573000000000?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
+              href="https://wa.me/573053678742?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
