@@ -5,6 +5,7 @@ import MetodoYanetsis from "@/components/MetodoYanetsis";
 import NuestrosServicios from "@/components/NuestrosServicios";
 import EmpresasEInstituciones from "@/components/EmpresasEInstituciones";
 import TestimoniosSection from "@/components/Testimonios";
+import PromoFlowManager from "@/components/PromoFlowManager";
 import { getCatalog } from "@/data/services";
 import type { ServiceItem } from "@/data/services";
 // import DemoEstetica from "@/components/DemoEstetica";
@@ -41,6 +42,7 @@ export default async function Home() {
       )}
       <EmpresasEInstituciones />
       <TestimoniosSection />
+      <PromoFlowManager />
       {/* <DemoEstetica /> */}
     </main>
   );
