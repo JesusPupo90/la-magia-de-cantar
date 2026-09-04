@@ -21,10 +21,14 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5 sm:px-8 lg:px-8">
-        
-        {/* 1. LOGO */}
-        <a href="/#inicio" className="flex shrink-0 items-center" aria-label="Ir al inicio">
+      <nav className="relative mx-auto flex min-h-[60px] max-w-7xl items-center justify-center py-3.5">
+
+        {/* 1. LOGO (anclado al borde izquierdo) */}
+        <a
+          href="/#inicio"
+          aria-label="Ir al inicio"
+          className="absolute left-4 top-1/2 flex shrink-0 -translate-y-1/2 items-center sm:left-6 lg:left-5 xl:left-8"
+        >
           <Image
             src="/assets/dark-logo.png"
             alt="Yanetsis + La magia de cantar"
@@ -36,12 +40,12 @@ export default function Navbar() {
         </a>
 
         {/* 2. ENLACES CENTRADOS (Desktop) */}
-        <ul className="hidden items-center gap-6 xl:gap-8 lg:flex">
+        <ul className="hidden items-center justify-center gap-4 lg:flex xl:gap-6">
           {navLinks.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
-                className="font-poppins text-sm font-semibold text-gray-800 transition-colors hover:text-purple"
+                className="whitespace-nowrap font-poppins text-[13px] font-semibold text-gray-800 transition-colors hover:text-purple xl:text-sm"
               >
                 {link.label}
               </a>
@@ -50,12 +54,12 @@ export default function Navbar() {
         </ul>
 
         {/* 3. BOTÓN DERECHA: WhatsApp Directo (Desktop) */}
-        <div className="hidden items-center lg:flex">
+        <div className="absolute right-4 top-1/2 hidden -translate-y-1/2 items-center sm:right-6 lg:flex lg:right-5 xl:right-8">
           <a
             href="https://wa.me/573053678742?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-2xl border-2 border-brown bg-mint px-5 py-2 font-poppins text-xs font-bold uppercase tracking-wider text-black shadow-soft-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange hover:shadow-soft-md"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-2xl border-2 border-brown bg-mint px-4 py-2 font-poppins text-xs font-bold uppercase tracking-wider text-black shadow-soft-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange hover:shadow-soft-md xl:px-5"
           >
             <svg
               className="h-4 w-4 fill-current"
@@ -69,28 +73,30 @@ export default function Navbar() {
         </div>
 
         {/* BOTÓN MÓVIL (Hamburguesa) */}
-        <button
-          type="button"
-          className="relative z-50 inline-flex items-center justify-center rounded-xl p-2 text-black hover:bg-gray-100 focus:outline-none lg:hidden"
-          aria-label={open ? "Cerrar menú" : "Abrir menú"}
-          aria-expanded={open}
-          onClick={() => setOpen((prev) => !prev)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-7 w-7 transition-transform duration-200"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
+        <div className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-6 lg:hidden">
+          <button
+            type="button"
+            className="relative z-50 inline-flex items-center justify-center rounded-xl p-2 text-black hover:bg-gray-100 focus:outline-none"
+            aria-label={open ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={open}
+            onClick={() => setOpen((prev) => !prev)}
           >
-            {open ? (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-7 w-7 transition-transform duration-200"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              {open ? (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
       </nav>
 
       {/* MENÚ MÓVIL DESPLEGABLE CON POSICIÓN FIXED */}
