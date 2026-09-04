@@ -1,16 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { Mic } from "lucide-react";
 import PromoModal from "@/components/PromoModal";
+import { consentState, subscribeConsent } from "@/lib/meta";
 
 const STICKER_DELAY_MS = 1500;
 
 export default function PromoFlowManager() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const [isStickerVisible, setIsStickerVisible] = useState(false);
+  const consent = useSyncExternalStore(subscribeConsent, () => consentState(), () => null);
   const timerRef = useRef<number | null>(null);
+  const timerStartedRef = useRef(false);
 
   useEffect(() => {
     return () => {
@@ -18,13 +21,22 @@ export default function PromoFlowManager() {
     };
   }, []);
 
-  const handleCloseModal = useCallback(() => {
-    setIsModalOpen(false);
+  const startStickerTimer = useCallback(() => {
+    if (timerStartedRef.current) return;
+    timerStartedRef.current = true;
     timerRef.current = window.setTimeout(() => {
       setIsStickerVisible(true);
       timerRef.current = null;
     }, STICKER_DELAY_MS);
   }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!isModalOpen && consent !== null) startStickerTimer();
+  }, [isModalOpen, consent, startStickerTimer]);
 
   return (
     <>

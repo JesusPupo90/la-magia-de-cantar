@@ -2,7 +2,7 @@
 
 import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { consentState, subscribeConsent, CONSENT_KEY } from "@/lib/meta";
+import { consentState, declareConsent, subscribeConsent } from "@/lib/meta";
 
 export default function CookieNotice() {
   const state = useSyncExternalStore(subscribeConsent, () => consentState(), () => null);
@@ -12,11 +12,7 @@ export default function CookieNotice() {
   if (dismissed || state !== null) return null;
 
   const decide = (value: "accepted" | "rejected") => {
-    try {
-      window.localStorage.setItem(CONSENT_KEY, value);
-    } catch {
-      // noop
-    }
+    declareConsent(value);
     if (value === "accepted") {
       // Recargamos para que el Pixel cargue limpio con el consentimiento.
       window.location.reload();

@@ -24,11 +24,32 @@ export function hasConsent(): boolean {
   return consentState() === "accepted";
 }
 
-// Suscripción para useSyncExternalStore (el evento 'storage' cubre otras
-// pestañas; en la misma pestaña recargamos tras aceptar).
+const consentListeners = new Set<() => void>();
+
+function emitConsent() {
+  consentListeners.forEach((cb) => cb());
+}
+
+// Declara el consentimiento en localStorage y notifica a los suscriptores de la
+// misma pestaña (el evento 'storage' solo llega a otras pestañas).
+export function declareConsent(value: Exclude<ConsentState, null>) {
+  try {
+    window.localStorage.setItem(CONSENT_KEY, value);
+  } catch {
+    // noop
+  }
+  emitConsent();
+}
+
+// Suscripción para useSyncExternalStore. Escucha el evento 'storage' (otras
+// pestañas) y la emisión local de declareConsent (misma pestaña).
 export function subscribeConsent(cb: () => void): () => void {
+  consentListeners.add(cb);
   window.addEventListener("storage", cb);
-  return () => window.removeEventListener("storage", cb);
+  return () => {
+    consentListeners.delete(cb);
+    window.removeEventListener("storage", cb);
+  };
 }
 
 // Buffer de eventos que llegan antes de que window.fbq exista (el snippet base
