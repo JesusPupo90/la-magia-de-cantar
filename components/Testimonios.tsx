@@ -1,7 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
-import { Star, Quote, Mic2, Sparkles, Award } from "lucide-react";
+import {
+    Star,
+    Quote,
+    Mic2,
+    Sparkles,
+    Award,
+    ChevronLeft,
+    ChevronRight
+} from "lucide-react";
 
 // 1. TESTIMONIOS PRINCIPALES (Laura de León & Martin Trevy)
 const FEATURED_TESTIMONIALS = [
@@ -31,6 +40,20 @@ const FEATURED_TESTIMONIALS = [
         testimonial:
             "De la mano de Yanetsis me convertí en el artista que soy hoy. Me ayudó a enfrentar mis miedos, ganar seguridad sobre el escenario y confiar más en mí mismo. Su guía ha sido fundamental en mi crecimiento y en el desarrollo de mi carrera.",
         tag: "Giras & Performance"
+    },
+    {
+        id: "karoll",
+        name: "Karoll Márquez",
+        role: "Actor & Cantante",
+        badge: "Testimonio de Trayectoria",
+        bg: "bg-pink-soft",
+        image: "/assets/karoll-marquez.webp",
+        // Subimos la foto al marco (misma técnica que Martin)
+        imageClass: "object-cover object-top scale-135 -translate-y-10 hover:scale-180",
+        process: "Técnica vocal, Proceso artístico, Coaching vocal",
+        testimonial:
+            "Ha sido mi Coach vocal, durante más de 15 años, acompañándome en el proceso de encontrar una identidad y un manejo de la voz conectando lo físico con las emociones.",
+        tag: "Actuación & Música"
     }
 ];
 
@@ -65,10 +88,26 @@ const OTHER_ARTISTS = [
         name: "Producciones Audiovisuales",
         role: "La Reina del Flow / La Primera Vez",
         detail: "Coaching vocal para actrices y cantantes"
+    },
+    {
+        name: "Maía",
+        role: "Artista / Cantante / Compositora",
+        detail: "Técnica vocal, Gira / tour, Coaching vocal",
+        quote: "Yanetsis es mi columna vertebral en todos los aspectos artísticos, además me ha acompañado en los diferentes retos que ha vivido mi escena, mi música y mi voz. Con ella no paro de aprender."
     }
 ];
 
 export default function TestimoniosSection() {
+    const [activeIndex, setActiveIndex] = useState(0);
+    const featuredCount = FEATURED_TESTIMONIALS.length;
+
+    const goPrev = () =>
+        setActiveIndex((prev) => (prev - 1 + featuredCount) % featuredCount);
+    const goNext = () =>
+        setActiveIndex((prev) => (prev + 1) % featuredCount);
+
+    const current = FEATURED_TESTIMONIALS[activeIndex];
+
     return (
         <section
             id="testimonios"
@@ -110,18 +149,23 @@ export default function TestimoniosSection() {
                     </div>
                 </div>
 
-                {/* 1. BLOQUE DE DESTACADOS: LAURA DE LEÓN & MARTIN TREVY */}
-                <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
-                    {FEATURED_TESTIMONIALS.map((item) => (
+                {/* 1. BLOQUE DE DESTACADOS: CARRUSEL 1 A LA VEZ */}
+                <div
+                    role="region"
+                    aria-roledescription="carrusel"
+                    aria-label="Testimonios destacados"
+                    className="mt-12 mx-auto max-w-3xl"
+                >
+                    {/* TARJETA ACTIVA */}
+                    <div key={current.id} aria-live="polite" className="animate-fadeIn">
                         <div
-                            key={item.id}
-                            className={`relative flex flex-col justify-between rounded-3xl border-2 border-black ${item.bg} p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]`}
+                            className={`relative flex flex-col justify-between rounded-3xl border-2 border-black ${current.bg} p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]`}
                         >
                             <div>
                                 {/* INSIGNIA Y ESTRELLAS */}
                                 <div className="flex items-center justify-between gap-2 mb-6">
                                     <span className="inline-flex items-center gap-1 rounded-md border border-black bg-white px-3 py-1 font-poppins text-[11px] font-black uppercase text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
-                                        <Sparkles className="h-3.5 w-3.5 text-purple-700" /> {item.badge}
+                                        <Sparkles className="h-3.5 w-3.5 text-purple-700" /> {current.badge}
                                     </span>
                                     <div className="flex text-amber-500">
                                         {[...Array(5)].map((_, i) => (
@@ -136,11 +180,11 @@ export default function TestimoniosSection() {
                                     {/* FOTO VERTICAL */}
                                     <div className="relative w-full sm:w-44 md:w-48 shrink-0 aspect-[3/4] rounded-2xl border-2 border-black bg-white/60 overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                                         <Image
-                                            src={item.image}
-                                            alt={item.name}
+                                            src={current.image}
+                                            alt={current.name}
                                             fill
                                             sizes="(max-width: 640px) 100vw, 200px"
-                                            className={`transition-transform duration-500 ${item.imageClass}`}
+                                            className={`transition-transform duration-500 ${current.imageClass}`}
                                         />
                                     </div>
 
@@ -148,16 +192,16 @@ export default function TestimoniosSection() {
                                     <div className="flex flex-col justify-between w-full flex-1 min-w-0">
                                         <div>
                                             <h3 className="font-poppins text-2xl font-black text-black">
-                                                {item.name}
+                                                {current.name}
                                             </h3>
                                             <p className="font-poppins text-xs font-extrabold uppercase tracking-wide text-purple-800 mt-1">
-                                                {item.role}
+                                                {current.role}
                                             </p>
 
                                             <div className="relative mt-4 rounded-2xl border-2 border-black bg-white p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                                                 <Quote className="absolute right-2 top-2 h-5 w-5 text-black/10" />
                                                 <p className="font-jakarta text-xs sm:text-sm font-semibold italic leading-relaxed text-gray-900">
-                                                    &ldquo;{item.testimonial}&rdquo;
+                                                    &ldquo;{current.testimonial}&rdquo;
                                                 </p>
                                             </div>
                                         </div>
@@ -167,7 +211,7 @@ export default function TestimoniosSection() {
                                                 Proceso con Yanetsis:
                                             </p>
                                             <p className="font-jakarta text-xs text-gray-800 font-medium leading-relaxed mt-0.5">
-                                                {item.process}
+                                                {current.process}
                                             </p>
                                         </div>
                                     </div>
@@ -178,19 +222,57 @@ export default function TestimoniosSection() {
                             {/* PIE DE TARJETA */}
                             <div className="mt-6 pt-4 border-t-2 border-black/10 flex items-center justify-between">
                                 <span className="inline-block rounded-lg border border-black bg-yellow px-2.5 py-0.5 font-poppins text-[10px] font-black uppercase text-black">
-                                    {item.tag}
+                                    {current.tag}
                                 </span>
                                 <span className="font-poppins text-[10px] font-black uppercase text-black/60">
                                     Voice Evolution
                                 </span>
                             </div>
                         </div>
-                    ))}
+                    </div>
+
+                    {/* NAVEGACIÓN: FLECHAS + DOTS */}
+                    <div className="mt-8 flex items-center justify-center gap-4">
+                        <button
+                            type="button"
+                            onClick={goPrev}
+                            aria-label="Testimonio anterior"
+                            className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-yellow hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                            <ChevronLeft className="h-6 w-6" />
+                        </button>
+
+                        <div className="flex items-center gap-2.5">
+                            {FEATURED_TESTIMONIALS.map((item, index) => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => setActiveIndex(index)}
+                                    aria-label={`Ir al testimonio de ${item.name}`}
+                                    aria-current={index === activeIndex ? "true" : undefined}
+                                    className={`h-3.5 w-3.5 rounded-full border-2 border-black transition-all duration-200 ${
+                                        index === activeIndex
+                                            ? "bg-yellow shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                                            : "bg-white hover:bg-pink-soft"
+                                    }`}
+                                />
+                            ))}
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={goNext}
+                            aria-label="Siguiente testimonio"
+                            className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-black bg-white text-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-yellow hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
+                        >
+                            <ChevronRight className="h-6 w-6" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* 2. GRILLA SECUNDARIA: OTROS ARTISTAS Y PROCESOS */}
                 <div className="mt-16">
-                    <div className="mb-8 flex justify-center md:justify-start">
+                    <div className="mb-8 flex justify-center">
                         <div className="inline-flex items-center gap-3 rounded-2xl border-2 border-black bg-mint px-5 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-1">
                             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border-2 border-black bg-yellow shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                                 <Mic2 className="h-5 w-5 text-black" />
@@ -220,6 +302,11 @@ export default function TestimoniosSection() {
                                     <p className="mt-2 font-jakarta text-xs text-gray-700 font-medium">
                                         {artist.detail}
                                     </p>
+                                    {artist.quote && (
+                                        <p className="mt-3 font-jakarta text-xs font-semibold italic leading-relaxed text-gray-900">
+                                            &ldquo;{artist.quote}&rdquo;
+                                        </p>
+                                    )}
                                 </div>
                             </div>
                         ))}
