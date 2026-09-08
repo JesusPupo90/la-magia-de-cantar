@@ -1,9 +1,9 @@
 // scripts/test-resend.ts
-// Harness standalone: prueba sendQuoteNotification (email B2B) sin pagos.
-// Uso:
+// Standalone harness: tests sendQuoteNotification (B2B email) without payments.
+// Usage:
 //   npx tsx scripts/test-resend.ts [email1 email2 ...]
-// (sin emails usa CONTACT_NOTIFICATION_EMAIL del .env.local)
-// Carga .env.local manualmente (Node no lo hace por defecto con tsx).
+// (without emails it uses CONTACT_NOTIFICATION_EMAIL from .env.local)
+// Loads .env.local manually (Node doesn't do it by default with tsx).
 
 import { readFileSync } from "fs";
 import { resolve } from "path";
@@ -20,7 +20,7 @@ function loadEnv() {
       }
     }
   } catch {
-    // si no existe .env.local, seguimos con process.env
+    // if .env.local doesn't exist, keep going with process.env
   }
 }
 loadEnv();

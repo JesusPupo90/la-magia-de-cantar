@@ -43,7 +43,7 @@ export default async function CheckoutPage({ searchParams }: CheckoutPageProps) 
         variantId={variant.id}
       />
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-        {/* Volver */}
+        {/* Back */}
         <Link
           href="/#nuestros-servicios"
           className="inline-flex items-center gap-1.5 font-poppins text-xs font-black uppercase tracking-wider text-purple hover:underline"

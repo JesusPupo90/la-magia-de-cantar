@@ -1,7 +1,7 @@
 // app/api/veredicto/route.ts
-// Recibe las métricas de la Prueba de Voz IA y pide un veredicto a Anthropic (Claude).
-// Fallback crítico: si no hay ANTHROPIC_API_KEY, el fetch falla o no hay texto,
-// responde { error: "fallback" } con status 200 (nunca 500).
+// Receives the AI Voice Test metrics and requests a verdict from Anthropic (Claude).
+// Critical fallback: if there's no ANTHROPIC_API_KEY, the fetch fails or there's no text,
+// it responds { error: "fallback" } with status 200 (never 500).
 
 import { createHash, randomUUID } from "crypto";
 import { NextResponse } from "next/server";
@@ -18,10 +18,10 @@ function isValidMetric(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
 }
 
-// Instrucciones de rol/estilo: van en el parámetro `system` (stateless, no afecta entre peticiones).
+// Role/style instructions: they go in the `system` parameter (stateless, doesn't leak across requests).
 const SYSTEM_PROMPT = `Eres el asistente de redacción de Yanetsis Alfonso, coach vocal de televisión y fundadora de La Magia de Cantar. Escribe veredictos breves (entre 80 y 120 palabras), en español, en primera persona como si los dijera Yanetsis: cálidos, cercanos, profesionales, nunca condescendientes. Menciona un aspecto fuerte y un aspecto a mejorar, basados únicamente en las métricas dadas. No inventes datos que no estén en las métricas (no menciones rango vocal, tono de voz, género musical, ni nada que no puedas saber de esos tres números). No uses lenguaje técnico de ingeniería de audio. Cierra invitando, de forma natural, a dar el siguiente paso con una clase de prueba. Responde solo con el texto del veredicto, sin título ni comillas.`;
 
-// El mensaje del usuario solo contiene las métricas reales de ESTA grabación.
+// The user message only contains the real metrics from THIS recording.
 function buildUserPrompt(pitchAcc: number, stab: number, total: number): string {
   return `Alguien acaba de hacer una prueba de voz en la página web. Estas son las únicas métricas reales que tienes sobre esa grabación: afinación ${pitchAcc}%, estabilidad de la respiración ${stab}%, puntaje total ${total}/100.`;
 }
@@ -48,8 +48,8 @@ export async function POST(request: Request) {
 
   const prompt = buildUserPrompt(pitchAcc, stab, total);
 
-  // Sesión nueva por consulta: id aleatorio (para correlacionar logs) y user_id
-  // anonimizado (hash opaco, sin PII) para el tracking de abuso de Anthropic.
+  // Fresh session per request: random id (to correlate logs) and anonymized
+  // user_id (opaque hash, no PII) for Anthropic's abuse tracking.
   const sessionId = randomUUID();
   const forwarded = request.headers.get("x-forwarded-for") ?? request.headers.get("x-real-ip") ?? "unknown";
   const userAgent = request.headers.get("user-agent") ?? "unknown";

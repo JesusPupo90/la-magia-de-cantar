@@ -17,15 +17,15 @@ export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
 
   const data = validation.data;
 
-  // ⚡ AQUÍ USAMOS EL AWAIT
+  // HERE WE USE THE AWAIT
   const supabase = await createClient();
 
-  // 🍯 Honeypot anti-spam
+  // Anti-spam honeypot
   if (data.honeypot && data.honeypot.trim() !== "") {
     return { success: true, message: "Solicitud enviada correctamente." };
   }
 
-  // 🔁 Dedupe por email: evita spam repetido sin informar al atacante
+  // Dedupe by email: prevents repeated spam without informing the attacker
   const existing = await supabase
     .from("company_quotes")
     .select("id")
@@ -62,10 +62,10 @@ export async function submitCompanyQuote(formData: CotizacionEmpresaInput) {
     };
   }
 
-  // 📧 Notificación al dueño (inactiva hasta configurar las claves en .env.local)
+  // Owner notification (inactive until the keys are set in .env.local)
   await sendQuoteNotification(data);
 
-  // 📧 Confirmación transaccional al solicitante (plazo de respuesta ≤3 días hábiles)
+  // Transactional confirmation to the requester (response time ≤3 business days)
   await sendQuoteConfirmation(data).catch((err) =>
     console.error("[email] Error enviando confirmación al solicitante:", err)
   );

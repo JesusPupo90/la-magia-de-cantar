@@ -1,7 +1,7 @@
 // lib/checkout-storage.ts
-// Persistencia en sessionStorage del formulario de checkout y de la intención
-// de pago (orderId reutilizable en reintentos). Compartido por CheckoutForm
-// (guarda/restaura el borrador) y MpBricks (limpia el orderId tras el éxito).
+// sessionStorage persistence for the checkout form and the payment intent
+// (reusable orderId on retries). Shared by CheckoutForm
+// (saves/restores the draft) and MpBricks (clears the orderId after success).
 
 export const DRAFT_KEY = "lmdc_checkout_draft";
 export const ORDER_KEY = "lmdc_checkout_order";
@@ -21,7 +21,7 @@ export function saveDraft<T>(value: T) {
   try {
     window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(value));
   } catch {
-    // storage lleno o bloqueado
+    // storage full or blocked
   }
 }
 

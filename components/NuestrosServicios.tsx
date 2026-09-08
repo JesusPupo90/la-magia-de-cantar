@@ -59,7 +59,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
   const handleSelectPlan = (serviceId: string, idx: number) => {
     setSelectedPlanIndexes(prev => ({ ...prev, [serviceId]: idx }));
 
-    // 📊 Meta Pixel: ViewContent al elegir un plan (funnel).
+    // Meta Pixel: ViewContent when a plan is chosen (funnel).
     const svc = services.find((s) => s.id === serviceId);
     const plan = svc?.plans[idx] ?? svc?.plans[0];
     if (svc && plan) {
@@ -83,7 +83,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
       aria-labelledby="servicios-titulo"
       className="relative w-full overflow-hidden bg-mint py-16 sm:py-20 lg:py-24"
     >
-      {/* 📍 Fondo Vectorial con Opacidad Suavizada para No Interferir con la Lectura */}
+      {/* Repeating Vector Background with Softened Opacity to Keep Away from Reading */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-15 bg-[url('/assets/patron-1.svg')] bg-repeat bg-top-left [background-size:1400px] md:bg-auto"
@@ -91,7 +91,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-        {/* 1. ENCABEZADO DENTRO DE "STICKER CARD" PARA MÁXIMO CONTRASTE */}
+        {/* 1. HEADER INSIDE "STICKER CARD" FOR MAXIMUM CONTRAST */}
         <div className="mx-auto max-w-3xl text-center rounded-3xl border-2 border-black bg-white p-6 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-pink-soft px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             ✦ NUESTROS SERVICIOS
@@ -111,7 +111,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
             En La Magia de Cantar cada voz tiene una ruta. Encuentra el proceso que necesitas e invierte en línea de forma fácil y segura.
           </p>
 
-          {/* Badges en Cajas Sólidas con Borde Negro */}
+          {/* Badges in Solid Boxes with Black Border */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3 pt-2">
             <span className="inline-flex items-center gap-1.5 rounded-xl border-2 border-black bg-[#F8FAFC] px-3.5 py-1.5 font-poppins text-xs font-black text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               <ShieldCheck className="h-4 w-4 text-emerald-600" /> Pago seguro
@@ -122,7 +122,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
           </div>
         </div>
 
-        {/* 1.5 BANNER CTA: PRUEBA DE VOZ IA */}
+        {/* CTA BANNER: AI VOICE TEST */}
         <div className="mt-8 mx-auto max-w-3xl rounded-2xl border-[3px] border-black bg-yellow p-5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] sm:p-6">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <div className="text-center sm:text-left">
@@ -142,7 +142,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
           </div>
         </div>
 
-        {/* 2. NAVEGACIÓN DE CATEGORÍAS */}
+        {/* 2. CATEGORY NAVIGATION */}
         <div className="mt-8 sm:hidden sticky top-4 z-20 px-2">
   <div className="rounded-2xl border-2 border-black bg-yellow p-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
     <label
@@ -188,7 +188,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
           </div>
         </div>
 
-        {/* 3. GRILLA DE TARJETAS */}
+        {/* 3. CARDS GRID */}
         <div className={`mt-8 grid gap-4 ${filteredServices.length === 1
           ? "max-w-md mx-auto grid-cols-1"
           : filteredServices.length === 2
@@ -211,7 +211,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
                   }`}
               >
                 <div>
-                  {/* Encabezado Tarjeta */}
+                  {/* Card Header */}
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <span className="inline-block rounded-md border border-black bg-pink-soft/80 px-2.5 py-0.5 font-poppins text-[10px] font-black uppercase text-black">
@@ -248,7 +248,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
                     </span>
                   </div>
 
-                  {/* Selector de Planes */}
+                  {/* Plans Selector */}
                   {service.plans.length > 1 && (
                     <div className="mt-6">
                       <p className="mb-2 font-poppins text-[11px] font-bold text-gray-500 uppercase">
@@ -279,7 +279,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
                     </div>
                   )}
 
-                  {/* Display de Precio */}
+                  {/* Price Display */}
                   {selectedPlan && (
                     <div className="mt-5 rounded-2xl border-2 border-black bg-mint/30 p-4 shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
                       <div className="flex items-baseline justify-between">
@@ -354,7 +354,7 @@ export default function NuestrosServicios({ services }: NuestrosServiciosProps) 
           })}
         </div>
 
-        {/* 4. FRASE DE CIERRE DE SECCIÓN DENTRO DE STICKER BOX */}
+        {/* 4. SECTION CLOSING STATEMENT INSIDE STICKER BOX */}
         <div className="mt-12 text-center">
           <div className="mx-auto max-w-xl rounded-2xl border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <p className="font-jakarta text-xs font-black text-black uppercase tracking-widest">

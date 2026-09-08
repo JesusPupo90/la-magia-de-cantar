@@ -1,12 +1,12 @@
 // scripts/test-payment-email.ts
-// Harness standalone: prueba sendPaymentConfirmation (email de bienvenida)
-// con datos de muestra o con una orden real ya pagada — SIN hacer pagos.
-// Uso:
+// Standalone harness: tests sendPaymentConfirmation (welcome email)
+// with sample data or with a real paid order — WITHOUT making payments.
+// Usage:
 //   npx tsx scripts/test-payment-email.ts [email1 email2 ...] [--from-db <orderId>]
-// - Sin args: envía a payerEmail de la muestra (o de la orden si --from-db).
-// - Con emails: los usa como destinatarios (para pruebas; no se commitean).
-// - --from-db <orderId>: carga una orden real pagada y reenvía su confirmación.
-// Carga .env.local manualmente (Node no lo hace por defecto con tsx).
+// - No args: sends to the sample's payerEmail (or the order's if --from-db).
+// - With emails: uses them as recipients (for testing; not committed).
+// - --from-db <orderId>: loads a real paid order and resends its confirmation.
+// Loads .env.local manually (Node doesn't do it by default with tsx).
 
 import { readFileSync } from "fs";
 import { resolve } from "path";
@@ -24,7 +24,7 @@ function loadEnv() {
       }
     }
   } catch {
-    // si no existe .env.local, seguimos con process.env
+    // if .env.local doesn't exist, keep going with process.env
   }
 }
 loadEnv();

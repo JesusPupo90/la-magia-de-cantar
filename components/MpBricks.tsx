@@ -43,10 +43,10 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
   const createdRef = useRef(false);
   const [retryKey, setRetryKey] = useState(0);
 
-  // Inicializar el brick una vez que el SDK esté cargado.
-  // Con preferenceId se habilita la opción "Mercado Pago" (wallet). Para tarjetas
-  // y otros métodos, el brick tokeniza y entrega el formData a onSubmit; nuestro
-  // backend crea el pago (POST /v1/payments) y redirige según el resultado.
+  // Initialize the brick once the SDK is loaded.
+  // With preferenceId the "Mercado Pago" (wallet) option is enabled. For cards
+  // and other methods, the brick tokenizes and hands the formData to onSubmit;
+  // our backend creates the payment (POST /v1/payments) and redirects based on the result.
   useEffect(() => {
     if (!sdkReady || createdRef.current || !containerRef.current) return;
     const mp = window.MercadoPago;
@@ -67,8 +67,8 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
           paymentMethods: {
             creditCard: "all",
             debitCard: "all",
-            // PSE oculto: no se incluye bankTransfer (MP rechaza "none" con 422).
-            // Re-activar (bankTransfer: "all") solo cuando MP/Wompi tenga PSE operativo.
+            // PSE hidden: bankTransfer is not included (MP rejects "none" with 422).
+            // Re-enable (bankTransfer: "all") only when MP/Wompi has PSE operational.
             ticket: "all",
             mercadoPago: "all",
           },
@@ -76,7 +76,7 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
         callbacks: {
           onReady: () => {
             console.log("PaymentBrick listo, order:", orderId, "preference:", preferenceId);
-            // 📊 Meta Pixel: inició el flujo de pago (funnel).
+            // Meta Pixel: payment flow started (funnel).
             fireEvent("InitiateCheckout", { value: amount, currency: "COP" });
           },
           onSubmit: async (formData: unknown, additionalData: unknown) => {
@@ -86,9 +86,9 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
             const selected = (formData as { selectedPaymentMethod?: string } | null)
               ?.selectedPaymentMethod;
 
-            // La opción "Mercado Pago" (wallet) abre su propio checkout de MP en una
-            // pestaña nueva (window.open con la preferencia); el redirect a back_urls
-            // lo maneja MP en esa pestaña. No hay nada que hacer aquí.
+            // The "Mercado Pago" (wallet) option opens its own MP checkout in a
+            // new tab (window.open with the preference); the redirect to back_urls
+            // is handled by MP in that tab. Nothing to do here.
             if (selected === "wallet_purchase") {
               console.log("PaymentBrick: flujo wallet, MP redirige en su pestaña.");
               return;
@@ -100,7 +100,7 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
               if (result.warning) console.warn("PaymentBrick: warning:", result.warning);
 
               if (!result.success) {
-                // Ya hay un pago en proceso para esta intención → aviso rápido centrado.
+                // There's already a payment in progress for this intent → quick centered notice.
                 if (result.code === "PENDING_PAYMENT") {
                   onToast?.(result.message || "El pago ya está en proceso de confirmación.");
                 } else {
@@ -117,9 +117,9 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
                 amount: String(amount),
               });
 
-              // PSE: MP devuelve la URL del banco (simulado en TEST) para completar
-              // la transferencia. Se abre en pestaña nueva; esta pestaña sigue a la
-              // página de "Pago en proceso".
+              // PSE: MP returns the bank URL (simulated in TEST) to complete
+              // the transfer. It opens in a new tab; this tab goes to the
+              // "Payment in progress" page.
               if (result.redirectUrl) {
                 window.open(result.redirectUrl, "_blank");
               }
@@ -128,11 +128,11 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
                 clearOrderId();
                 window.location.href = `/checkout/success?${query.toString()}`;
               } else if (status === "pending" || status === "in_process") {
-                // PSE / efectivo / pagos diferidos: la página de éxito muestra "Pago en proceso".
+                // PSE / cash / deferred payments: the success page shows "Payment in progress".
                 clearOrderId();
                 window.location.href = `/checkout/success?${query.toString()}`;
               } else {
-                // rejected / cancelled: mostramos el error en línea para reintentar sin recargar.
+                // rejected / cancelled: we show the inline error so the user can retry without reloading.
                 setPaymentError(
                   "El pago fue rechazado. Verifica los datos del medio de pago e inténtalo de nuevo."
                 );
@@ -143,10 +143,10 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
             }
           },
           onError: (brickError: unknown) => {
-            // Contrato del SDK: BrickError.type === "critical" es la única falla
-            // terminal. Los errores "non_critical" (p. ej. tarjeta inválida mientras
-            // se tipea) los muestra el propio brick con validación inline y se
-            // recupera solo. Logueamos TODOS para poder diagnosticar.
+            // SDK contract: BrickError.type === "critical" is the only terminal
+            // failure. "non_critical" errors (e.g. invalid card while
+            // typing) are shown by the brick itself with inline validation and
+            // recover on their own. We log ALL of them to diagnose.
             const e = brickError as { type?: string; cause?: string; message?: string };
             if (e?.type === "critical") {
               console.error("PaymentBrick (critical):", brickError);
@@ -159,7 +159,7 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
       })
       .catch((err: unknown) => {
         console.error("Error creando PaymentBrick:", err);
-        createdRef.current = false; // permitir reintento
+        createdRef.current = false; // allow retry
         setError("No se pudo iniciar el pago. Inténtalo de nuevo.");
       });
   }, [sdkReady, preferenceId, orderId, amount, retryKey, onToast]);
@@ -168,7 +168,7 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
 
   const handleRetry = useCallback(() => {
     if (containerRef.current) {
-      containerRef.current.innerHTML = ""; // limpiar DOM huérfano del brick anterior
+      containerRef.current.innerHTML = ""; // clean up orphaned DOM from the previous brick
     }
     createdRef.current = false;
     setError("");
@@ -193,9 +193,9 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
         </p>
       </div>
 
-      {/* Banner de error SOLO para fallas críticas. Vive en un slot aparte, ARRIBA
-          del brick: nunca reemplaza ni comparte el contenedor de MP, por lo que no
-          puede encoger ni mover el formulario. */}
+      {/* Error banner ONLY for critical failures. Lives in a separate slot, ABOVE
+          the brick: it never replaces or shares the MP container, so it can't
+          shrink or move the form. */}
       {error && (
         <div className="flex w-full items-start gap-2 rounded-xl border-2 border-black bg-pink-soft p-3 text-xs font-extrabold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
@@ -212,8 +212,8 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
         </div>
       )}
 
-      {/* Error de PAGO (rechazo o fallo al cobrar): NO desmonta el brick; el
-          usuario puede corregir los datos y reintentar sin recargar la página. */}
+      {/* PAYMENT error (rejection or charge failure): does NOT unmount the brick;
+          the user can fix the data and retry without reloading the page. */}
       {paymentError && (
         <div className="flex w-full items-start gap-2 rounded-xl border-2 border-black bg-pink-soft p-3 text-xs font-extrabold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
@@ -221,9 +221,9 @@ export default function MpBricks({ preferenceId, orderId, amount, onToast }: MpB
         </div>
       )}
 
-      {/* El contenedor del brick, una vez que el SDK está listo, se renderiza de
-          forma incondicional y NUNCA se desmonta ni se intercambia por otro nodo.
-          (mpMissing / !sdkReady son estados previos al montaje: no hay brick aún.) */}
+      {/* Once the SDK is ready, the brick container renders unconditionally and is
+          NEVER unmounted or swapped for another node.
+          (mpMissing / !sdkReady are pre-mount states: there's no brick yet.) */}
       {mpMissing ? (
         <div className="flex items-start gap-2 rounded-xl border-2 border-black bg-pink-soft p-3 text-xs font-extrabold text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />

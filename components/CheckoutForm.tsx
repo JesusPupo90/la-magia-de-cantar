@@ -49,14 +49,14 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
   const [orderId, setOrderId] = useState<string | null>(null);
   const [studentIsPayer, setStudentIsPayer] = useState(false);
 
-  // 🔔 Notificación rápida centrada (p. ej. "pago en proceso"). Auto-cierre ~5s.
+  // Quick centered notification (e.g. "payment in progress"). Auto-closes ~5s.
   useEffect(() => {
     if (!toast) return;
     const t = setTimeout(() => setToast(null), 5000);
     return () => clearTimeout(t);
   }, [toast]);
 
-  // 🍯 Honeypot + rellenado de pagador → estudiante
+  // Honeypot + payer → student autofill
   const defaultValues = useMemo<OrdenCompraInput>(() => {
     const stored = loadDraft<Partial<OrdenCompraInput>>();
     return {
@@ -91,8 +91,8 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
 
   const values = watch();
 
-  // 🗃️ Auto-guardado en sessionStorage (solo mientras se está llenando el formulario;
-  //     tras enviar y pasar al brick ya no debe re-guardarse el borrador).
+  // Auto-save in sessionStorage (only while the form is being filled;
+  //     after submitting and moving to the brick, the draft must not be saved again).
   const firstRun = useRef(true);
   useEffect(() => {
     if (step !== "form") return;
@@ -104,7 +104,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
     return () => clearTimeout(t);
   }, [values, step]);
 
-  // ⚖️ Toggle "el estudiante es el pagador"
+  // Toggle "the student is the payer"
   const handleStudentIsPayer = useCallback((checked: boolean) => {
     setStudentIsPayer(checked);
   }, []);
@@ -134,10 +134,10 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
       studentLastName: studentIsPayer ? data.payerLastName : data.studentLastName,
     };
 
-    // Reutilizamos la misma orden (intención de compra) en los reintentos.
+    // We reuse the same order (purchase intent) on retries.
     const result = await submitOrder(payload, loadOrderId() ?? undefined);
 
-    // ⚠️ Ya existe un pago en proceso para esta intención → aviso rápido centrado.
+    // There's already a payment in progress for this intent → quick centered notice.
     if (result.code === "PENDING_PAYMENT") {
       setToast(result.message || "El pago ya está en proceso de confirmación.");
       setStep("form");
@@ -164,10 +164,10 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
   };
 
   return (
-    /* 🔴 CAMBIO CSS: flex-col-reverse pone el resumen arriba en móvil */
+    /* CSS CHANGE: flex-col-reverse puts the summary on top on mobile */
     <div className="mt-8 flex flex-col-reverse items-start gap-8 lg:flex-row">
       
-      {/* ⬅️ FORMULARIO (Mantiene el peso visual principal) */}
+      {/* FORM (keeps the main visual weight) */}
       <div className="w-full flex-1 rounded-3xl border-[3px] border-black bg-white p-6 sm:p-8 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
         {step === "form" && (
           <form
@@ -182,7 +182,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
                 e.preventDefault();
               }
             }}
-            className="space-y-8" /* 🔴 Más respiro entre secciones */
+            className="space-y-8" /* CSS CHANGE: More breathing room between sections */
           >
             <input
               {...register("honeypot")}
@@ -193,10 +193,10 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
               className="absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
             />
 
-            {/* 🎓 ESTUDIANTE */}
+            {/* STUDENT */}
             <fieldset className="space-y-5">
               <legend className="flex items-center gap-3 font-poppins text-lg font-black uppercase tracking-tight text-black">
-                {/* 🔴 CAMBIO CSS: Numeración visual */}
+                {/* CSS CHANGE: Visual numbering */}
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black text-sm text-white">
                   1
                 </span>
@@ -215,9 +215,9 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
                 </span>
               </label>
 
-              {/* 🔴 CAMBIO CSS: Ocultamiento animado (Grid Trick) — SOLO nombre/apellido.
-                  La edad y las notas son datos del estudiante (independientes del pagador):
-                  quedan siempre visibles. */}
+              {/* CSS CHANGE: Animated hiding (Grid Trick) — ONLY first/last name.
+                  Age and notes are student data (independent from the payer):
+                  they always stay visible. */}
               <div
                 className={`grid transition-[grid-template-rows,opacity] duration-300 ease-in-out ${
                   studentIsPayer ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100"
@@ -298,11 +298,11 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
 
             <hr className="border-black/10" />
 
-            {/* 💳 PAGADOR / FACTURACIÓN */}
-            {/* 🔴 CAMBIO CSS: Fondo sutil para separar visualmente */}
+            {/* PAYER / BILLING */}
+            {/* CSS CHANGE: Subtle background for visual separation */}
             <fieldset className="rounded-2xl border-2 border-black/5 bg-[#FFFBEB]/40 p-5 sm:p-6 space-y-5">
               <legend className="flex items-center gap-3 font-poppins text-lg font-black uppercase tracking-tight text-black">
-                {/* 🔴 CAMBIO CSS: Numeración visual */}
+                {/* CSS CHANGE: Visual numbering */}
                 <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black text-sm text-white">
                   2
                 </span>
@@ -398,7 +398,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
               </div>
             </fieldset>
 
-            {/* ⚖️ HABEAS DATA */}
+            {/* HABEAS DATA */}
             <div className="rounded-2xl border-2 border-black bg-mint/30 p-4">
               <label className="flex cursor-pointer items-start gap-2.5">
                 <input
@@ -430,7 +430,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
               </label>
             </div>
 
-            {/* MENSAJE DE ERROR */}
+            {/* ERROR MESSAGE */}
             <div
               aria-live="polite"
               className={`grid transition-[grid-template-rows] duration-300 ease-out ${
@@ -506,7 +506,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
         )}
       </div>
 
-      {/* ➡️ RESUMEN DEL PRODUCTO (Estilo recibo secundario flotante) */}
+      {/* PRODUCT SUMMARY (floating secondary receipt style) */}
       <aside className="sticky top-10 w-full shrink-0 rounded-3xl border-2 border-black/10 bg-white/70 p-6 backdrop-blur-xl lg:w-[380px]">
         <p className="inline-flex items-center gap-1.5 rounded-full border-2 border-black bg-pink-soft px-3 py-1 font-poppins text-[10px] font-black uppercase text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
           <Users className="h-3.5 w-3.5" /> Tu selección
@@ -548,7 +548,7 @@ export default function CheckoutForm({ service, variant }: CheckoutFormProps) {
         )}
       </aside>
 
-      {/* 🔔 Notificación rápida centrada (se cierra al hacer clic o a los ~3s) */}
+      {/* Quick centered notification (closes on click or after ~3s) */}
       {toast && (
         <div
           role="status"

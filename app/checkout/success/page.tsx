@@ -12,7 +12,7 @@ interface SuccessPageProps {
 }
 
 export default async function SuccessPage({ searchParams }: SuccessPageProps) {
-  // En Next.js App Router (v15+), searchParams es una promesa
+  // In Next.js App Router (v15+), searchParams is a promise
   const params = await searchParams;
   
   const orderId = params.external_reference;
@@ -25,10 +25,10 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
       <MetaPurchaseEvent value={amount} orderId={orderId ?? ""} status={params.status} />
       <div className="w-full max-w-2xl">
         
-        {/* TARJETA PRINCIPAL */}
+        {/* MAIN CARD */}
         <div className="overflow-hidden rounded-3xl border-[3px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           
-          {/* Cabecera de éxito */}
+          {/* SUCCESS HEADER */}
           <div className={`border-b-[3px] border-black p-8 text-center sm:p-10 ${isPending ? 'bg-yellow' : 'bg-mint/40'}`}>
             <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-[3px] border-black bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               {isPending ? (
@@ -48,7 +48,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
             </p>
           </div>
 
-          {/* Detalles de la orden */}
+          {/* Order details */}
           <div className="p-8 sm:p-10">
             <h2 className="font-poppins text-lg font-black uppercase tracking-tight text-black">
               Resumen de la transacción
@@ -69,7 +69,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               )}
             </div>
 
-            {/* Siguientes pasos */}
+            {/* Next steps */}
             <h3 className="mt-10 font-poppins text-lg font-black uppercase tracking-tight text-black">
               ¿Qué sigue ahora?
             </h3>
@@ -100,7 +100,7 @@ export default async function SuccessPage({ searchParams }: SuccessPageProps) {
               </li>
             </ul>
 
-            {/* Botones de acción */}
+            {/* Action buttons */}
             <div className="mt-10 flex flex-col sm:flex-row gap-4">
               <Link
                 href="/"

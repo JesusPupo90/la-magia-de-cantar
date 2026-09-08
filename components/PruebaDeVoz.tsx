@@ -27,7 +27,7 @@ const COUNTDOWN_WORDS = ["Respira", "Afina", "¡Ya!"];
 const WHATSAPP_URL =
   "https://wa.me/573053678742?text=Hola%20Yanetsis%2C%20hice%20mi%20prueba%20de%20voz%20con%20IA%20y%20quiero%20dar%20el%20siguiente%20paso%20con%20una%20clase%20de%20prueba";
 
-// --- LÓGICA DE FALLBACK LOCAL (veredicto en la voz de Yanetsis) ---
+// --- LOCAL FALLBACK LOGIC (verdict in Yanetsis' voice) ---
 function localVeredicto(pitchAcc: number, stab: number, total: number): string {
   const open =
     total >= 80
@@ -56,7 +56,7 @@ function localVeredicto(pitchAcc: number, stab: number, total: number): string {
   return `${open} ${pitchLine} ${stabLine} ${close}`;
 }
 
-// --- LÓGICA DE DETECCIÓN DE PITCH (autocorrelación) ---
+// --- PITCH DETECTION LOGIC (autocorrelation) ---
 function detectPitch(data: Float32Array, sampleRate: number): number {
   const SIZE = data.length;
   let rms = 0;
@@ -245,9 +245,9 @@ export default function PruebaDeVoz() {
       return;
     }
 
-    // Filtro de outliers: descarta frames de pitch espurios (ruido, respiraciones,
-    // errores de octava) conservando solo los que están dentro de ±2 semitonos de
-    // la mediana. La fórmula de estabilidad no cambia; solo opera sobre datos limpios.
+    // Outlier filter: discards spurious pitch frames (noise, breaths,
+    // octave errors) keeping only those within ±2 semitones of
+    // the median. The stability formula doesn't change; it only operates on clean data.
     const sorted = [...samples].sort((a, b) => a - b);
     const mid = Math.floor(sorted.length / 2);
     const median =
@@ -296,7 +296,7 @@ export default function PruebaDeVoz() {
         veredicto = data.veredicto;
       }
     } catch {
-      // Silencioso: se mantiene el veredicto local.
+      // Silent: keep the local verdict.
     }
     setResult({ pitchAcc, stab, total, veredicto });
     setStatus("result");
@@ -321,7 +321,7 @@ export default function PruebaDeVoz() {
           </p>
         </div>
 
-        {/* ================= TARJETA PRINCIPAL ================= */}
+        {/* ================= MAIN CARD ================= */}
         <div className="mt-10 rounded-3xl border-[3px] border-black bg-white p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] sm:p-8">
           {status === "idle" && (
             <div className="flex flex-col items-center py-6 text-center sm:py-10">
@@ -475,7 +475,7 @@ export default function PruebaDeVoz() {
                 </div>
               </div>
 
-              {/* VEREDICTO */}
+              {/* VERDICT */}
               <div className="mt-6 rounded-2xl border-[3px] border-black bg-pink-soft p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] sm:p-6">
                 <p className="flex items-center gap-2 font-poppins text-[10px] font-black uppercase tracking-wider text-black">
                   <Activity className="h-4 w-4" /> Veredicto de Yanetsis
@@ -485,7 +485,7 @@ export default function PruebaDeVoz() {
                 </p>
               </div>
 
-              {/* CTA FINAL */}
+              {/* FINAL CTA */}
               <div className="mt-6 flex flex-col items-center gap-3">
                 <a
                   href={WHATSAPP_URL}
@@ -507,7 +507,7 @@ export default function PruebaDeVoz() {
           )}
         </div>
 
-        {/* ================= NOTA DE CONFIANZA ================= */}
+        {/* ================= TRUST NOTE ================= */}
         {status !== "recording" && status !== "processing" && (
           <p className="mt-8 text-center font-jakarta text-[11px] text-gray-500">
             Prueba orientativa para conocerte mejor. El veredicto no sustituye una evaluación vocal

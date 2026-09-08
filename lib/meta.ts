@@ -1,6 +1,6 @@
 // lib/meta.ts
-// Helper del Meta Pixel (fbq) para el lado cliente. No-op si no hay
-// NEXT_PUBLIC_META_PIXEL_ID configurado o si el usuario no aceptó cookies.
+// Helper for the Meta Pixel (fbq) on the client side. No-op if there's no
+// NEXT_PUBLIC_META_PIXEL_ID configured or the user hasn't accepted cookies.
 
 export const CONSENT_KEY = "lmdc_cookie_consent";
 
@@ -30,8 +30,8 @@ function emitConsent() {
   consentListeners.forEach((cb) => cb());
 }
 
-// Declara el consentimiento en localStorage y notifica a los suscriptores de la
-// misma pestaña (el evento 'storage' solo llega a otras pestañas).
+// Declares consent in localStorage and notifies subscribers in the
+// same tab (the 'storage' event only reaches other tabs).
 export function declareConsent(value: Exclude<ConsentState, null>) {
   try {
     window.localStorage.setItem(CONSENT_KEY, value);
@@ -41,8 +41,8 @@ export function declareConsent(value: Exclude<ConsentState, null>) {
   emitConsent();
 }
 
-// Suscripción para useSyncExternalStore. Escucha el evento 'storage' (otras
-// pestañas) y la emisión local de declareConsent (misma pestaña).
+// Subscription for useSyncExternalStore. Listens to the 'storage' event (other
+// tabs) and the local emission from declareConsent (same tab).
 export function subscribeConsent(cb: () => void): () => void {
   consentListeners.add(cb);
   window.addEventListener("storage", cb);
@@ -52,9 +52,9 @@ export function subscribeConsent(cb: () => void): () => void {
   };
 }
 
-// Buffer de eventos que llegan antes de que window.fbq exista (el snippet base
-// de Meta se inyecta con afterInteractive). Se drenan en flushPending() tras el
-// init del Pixel, para no perder ViewContent/InitiateCheckout/etc. por timing.
+// Buffer for events that arrive before window.fbq exists (Meta's base snippet
+// is injected with afterInteractive). They're drained in flushPending() after
+// the Pixel init, so we don't lose ViewContent/InitiateCheckout/etc. by timing.
 interface QueuedEvent {
   name: string;
   data?: Record<string, unknown>;

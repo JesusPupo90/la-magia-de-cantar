@@ -8,13 +8,13 @@ export default function CookieNotice() {
   const state = useSyncExternalStore(subscribeConsent, () => consentState(), () => null);
   const [dismissed, setDismissed] = useState(false);
 
-  // El aviso se muestra solo si el usuario aún no decidió (ni aceptado ni rechazado).
+  // The notice only shows if the user hasn't decided yet (neither accepted nor rejected).
   if (dismissed || state !== null) return null;
 
   const decide = (value: "accepted" | "rejected") => {
     declareConsent(value);
     if (value === "accepted") {
-      // Recargamos para que el Pixel cargue limpio con el consentimiento.
+      // We reload so the Pixel loads clean with the consent.
       window.location.reload();
     } else {
       setDismissed(true);

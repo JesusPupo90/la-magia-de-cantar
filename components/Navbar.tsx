@@ -4,8 +4,8 @@
 import Image from "next/image";
 import { useState } from "react";
 
-// Hash ABSOLUTO (/#...) para que los enlaces funcionen desde cualquier página
-// (p. ej. /checkout), no solo desde la home donde existen las secciones.
+// ABSOLUTE hash (/#...) so links work from any page
+// (e.g. /checkout), not only from the home where the sections live.
 const navLinks = [
   { href: "/#inicio", label: "Inicio" },
   { href: "/#la-magia-de-cantar", label: "La magia de cantar" },
@@ -23,7 +23,7 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white">
       <nav className="relative mx-auto flex min-h-[60px] max-w-7xl items-center justify-center py-3.5">
 
-        {/* 1. LOGO (anclado al borde izquierdo) */}
+        {/* 1. LOGO (anchored to the left edge) */}
         <a
           href="/#inicio"
           aria-label="Ir al inicio"
@@ -39,7 +39,7 @@ export default function Navbar() {
           />
         </a>
 
-        {/* 2. ENLACES CENTRADOS (Desktop) */}
+        {/* 2. CENTERED LINKS (Desktop) */}
         <ul className="hidden items-center justify-center gap-4 lg:flex xl:gap-6">
           {navLinks.map((link) => (
             <li key={link.href}>
@@ -53,7 +53,7 @@ export default function Navbar() {
           ))}
         </ul>
 
-        {/* 3. BOTÓN DERECHA: WhatsApp Directo (Desktop) */}
+        {/* 3. RIGHT BUTTON: Direct WhatsApp (Desktop) */}
         <div className="absolute right-4 top-1/2 hidden -translate-y-1/2 items-center sm:right-6 lg:flex lg:right-5 xl:right-8">
           <a
             href="https://wa.me/573053678742?text=Hola%20Yanetsis,%20quiero%20más%20información%20sobre%20tus%20clases"
@@ -72,7 +72,7 @@ export default function Navbar() {
           </a>
         </div>
 
-        {/* BOTÓN MÓVIL (Hamburguesa) */}
+        {/* MOBILE BUTTON (Hamburger) */}
         <div className="absolute right-4 top-1/2 -translate-y-1/2 sm:right-6 lg:hidden">
           <button
             type="button"
@@ -99,7 +99,7 @@ export default function Navbar() {
         </div>
       </nav>
 
-      {/* MENÚ MÓVIL DESPLEGABLE CON POSICIÓN FIXED */}
+      {/* MOBILE DROPDOWN MENU WITH FIXED POSITION */}
       {open && (
         <div className="fixed inset-x-0 top-[60px] z-40 h-[calc(100vh-60px)] overflow-y-auto bg-white px-6 pb-12 pt-6 shadow-2xl lg:hidden">
           <ul className="flex flex-col gap-3">

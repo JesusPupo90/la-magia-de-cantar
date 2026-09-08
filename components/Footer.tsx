@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { MessageCircle, Mail, MapPin } from "lucide-react";
 
-// 📍 ÍCONOS SVG NATIVOS PARA REDES SOCIALES
+// NATIVE SVG ICONS FOR SOCIAL MEDIA
 const SocialIcons = {
   Instagram: () => (
     <svg className="h-4 w-4 fill-current" viewBox="0 0 24 24">
@@ -32,18 +32,18 @@ export default function Footer() {
   return (
     <footer id="footer" className="w-full bg-neutral-900 text-neutral-300 font-jakarta border-t border-neutral-800">
 
-      {/* 1. BANNER CON FRASE DE CIERRE */}
+      {/* 1. BANNER WITH CLOSING STATEMENT */}
       <div className="border-b border-neutral-800 py-10 px-4 sm:px-6 lg:px-8 text-center bg-neutral-950/50">
         <p className="font-poppins text-lg sm:text-2xl font-extrabold tracking-wide text-white">
           &ldquo;La magia empieza cuando decides escuchar tu voz.&rdquo;
         </p>
       </div>
 
-      {/* 2. CONTENIDO PRINCIPAL EN COLUMNAS */}
+      {/* 2. MAIN CONTENT IN COLUMNS */}
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 sm:py-16">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-5">
 
-          {/* COLUMNA 1: MARCA Y CONTACTO */}
+          {/* COLUMN 1: BRAND AND CONTACT */}
           <div className="lg:col-span-2 space-y-6">
             <div>
               <h3 className="font-poppins text-xl font-black text-white tracking-tight">
@@ -58,7 +58,7 @@ export default function Footer() {
               Plataforma de transformación vocal, emocional y artística. Entrenamos voces con sueños grandes para la escena, la televisión y la vida.
             </p>
 
-            {/* DATOS DE CONTACTO */}
+            {/* CONTACT DATA */}
             <div className="space-y-3 text-xs">
               <a
                 href="https://wa.me/573053678742"
@@ -84,7 +84,7 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* REDES SOCIALES CON SVGs DIRECTOS */}
+            {/* SOCIAL MEDIA WITH DIRECT SVGs */}
             <div className="pt-2 flex items-center gap-3">
               <a
                 href="https://instagram.com/lamagiadecantar"
@@ -128,7 +128,7 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* COLUMNA 2: MENÚ RÁPIDO */}
+          {/* COLUMN 2: QUICK MENU */}
           <div>
             <h4 className="font-poppins text-xs font-black uppercase tracking-wider text-white mb-4">
               Navegación
@@ -167,7 +167,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* COLUMNA 3: SERVICIOS DESTACADOS */}
+          {/* COLUMN 3: FEATURED SERVICES */}
           <div>
             <h4 className="font-poppins text-xs font-black uppercase tracking-wider text-white mb-4">
               Servicios Destacados
@@ -216,7 +216,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* COLUMNA 4: LEGAL (Rutas conectadas a App Router) */}
+          {/* COLUMN 4: LEGAL (Routes wired to App Router) */}
           <div>
             <h4 className="font-poppins text-xs font-black uppercase tracking-wider text-white mb-4">
               Legal
@@ -253,16 +253,16 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* 3. BARRA INFERIOR DE COPYRIGHT */}
+      {/* 3. BOTTOM COPYRIGHT BAR */}
       <div className="w-full border-t border-neutral-800 bg-black py-6 px-4 sm:px-8">
         <div className="mx-auto max-w-7xl flex flex-col sm:flex-row items-center justify-between gap-4 font-poppins text-xs">
 
-          {/* Izquierda: Derechos Reservados */}
+          {/* Left: All Rights Reserved */}
           <p className="text-neutral-400 text-center sm:text-left">
             © 2026 Yanetsis Alfonso · La Magia de Cantar. Todos los derechos reservados.
           </p>
 
-          {/* Derecha: Créditos de Desarrollo */}
+          {/* Right: Development Credits */}
           <p className="text-neutral-400 text-center sm:text-right">
             Desarrollado por{' '}
             <span className="text-lime-400 font-semibold">Jesus Pupo</span>{' '}

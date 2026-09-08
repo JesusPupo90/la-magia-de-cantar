@@ -1,7 +1,7 @@
 // scripts/test-pse.ts
-// Diagnóstico (temporal): PSE (bank_transfer) en sandbox de MP.
-// Itera variantes del body contra POST /v1/payments para hallar la que MP acepta.
-// Uso: npx tsx scripts/test-pse.ts
+// Temporary diagnosis: PSE (bank_transfer) on MP sandbox.
+// Iterates body variants against POST /v1/payments to find the one MP accepts.
+// Usage: npx tsx scripts/test-pse.ts
 
 import { readFileSync } from "fs";
 import { resolve } from "path";

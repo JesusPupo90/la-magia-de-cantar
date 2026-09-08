@@ -2,16 +2,16 @@ import type { CotizacionEmpresaInput } from "@/lib/schemas/cotizacion.schema";
 
 const RESEND_API_URL = "https://api.resend.com/emails";
 
-// Resend acepta una string o un array de strings en `to`. Si alguien pasa una
-// string con comas (p. ej. desde CLI), la normalizamos a array.
+// Resend accepts a string or an array of strings in `to`. If someone passes a
+// string with commas (e.g. from CLI), we normalize it to an array.
 function normalizeRecipients(value: string | string[] | undefined | null): string | string[] | undefined {
   if (!value) return undefined;
   if (Array.isArray(value)) return value.map((v) => v.trim()).filter(Boolean);
   return value.includes(",") ? value.split(",").map((v) => v.trim()).filter(Boolean) : value;
 }
 
-// FROM con nombre visible (mejora confianza/entrega). Si RESEND_FROM_EMAIL ya
-// trae "Nombre <email>", se respeta tal cual.
+// FROM with visible name (improves trust/delivery). If RESEND_FROM_EMAIL already
+// has "Name <email>", it's respected as-is.
 const FROM_DISPLAY_NAME = "La Magia de Cantar";
 
 function buildFrom(): string | undefined {
@@ -24,7 +24,7 @@ function esc(v: string | undefined | null): string {
   return (v ?? "").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-// Logo oficial del sitio (oscuro → legible sobre fondo blanco).
+// Official site logo (dark → readable on white background).
 const BRAND_LOGO =
   '<img src="https://www.lamagiadecantar.co/assets/dark-logo.png" alt="La Magia de Cantar" width="200" height="113" style="display:block;border:0;width:200px;height:113px;margin:0 auto;" />';
 
@@ -37,7 +37,7 @@ function detailRow(label: string, value: string) {
 }
 
 // ============================================================================
-// B2B — NOTIFICACIÓN INTERNA (para el equipo/la clienta). Sobrio/formal, blanco.
+// B2B — INTERNAL NOTIFICATION (for the team/client). Sober/formal, white.
 // ============================================================================
 
 function buildQuoteHtml(data: CotizacionEmpresaInput) {
@@ -130,7 +130,7 @@ export async function sendQuoteNotification(data: CotizacionEmpresaInput, toOver
 }
 
 // ============================================================================
-// B2B — CONFIRMACIÓN AL SOLICITANTE (transaccional). Breve y profesional.
+// B2B — CONFIRMATION TO THE REQUESTER (transactional). Short and professional.
 // ============================================================================
 
 function buildQuoteConfirmationHtml(data: CotizacionEmpresaInput) {
@@ -198,7 +198,7 @@ export async function sendQuoteConfirmation(data: CotizacionEmpresaInput, toOver
 }
 
 // ============================================================================
-// PAGO — CONFIRMACIÓN AL COMPRADOR (diseño de marca, fondo blanco).
+// PAYMENT — CONFIRMATION TO THE BUYER (brand design, white background).
 // ============================================================================
 
 export interface PaymentConfirmationData {

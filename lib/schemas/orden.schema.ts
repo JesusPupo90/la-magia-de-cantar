@@ -2,8 +2,8 @@ import { z } from "zod";
 
 export const DOC_TYPE_OPTIONS = ["CC", "NIT", "CE", "PASAPORTE"] as const;
 
-// Edad: el form convierte el string con setValueAs; el schema recibe number.
-// Opcional en adultos, obligatoria en Kids/Teens (se exige por superRefine).
+// Age: the form converts the string with setValueAs; the schema receives a number.
+// Optional for adults, required for Kids/Teens (enforced via superRefine).
 const ageField = z
   .number("Ingresa una edad válida")
   .int("La edad debe ser un número entero")
@@ -27,7 +27,7 @@ export function buildOrdenSchema(opts?: { requiresAge?: boolean }) {
       .min(1, "El plan es obligatorio")
       .max(80, "Identificador de plan inválido"),
 
-    // 🎓 ESTUDIANTE
+    // STUDENT
     studentFirstName: z
       .string({ message: "El nombre del estudiante es obligatorio" })
       .min(2, "El nombre del estudiante es obligatorio")
@@ -44,7 +44,7 @@ export function buildOrdenSchema(opts?: { requiresAge?: boolean }) {
 
     studentNotes: z.string().max(2000).optional().or(z.literal("")),
 
-    // 💳 PAGADOR / FACTURACIÓN
+    // PAYER / BILLING
     payerEmail: z
       .string({ message: "El correo del pagador es obligatorio" })
       .email("Ingresa un correo electrónico válido")
@@ -87,12 +87,12 @@ export function buildOrdenSchema(opts?: { requiresAge?: boolean }) {
       .regex(/^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/, "IP inválida")
       .optional(),
 
-    // ⚖️ HABEAS DATA (Ley 1581) — checkbox desmarcado por defecto; se exige true
+    // HABEAS DATA (Law 1581) — checkbox unchecked by default; requires true
     habeasDataAccepted: z.boolean().refine((v) => v === true, {
       message: "Debes autorizar el tratamiento de tus datos personales",
     }),
 
-    // 🍯 Anti-spam
+    // Anti-spam honeypot
     honeypot: z.string().optional(),
   })
   .superRefine((data, ctx) => {
@@ -106,8 +106,8 @@ export function buildOrdenSchema(opts?: { requiresAge?: boolean }) {
   });
 }
 
-// Esquema base usado por el servidor (createOrder). La edad es opcional a nivel
-// de servidor; la obligatoriedad para Kids/Teens se aplica en el cliente (UX).
+// Base schema used by the server (createOrder). Age is optional at the server
+// level; the requirement for Kids/Teens is enforced on the client (UX).
 export const ordenCompraSchema = buildOrdenSchema();
 
 export type OrdenCompraInput = z.infer<typeof ordenCompraSchema>;

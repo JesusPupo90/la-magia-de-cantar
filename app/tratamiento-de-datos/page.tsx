@@ -6,7 +6,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 export default function TratamientoDatosPage() {
   return (
     <main className="relative min-h-screen w-full bg-[#FFFBEB] font-jakarta py-12 px-4 sm:px-6 lg:px-8">
-      {/* Fondo Vectorial */}
+      {/* VECTOR BACKGROUND */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-10 bg-[url('/assets/patron-3.svg')] bg-repeat bg-top-left [background-size:1400px]"

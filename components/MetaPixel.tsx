@@ -21,7 +21,7 @@ export default function MetaPixel() {
   const pathname = usePathname();
   const initialized = useRef(false);
 
-  // PageView por cambio de ruta (SPA). El PageView inicial lo emite el snippet base.
+  // PageView on route change (SPA). The initial PageView is emitted by the base snippet.
   useEffect(() => {
     if (!pixelId || !consent) return;
     if (initialized.current) {

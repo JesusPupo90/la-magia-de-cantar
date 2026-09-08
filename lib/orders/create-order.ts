@@ -1,7 +1,7 @@
 // lib/orders/create-order.ts
-// Lógica central de creación de orden + preferencia (Checkout Pro / Payment Brick).
-// SIN "use server": es una función pura ejecutable desde Server Actions,
-// Route Handlers o scripts de prueba (scripts/test-create-order.ts).
+// Central order + preference creation logic (Checkout Pro / Payment Brick).
+// WITHOUT "use server": it's a pure function callable from Server Actions,
+// Route Handlers or test scripts (scripts/test-create-order.ts).
 
 import { randomUUID } from "crypto";
 import { ordenCompraSchema, type OrdenCompraInput } from "../schemas/orden.schema";
@@ -37,15 +37,15 @@ interface VariantWithService {
   } | null;
 }
 
-// Mapeo de tipos de documento del form → valores que MP acepta (MCO/Colombia):
-// ver MP_DOC_TYPES en ./mp-status (compartido con el procesamiento de pagos).
+// Mapping of form document types → values MP accepts (MCO/Colombia):
+// see MP_DOC_TYPES in ./mp-status (shared with payment processing).
 
 function getBaseUrl(): string | null {
   const url = process.env.NEXT_PUBLIC_APP_URL;
   if (url) return url;
-  // En dev se mantiene un túnel local de respaldo. En producción NO hay fallback:
-  // si falta NEXT_PUBLIC_APP_URL el pago se bloquea con un error claro (el
-  // notification_url/back_urls jamás deben apuntar a una URL muerta).
+// Dev keeps a local fallback tunnel. In production there's NO fallback:
+// if NEXT_PUBLIC_APP_URL is missing the payment is blocked with a clear error (the
+// notification_url/back_urls must never point to a dead URL).
   if (process.env.NODE_ENV !== "production") {
     return "https://pocket-proposed-rarely-recorded.trycloudflare.com";
   }
@@ -53,9 +53,9 @@ function getBaseUrl(): string | null {
 }
 
 function amountForMp(price: number): number {
-  // Checkout Pro (preferencias): unit_price es NUMBER en la unidad principal de la
-  // moneda. COP no tiene decimales → se envía el entero (validado en sandbox, riesgo
-  // off-by-100 según método de pago; ver docs/paymentSpecs.md §5).
+  // Checkout Pro (preferences): unit_price is NUMBER in the currency's main unit.
+  // COP has no decimals → the integer is sent (validated in sandbox, off-by-100
+  // risk depending on payment method; see docs/paymentSpecs.md §5).
   return price;
 }
 
@@ -63,7 +63,7 @@ export async function createOrder(
   input: OrdenCompraInput,
   existingOrderId?: string
 ): Promise<CreateOrderResult> {
-  // 1. VALIDACIÓN ZOD
+  // 1. ZOD VALIDATION
   const validation = ordenCompraSchema.safeParse(input);
   if (!validation.success) {
     return {
@@ -73,15 +73,15 @@ export async function createOrder(
   }
   const data = validation.data;
 
-  // 2. 🍯 HONEYPOT: si un bot lo llenó, simulamos éxito sin procesar nada.
+  // 2. HONEYPOT: if a bot filled it, simulate success without processing anything.
   if (data.honeypot && data.honeypot.trim() !== "") {
     return { success: true, message: "Orden simulada (honeypot)." };
   }
 
-  // 2b. auto_return: "approved" exige back_urls HTTPS públicos (validado en sandbox:
-  //     MP devuelve 400 invalid_auto_return si back_urls es http://localhost).
-  //     Mantenemos auto_return SIEMPRE (no olvidarlo en producción) y solo exigimos
-  //     que NEXT_PUBLIC_APP_URL sea HTTPS (en local: un túnel tipo ngrok).
+// 2b. auto_return: "approved" requires public HTTPS back_urls (validated in sandbox:
+//     MP returns 400 invalid_auto_return if back_urls is http://localhost).
+//     We keep auto_return ALWAYS (don't forget it in production) and only require
+//     NEXT_PUBLIC_APP_URL to be HTTPS (locally: an ngrok-style tunnel).
   const baseUrl = getBaseUrl();
   if (!baseUrl || !baseUrl.startsWith("https://")) {
     return {
@@ -93,7 +93,7 @@ export async function createOrder(
 
   const supabase = createAdminClient();
 
-  // 3. CONSULTAR VARIANTE + SERVICIO (join) — fuente de verdad del precio.
+  // 3. QUERY VARIANT + SERVICE (join) — source of truth for the price.
   const { data: rows, error: queryError } = await supabase
     .from("service_variants")
     .select("id, service_id, label, price, is_active, services(id, title, is_custom_quote, is_active)")
@@ -111,7 +111,7 @@ export async function createOrder(
   const variant = rows as VariantWithService;
   const service = variant.services;
 
-  // 4. VALIDACIONES DE SEGURIDAD (anti-manipulación, §1)
+  // 4. SECURITY VALIDATIONS (anti-manipulation, §1)
   if (!service) {
     return { success: false, message: "El servicio seleccionado no existe." };
   }
@@ -125,7 +125,7 @@ export async function createOrder(
     return { success: false, message: "Este plan ya no está disponible." };
   }
 
-  // 5. ID DE LA ORDEN (generado en el servidor — nunca del cliente)
+  // 5. ORDER ID (generated on the server — never from the client)
   let orderId = existingOrderId?.trim() || "";
 
   const orderSnapshot = {
@@ -149,9 +149,9 @@ export async function createOrder(
     habeas_data_accepted_at: new Date().toISOString(),
   };
 
-  // 6. REUTILIZACIÓN DE ORDEN (fix: 1 orden por intención de compra, N intentos)
-  //    Si el cliente reintenta, validamos que la orden exista y pertenezca a esta
-  //    misma intención (mismo plan + mismo pagador) antes de reutilizarla.
+  // 6. ORDER REUSE (fix: 1 order per purchase intent, N attempts)
+  //    On retry we validate the order exists and belongs to this same intent
+  //    (same plan + same payer) before reusing it.
   if (orderId) {
     const { data: existing, error: existingError } = await supabase
       .from("orders")
@@ -165,8 +165,8 @@ export async function createOrder(
       existing.variant_id === data.variantId &&
       existing.payer_email.toLowerCase() === data.payerEmail.toLowerCase();
 
-    // Si ya hay un pago en proceso (p. ej. PSE/efectivo sin confirmar) para esta
-    // misma intención, NO se abre otra orden: evita el doble cobro (blindaje §3).
+    // If there's already a payment in progress (e.g. unconfirmed PSE/cash) for this
+    // same intent, NO new order is opened: avoids double charging (shield §3).
     if (sameIntent && existing!.status === "pending_payment") {
       return {
         success: false,
@@ -196,7 +196,7 @@ export async function createOrder(
         return { success: false, message: "Ocurrió un error al crear la orden. Inténtalo de nuevo." };
       }
     } else {
-      // La orden indicada no es reutilizable: creamos una nueva.
+      // The given order is not reusable: we create a new one.
       orderId = randomUUID();
       const { error: insertError } = await supabase.from("orders").insert({
         id: orderId,
@@ -225,9 +225,9 @@ export async function createOrder(
     }
   }
 
-  // 7. CREAR PREFERENCIA EN MERCADO PAGO (POST /checkout/preferences)
-  //    El Payment Brick se monta con preferenceId; MP procesa el pago y redirige a
-  //    back_urls con payment_id/status/external_reference.
+  // 7. CREATE PREFERENCE AT MERCADO PAGO (POST /checkout/preferences)
+  //    The Payment Brick mounts with preferenceId; MP processes the payment and redirects to
+  //    back_urls with payment_id/status/external_reference.
   const idempotencyKey = randomUUID();
   const unitPrice = amountForMp(variant.price);
 
@@ -306,7 +306,7 @@ export async function createOrder(
     };
   }
 
-  // 8. GUARDAR DATOS DE MP EN LA ORDEN
+  // 8. SAVE MP DATA ON THE ORDER
   const { error: updateError } = await supabase
     .from("orders")
     .update({

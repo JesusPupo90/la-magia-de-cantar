@@ -1,8 +1,8 @@
 // lib/orders/send-confirmation.ts
-// Envía la confirmación de pago (email de bienvenida) UNA sola vez por orden.
-// Guarda anti-duplicados: usa confirmation_sent_at como flag atómico — solo la
-// primera ejecución "gana" el UPDATE condicional y envía. Fire-and-forget para
-// no bloquear la respuesta HTTP (spec §7).
+// Sends the payment confirmation (welcome email) ONCE per order.
+// Anti-duplicate guard: uses confirmation_sent_at as an atomic flag — only the
+// first execution "wins" the conditional UPDATE and sends. Fire-and-forget to
+// avoid blocking the HTTP response (spec §7).
 
 import { createAdminClient } from "../supabase/admin";
 import { sendPaymentConfirmation } from "../email";
@@ -10,7 +10,7 @@ import { sendPaymentConfirmation } from "../email";
 export async function maybeSendConfirmation(orderId: string): Promise<void> {
   const supabase = createAdminClient();
 
-  // Claim atómico: solo el que encuentre confirmation_sent_at NULL gana.
+  // Atomic claim: only the one that finds confirmation_sent_at NULL wins.
   const { data: winner, error } = await supabase
     .from("orders")
     .update({ confirmation_sent_at: new Date().toISOString() })
@@ -35,10 +35,10 @@ export async function maybeSendConfirmation(orderId: string): Promise<void> {
     return;
   }
   if (!winner) {
-    return; // ya se envió (o la orden no existe)
+    return; // already sent (or the order doesn't exist)
   }
 
-  // ID de pago real (auditoría / detalle para el comprador).
+  // Real payment id (audit / detail for the buyer).
   const { data: paymentRow } = await supabase
     .from("order_payments")
     .select("mp_payment_id")

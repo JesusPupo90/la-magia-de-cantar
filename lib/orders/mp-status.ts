@@ -1,7 +1,7 @@
 // lib/orders/mp-status.ts
-// Mapeos compartidos entre el Server Action de pagos, el webhook y createOrder:
-//   - Estado de Mercado Pago (payment.status) → order_status de la BD.
-//   - Tipos de documento del formulario → valores que MP acepta (MCO/Colombia).
+// Shared mappings between the payment Server Action, the webhook and createOrder:
+//   - Mercado Pago status (payment.status) → DB order_status.
+//   - Document types from the form → values MP accepts (MCO/Colombia).
 
 export function mapPaymentStatus(status: string): { dbStatus: string; detail?: string } | null {
   switch (status) {
@@ -22,7 +22,7 @@ export function mapPaymentStatus(status: string): { dbStatus: string; detail?: s
   }
 }
 
-// MP: CC, CE, NIT, Otro. "PASAPORTE" no existe → va como "Otro".
+// MP: CC, CE, NIT, Other. "PASAPORTE" doesn't exist → goes as "Otro".
 export const MP_DOC_TYPES: Record<string, string> = {
   CC: "CC",
   CE: "CE",

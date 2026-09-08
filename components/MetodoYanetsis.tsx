@@ -75,7 +75,7 @@ export default function MetodoYanetsis() {
       aria-labelledby="metodo-titulo"
       className="relative w-full overflow-hidden bg-[#E6F4F1] py-16 sm:py-20 lg:py-24"
     >
-      {/* 📍 Fondo Vectorial Zigzag Responsivo */}
+      {/* Responsive Zigzag Vector Background */}
       <div className="pointer-events-none absolute inset-0 top-0 z-0 h-full w-full overflow-hidden opacity-25">
         <svg
           className="h-full w-full text-gray-400"
@@ -114,7 +114,7 @@ export default function MetodoYanetsis() {
         </svg>
       </div>
 
-      {/* CONTENEDOR PRINCIPAL ESTILO "CASA / CARD GIGANTE" */}
+      {/* MAIN CONTAINER STYLED AS "HOUSE / GIANT CARD" */}
       <div className="relative z-10 mx-auto max-w-7xl pt-32 md:pt-45 px-4 sm:px-6 lg:px-8">
         <div className="absolute top-[-85px] md:top-[-130px] left-1/2 -translate-x-1/2 z-100 w-48 sm:w-64 lg:w-80">
           <Image 
@@ -129,7 +129,7 @@ export default function MetodoYanetsis() {
 
         <div className="rounded-[2.5rem] border-2 border-black bg-white p-6 sm:p-12 lg:p-16 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
           
-          {/* 1. ENCABEZADO Y PROMESA */}
+          {/* 1. HEADER AND PROMISE */}
           <div className="mx-auto max-w-3xl text-center">
             <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-pink-soft px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
               ✦ MÉTODOS YANETSIS
@@ -150,7 +150,7 @@ export default function MetodoYanetsis() {
             </p>
           </div>
 
-          {/* 2. CINTA DE AUTORIDAD Y PROCESOS VOCALES */}
+          {/* 2. AUTHORITY RIBBON AND VOCAL PROCESSES */}
           <div className="mt-12 rounded-2xl border-2 border-black bg-[#F8FAFC] p-5 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <div className="flex flex-col items-center justify-between gap-6 lg:flex-row">
               <div className="flex items-center gap-3">
@@ -163,7 +163,7 @@ export default function MetodoYanetsis() {
                 </div>
               </div>
 
-              {/* Badges tipo Sticker */}
+              {/* Sticker-style badges */}
               <div className="flex flex-wrap items-center justify-center gap-2 lg:max-w-md">
                 {authorityBadges.map((badge, idx) => (
                   <span
@@ -177,7 +177,7 @@ export default function MetodoYanetsis() {
             </div>
           </div>
 
-          {/* 3. BLOQUE DE LOS 6 PILARES */}
+          {/* 3. THE 6 PILLARS BLOCK */}
           <div className="mt-16">
             <div className="text-center mb-10">
               <h3 className="font-poppins text-2xl font-black text-black sm:text-3xl">
@@ -195,7 +195,7 @@ export default function MetodoYanetsis() {
                   className="group relative flex flex-col justify-between rounded-2xl border-2 border-black bg-white p-5 sm:p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]"
                 >
                   <div>
-                    {/* Cabecera optimizada: Número ordinal discreto + Tag + Icono */}
+                    {/* Optimized header: discrete ordinal number + Tag + Icon */}
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <div className="flex items-center gap-2">
                         <span className="font-poppins text-xs font-black text-gray-400 group-hover:text-black transition-colors">
@@ -211,7 +211,7 @@ export default function MetodoYanetsis() {
                       </div>
                     </div>
 
-                    {/* Título y Descripción con mejor jerarquía y legibilidad */}
+                    {/* Title and Description with better hierarchy and readability */}
                     <h4 className="font-poppins text-lg sm:text-xl font-extrabold text-black leading-snug">
                       {pillar.title}
                     </h4>
@@ -225,7 +225,7 @@ export default function MetodoYanetsis() {
             </div>
           </div>
 
-          {/* 4. FRASE DESTACADA Y CTA */}
+          {/* 4. HIGHLIGHTED STATEMENT AND CTA */}
           <div className="mt-16 text-center">
             <div className="mx-auto max-w-2xl rounded-2xl border-2 border-black bg-yellow p-6 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] -rotate-1">
               <p className="font-poppins text-base sm:text-xl font-extrabold text-black leading-snug">

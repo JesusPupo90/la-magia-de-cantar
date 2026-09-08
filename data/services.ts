@@ -1,24 +1,24 @@
 // data/services.ts
-// Capa de datos del catálogo: consume Supabase (fuente de verdad §8) y
-// expone el contrato que la UI espera. SOLO se ejecuta en el servidor.
+// Catalog data layer: consumes Supabase (source of truth §8) and
+// exposes the contract the UI expects. ONLY runs on the server.
 
 import { createClient } from "@supabase/supabase-js";
 
 export interface Plan {
-  id: string; // ej: "kids-grupales__mensual" (service_variants.id)
+  id: string; // e.g. "kids-grupales__mensual" (service_variants.id)
   label: string;
-  price: number; // Pesos COP enteros
+  price: number; // Whole COP pesos
   isRecommended?: boolean;
   tag?: string;
 }
 
 export interface ServiceItem {
   id: string;
-  category: string; // Label de la categoría (filtro de la UI)
+  category: string; // Category label (UI filter)
   microTitle: string;
   title: string;
   isSpecial?: boolean;
-  isCustomQuote?: boolean; // true => requiere cotización (nunca pago)
+  isCustomQuote?: boolean; // true => requires a quote (never payment)
   note?: string;
   metadata: {
     age?: string;
@@ -85,11 +85,11 @@ export async function getCatalog(): Promise<ServiceItem[]> {
 
   const labelByCategoryId = new Map(categories.map((c) => [c.id, c.label]));
 
-  // Orden determinístico del catálogo: agrupar por categoría en el orden de
-  // categories.position (Kids = 'Canto para niños' primero) y dentro de cada
-  // categoría ordenar por services.position. Así las pestañas de la UI siguen
-  // el orden de negocio y 'kids-grupales' queda antes que 'teens-grupales',
-  // independientemente del orden físico de la tabla.
+  // Deterministic catalog order: group by category following
+  // categories.order (Kids = 'Canto para niños' first) and within each
+  // category sort by services.position. This way the UI tabs follow the
+  // business order and 'kids-grupales' comes before 'teens-grupales',
+  // regardless of the physical order of the table.
   const servicesByCategory = new Map<string, ServiceRow[]>();
   for (const svc of services) {
     const arr = servicesByCategory.get(svc.category_id) ?? [];

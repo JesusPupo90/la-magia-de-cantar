@@ -1,8 +1,8 @@
 // scripts/test-create-order.ts
-// Harness standalone: prueba createOrder() sin formulario.
-// Ejecutar:
+// Standalone harness: tests createOrder() without a form.
+// Run:
 //   npx tsx scripts/test-create-order.ts
-// (carga .env.local manualmente; Node no lo hace por defecto con tsx)
+// (loads .env.local manually; Node doesn't do it by default with tsx)
 
 import { readFileSync } from "fs";
 import { resolve } from "path";
@@ -18,7 +18,7 @@ function loadEnv() {
       }
     }
   } catch {
-    // si no existe .env.local, seguimos con process.env
+    // if .env.local doesn't exist, keep going with process.env
   }
 }
 loadEnv();
@@ -26,7 +26,7 @@ loadEnv();
 import { createOrder } from "../lib/orders/create-order";
 import { createClient } from "@supabase/supabase-js";
 
-// Verificación en BD: usa service_role (omite RLS), igual que la app real.
+// DB verification: uses service_role (bypasses RLS), same as the real app.
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -79,15 +79,15 @@ async function main() {
   console.log("MP_ACCESS_TOKEN:", process.env.MP_ACCESS_TOKEN ? "presente" : "FALTA");
   console.log("SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL ?? "FALTA");
 
-  // 1. Happy path (crea orden + preferencia en MP)
+  // 1. Happy path (creates order + preference on MP)
   const first = await runCase("1. Happy path (kids-grupales__trimestral)", baseInput);
 
-  // 1b. Reintento: debe REUTILIZAR la misma orden (mismo order_id) y crear nueva preferencia.
+  // 1b. Retry: must REUSE the same order (same order_id) and create a new preference.
   if (first?.success && first.orderId) {
     await runCase("1b. Reintento (reutiliza misma orden)", baseInput, first.orderId);
   }
 
-  // 2. Variante inexistente
+  // 2. Nonexistent variant
   await runCase("2. Variante inexistente", {
     ...baseInput,
     variantId: "no-existe__x",
@@ -99,7 +99,7 @@ async function main() {
     serviceId: "piano",
   });
 
-  // 4. Servicio de solo cotización (no tiene variantes en BD → nunca debe pagar)
+  // 4. Quote-only service (has no variants in DB → should never pay)
   await runCase("4. is_custom_quote (coaching-yanetsis, sin variantes)", {
     ...baseInput,
     serviceId: "coaching-yanetsis",

@@ -1,6 +1,6 @@
 // lib/ip.ts
-// Normaliza y selecciona la primera IP PÚBLICA de los headers del cliente
-// (x-forwarded-for suele traer varias IPs en cadenas de proxy/CDN).
+// Normalizes and selects the first PUBLIC IP from the client headers
+// (x-forwarded-for usually carries several IPs in proxy/CDN chains).
 
 function isPrivateIp(ip: string): boolean {
   const parts = ip.split(".");
@@ -28,16 +28,16 @@ function isPrivateIp(ip: string): boolean {
 function normalize(ip: string): string | null {
   let v = ip.trim();
   if (!v) return null;
-  // Quitar prefijo IPv4-mapped IPv6 (::ffff:190.0.0.1 → 190.0.0.1)
+  // Strip IPv4-mapped IPv6 prefix (::ffff:190.0.0.1 → 190.0.0.1)
   if (v.startsWith("::ffff:")) v = v.slice(7);
-  // Quitar zona/interfaz (fe80::1%eth0)
+  // Strip zone/interface (fe80::1%eth0)
   const zone = v.indexOf("%");
   if (zone !== -1) v = v.slice(0, zone);
   return v || null;
 }
 
-// Recibe los valores de x-forwarded-for, x-real-ip, cf-connecting-ip (en ese
-// orden) y devuelve la primera IP pública válida.
+// Receives the x-forwarded-for, x-real-ip, cf-connecting-ip values (in that
+// order) and returns the first valid public IP.
 export function firstPublicIp(headerValues: (string | null)[]): string | undefined {
   for (const raw of headerValues) {
     if (!raw) continue;

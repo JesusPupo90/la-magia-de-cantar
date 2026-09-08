@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-// 📍 OPCIONES DE SELECCIÓN (ENUMS)
+// SELECTION OPTIONS (ENUMS)
 export const TIPO_ENTIDAD_OPTIONS = [
   "Empresa privada",
   "Institución educativa",
@@ -46,12 +46,12 @@ export const DURACION_DESEADA_OPTIONS = [
   "Por definir",
 ] as const;
 
-// Helper para transformar valores vacíos de selecciones opcionales a undefined
+// Helper to transform empty values from optional selects into undefined
 const optionalString = z.string().max(80).optional().or(z.literal(""));
 
-// 🛡️ ESQUEMA ALINEADO CON LA BASE DE DATOS
+// SCHEMA ALIGNED WITH THE DATABASE
 export const cotizacionEmpresaSchema = z.object({
-  // 🔴 CAMPOS OBLIGATORIOS (NOT NULL en SQL)
+  // REQUIRED FIELDS (NOT NULL in SQL)
   companyName: z
     .string({ message: "El nombre de la empresa es obligatorio" })
     .min(2, "El nombre de la empresa es obligatorio")
@@ -92,7 +92,7 @@ export const cotizacionEmpresaSchema = z.object({
 
   honeypot: z.string().optional(),
 
-  // 🟢 CAMPOS OPCIONALES (NULL en SQL)
+  // OPTIONAL FIELDS (NULL in SQL)
   entityType: optionalString,
   locationType: optionalString,
   participantsRange: optionalString,

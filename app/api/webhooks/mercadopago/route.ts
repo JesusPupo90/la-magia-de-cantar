@@ -1,7 +1,7 @@
 // app/api/webhooks/mercadopago/route.ts
-// Webhook de Mercado Pago (Checkout Pro / Payment Brick).
-// Verifica X-Signature, idempotencia en webhook_logs y reconcilia el pago
-// contra orders.external_reference (== orders.id). Responde 200 rápido.
+// Mercado Pago webhook (Checkout Pro / Payment Brick).
+// Verifies X-Signature, idempotency in webhook_logs and reconciles the payment
+// against orders.external_reference (== orders.id). Responds 200 fast.
 
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextResponse } from "next/server";
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
   const xSignature = request.headers.get("x-signature");
   const xRequestId = request.headers.get("x-request-id");
 
-  // 1. Verificación de firma (§2)
+  // 1. Signature verification (§2)
   const valid = await verifySignature(rawBody, xSignature, xRequestId);
   if (!valid) {
     console.warn("Webhook rechazado: firma inválida.");
@@ -75,7 +75,7 @@ export async function POST(request: Request) {
   const topic = payload.type ?? payload.action?.split(".")[0] ?? "unknown";
   const resourceId = String(payload.data?.id ?? "");
 
-  // 2. Idempotencia: si este evento ya fue procesado, responder 200 sin repetir.
+  // 2. Idempotency: if this event was already processed, respond 200 without repeating.
   const { data: existingLog } = await supabase
     .from("webhook_logs")
     .select("processed")
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, duplicate: true });
   }
 
-  // Registrar el evento (aún sin procesar).
+  // Log the event (still unprocessed).
   const { error: logInsertError } = await supabase.from("webhook_logs").insert({
     event_id: eventId,
     topic,
@@ -98,13 +98,13 @@ export async function POST(request: Request) {
     console.error("Error registrando webhook_logs:", logInsertError);
   }
 
-  // 3. Solo nos importan notificaciones de pago.
+  // 3. We only care about payment notifications.
   if (topic !== "payment" || !resourceId) {
     await supabase.from("webhook_logs").update({ processed: true }).eq("event_id", eventId);
     return NextResponse.json({ ok: true });
   }
 
-  // 4. Obtener el detalle del pago (fuente de verdad).
+  // 4. Fetch the payment detail (source of truth).
   let payment: MpPayment | null = null;
   try {
     const res = await fetch(`https://api.mercadopago.com/v1/payments/${resourceId}`, {
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // 5. Localizar la orden por external_reference == orders.id.
+  // 5. Locate the order by external_reference == orders.id.
   const { data: order } = await supabase
     .from("orders")
     .select("id, status, amount_total")
@@ -136,7 +136,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // 6. Reconciliación de monto (anti-fraude §2): el pago debe coincidir con el precio de BD.
+  // 6. Amount reconciliation (anti-fraud §2): the payment must match the DB price.
   const expectedAmount = order.amount_total;
   const actualAmount = Math.round(Number(payment.transaction_amount ?? 0));
 
@@ -150,13 +150,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  // 7. Actualizar estado (la orden NO retrocede de paid a estados previos; §2).
+  // 7. Update status (the order does NOT move back from paid to previous states; §2).
   const now = new Date().toISOString();
   const statusPatch: Record<string, string | null> = {};
 
   if (mapped) {
     if (order.status === "paid" && !["paid", "refunded", "partially_refunded"].includes(mapped.dbStatus)) {
-      // Evento tardío de rechazo/pendiente sobre orden pagada → ignorar.
+      // Late rejection/pending event on an already paid order → ignore.
     } else {
       statusPatch.status = mapped.dbStatus;
       if (mapped.dbStatus === "paid") statusPatch.paid_at = now;
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
     })
     .eq("id", order.id);
 
-  // 8. Registrar el intento de pago en order_payments (1 fila por payment MP).
+  // 8. Log the payment attempt in order_payments (1 row per MP payment).
   const { error: paymentUpsertError } = await supabase.from("order_payments").upsert(
     {
       order_id: order.id,
@@ -196,7 +196,7 @@ export async function POST(request: Request) {
 
   await supabase.from("webhook_logs").update({ processed: true }).eq("event_id", eventId);
 
-  // Email de confirmación si la orden quedó pagada (guarda anti-duplicados interna).
+  // Confirmation email if the order ended up paid (internal anti-duplicate guard).
   if (mapped?.dbStatus === "paid") {
     void maybeSendConfirmation(order.id).catch((err) =>
       console.error("[email] Error en maybeSendConfirmation:", err)
@@ -206,7 +206,7 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
-// MP a veces envía GET como verificación de suscripción del webhook.
+// MP sometimes sends a GET as the webhook subscription check.
 export async function GET() {
   return NextResponse.json({ ok: true });
 }

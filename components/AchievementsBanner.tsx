@@ -8,14 +8,14 @@ export default function AchievementsBanner() {
       <div className="mx-auto max-w-7xl px-4 sm:px-8">
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
 
-          {/* Mensaje de Autoridad */}
+          {/* Authority Message */}
           <div className="text-center lg:col-span-5 lg:text-left">
             <p className="mx-auto max-w-md font-poppins text-xl font-bold leading-snug tracking-tight text-black sm:text-2xl lg:mx-0">
               La plataforma de transformación vocal más elegida por artistas y apasionados del canto.
             </p>
           </div>
 
-          {/* Tarjeta con Cifras de Impacto */}
+          {/* Card with Impact Figures */}
           <div className="rounded-3xl border border-gray-200/80 bg-white p-6 shadow-sm sm:p-8 lg:col-span-7">
             <div className="grid grid-cols-3 gap-4 text-center sm:text-left">
 

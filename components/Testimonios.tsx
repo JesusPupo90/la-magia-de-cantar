@@ -12,7 +12,7 @@ import {
     ChevronRight
 } from "lucide-react";
 
-// 1. TESTIMONIOS PRINCIPALES (Laura de León & Martin Trevy)
+// 1. FEATURED TESTIMONIALS (Laura de León & Martin Trevy)
 const FEATURED_TESTIMONIALS = [
     {
         id: "laura",
@@ -34,7 +34,7 @@ const FEATURED_TESTIMONIALS = [
         badge: "Testimonio Destacado",
         bg: "bg-mint",
         image: "/assets/martin-trevy.webp",
-        // 🔍 Zoom in (scale-125) y subimos la foto (-translate-y-7)
+        // Zoom in (scale-125) and move the photo up (-translate-y-7)
         imageClass: "object-cover object-top scale-125 -translate-y-7 hover:scale-180",
         process: "Técnica vocal, Entrenamiento para personaje, Proceso artístico, Acompañamiento en producción, Preparación escénica, Gira / tour, Coaching vocal",
         testimonial:
@@ -48,7 +48,7 @@ const FEATURED_TESTIMONIALS = [
         badge: "Testimonio de Trayectoria",
         bg: "bg-pink-soft",
         image: "/assets/karoll-marquez.webp",
-        // Subimos la foto al marco (misma técnica que Martin)
+        // Move the photo up into the frame (same technique as Martin)
         imageClass: "object-cover object-top scale-135 -translate-y-10 hover:scale-180",
         process: "Técnica vocal, Proceso artístico, Coaching vocal",
         testimonial:
@@ -57,7 +57,7 @@ const FEATURED_TESTIMONIALS = [
     }
 ];
 
-// 2. OTROS ARTISTAS Y VOCES ACOMPAÑADAS
+// 2. OTHER ARTISTS AND ACCOMPANIED VOICES
 const OTHER_ARTISTS = [
     {
         name: "Carlos Vives",
@@ -114,7 +114,7 @@ export default function TestimoniosSection() {
             aria-labelledby="testimonios-titulo"
             className="relative w-full overflow-hidden bg-[#FFFBEB] py-16 sm:py-20 lg:py-24"
         >
-            {/* 📍 Fondo Vectorial Repetido */}
+            {/* Repeating Vector Background */}
             <div
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-100 bg-[url('/assets/patron-3.svg')] bg-repeat bg-top-left [background-size:1400px] md:bg-auto"
@@ -122,13 +122,13 @@ export default function TestimoniosSection() {
 
             <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-                {/* ENCABEZADO CON PROPUESTA DE TÍTULO POP ART */}
+                {/* HEADER WITH POP ART TITLE PROPOSAL */}
                 <div className="mx-auto max-w-3xl text-center">
                     <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-yellow px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                         ✦ VOCES QUE HAN LLEGADO MÁS LEJOS
                     </p>
 
-                    {/* 🌟 TÍTULO EN CINTAS DE ALTO CONTRASTE 🌟 */}
+                    {/* TITLE ON HIGH-CONTRAST RIBBONS */}
                     <h2
                         id="testimonios-titulo"
                         className="mt-6 flex flex-col items-center justify-center gap-2.5 font-poppins text-2xl font-black tracking-tight text-black sm:text-4xl lg:text-5xl"
@@ -141,7 +141,7 @@ export default function TestimoniosSection() {
                         </span>
                     </h2>
 
-                    {/* CONTENEDOR TIPO STICKER CON ALTO CONTRASTE */}
+                    {/* STICKER-TYPE CONTAINER WITH HIGH CONTRAST */}
                     <div className="mt-6 rounded-2xl border-2 border-black bg-white p-5 sm:p-6 shadow-[5px_5px_0px_0px_rgba(0,0,0,1)]">
                         <p className="font-jakarta text-sm sm:text-base font-bold leading-relaxed text-black">
                             Más de 20 años acompañando artistas, cantantes, actores y talentos que han ocupado escenarios, realities, producciones audiovisuales y proyectos musicales de alto nivel.
@@ -149,20 +149,20 @@ export default function TestimoniosSection() {
                     </div>
                 </div>
 
-                {/* 1. BLOQUE DE DESTACADOS: CARRUSEL 1 A LA VEZ */}
+                {/* 1. FEATURED BLOCK: CAROUSEL ONE AT A TIME */}
                 <div
                     role="region"
                     aria-roledescription="carrusel"
                     aria-label="Testimonios destacados"
                     className="mt-12 mx-auto max-w-3xl"
                 >
-                    {/* TARJETA ACTIVA */}
+                    {/* ACTIVE CARD */}
                     <div key={current.id} aria-live="polite" className="animate-fadeIn">
                         <div
                             className={`relative flex flex-col justify-between rounded-3xl border-2 border-black ${current.bg} p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]`}
                         >
                             <div>
-                                {/* INSIGNIA Y ESTRELLAS */}
+                                {/* BADGE AND STARS */}
                                 <div className="flex items-center justify-between gap-2 mb-6">
                                     <span className="inline-flex items-center gap-1 rounded-md border border-black bg-white px-3 py-1 font-poppins text-[11px] font-black uppercase text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                                         <Sparkles className="h-3.5 w-3.5 text-purple-700" /> {current.badge}
@@ -174,10 +174,10 @@ export default function TestimoniosSection() {
                                     </div>
                                 </div>
 
-                                {/* ESTRUCTURA CON FOTO VERTICAL + DETALLES */}
+                                {/* VERTICAL PHOTO + DETAILS LAYOUT */}
                                 <div className="flex flex-col sm:flex-row gap-6 items-start">
 
-                                    {/* FOTO VERTICAL */}
+                                    {/* VERTICAL PHOTO */}
                                     <div className="relative w-full sm:w-44 md:w-48 shrink-0 aspect-[3/4] rounded-2xl border-2 border-black bg-white/60 overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                                         <Image
                                             src={current.image}
@@ -188,7 +188,7 @@ export default function TestimoniosSection() {
                                         />
                                     </div>
 
-                                    {/* CONTENIDO Y TESTIMONIO */}
+                                    {/* CONTENT AND TESTIMONIAL */}
                                     <div className="flex flex-col justify-between w-full flex-1 min-w-0">
                                         <div>
                                             <h3 className="font-poppins text-2xl font-black text-black">
@@ -219,7 +219,7 @@ export default function TestimoniosSection() {
                                 </div>
                             </div>
 
-                            {/* PIE DE TARJETA */}
+                            {/* CARD FOOTER */}
                             <div className="mt-6 pt-4 border-t-2 border-black/10 flex items-center justify-between">
                                 <span className="inline-block rounded-lg border border-black bg-yellow px-2.5 py-0.5 font-poppins text-[10px] font-black uppercase text-black">
                                     {current.tag}
@@ -231,7 +231,7 @@ export default function TestimoniosSection() {
                         </div>
                     </div>
 
-                    {/* NAVEGACIÓN: FLECHAS + DOTS */}
+                    {/* NAVIGATION: ARROWS + DOTS */}
                     <div className="mt-8 flex items-center justify-center gap-4">
                         <button
                             type="button"
@@ -270,7 +270,7 @@ export default function TestimoniosSection() {
                     </div>
                 </div>
 
-                {/* 2. GRILLA SECUNDARIA: OTROS ARTISTAS Y PROCESOS */}
+                {/* 2. SECONDARY GRID: OTHER ARTISTS AND PROCESSES */}
                 <div className="mt-16">
                     <div className="mb-8 flex justify-center">
                         <div className="inline-flex items-center gap-3 rounded-2xl border-2 border-black bg-mint px-5 py-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] -rotate-1">
@@ -313,7 +313,7 @@ export default function TestimoniosSection() {
                     </div>
                 </div>
 
-                {/* 3. FRASE DE CIERRE DE SECCIÓN */}
+                {/* 3. SECTION CLOSING STATEMENT */}
                 <div className="mt-16 text-center">
                     <div className="mx-auto max-w-3xl rounded-3xl border-2 border-black bg-purple p-6 sm:p-8 text-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] rotate-1">
                         <p className="font-poppins text-lg sm:text-2xl font-black leading-snug text-yellow [-webkit-text-stroke:4px_black] [paint-order:stroke_fill]">

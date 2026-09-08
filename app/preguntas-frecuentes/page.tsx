@@ -58,7 +58,7 @@ const FAQS: FaqItem[] = [
 export default function PreguntasFrecuentesPage() {
   return (
     <main className="relative min-h-screen w-full bg-[#FFFBEB] py-12 px-4 font-jakarta sm:px-6 lg:px-8">
-      {/* Fondo Vectorial */}
+      {/* VECTOR BACKGROUND */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 h-full w-full bg-[url('/assets/patron-1.svg')] bg-repeat bg-top-left opacity-10 [background-size:1400px]"
@@ -89,7 +89,7 @@ export default function PreguntasFrecuentesPage() {
             <FaqAccordion items={FAQS} />
           </div>
 
-          {/* Contacto */}
+          {/* CONTACT */}
           <div className="mt-10 rounded-2xl border-2 border-black bg-mint/30 p-5">
             <p className="font-poppins text-sm font-black uppercase tracking-tight text-black">
               ¿Aún tienes dudas?

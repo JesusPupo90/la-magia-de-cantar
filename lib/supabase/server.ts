@@ -18,8 +18,8 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // El método 'setAll' se ignora cuando se llama desde un Server Component puro,
-            // pero funciona correctamente dentro de Server Actions y Route Handlers.
+            // The 'setAll' method is ignored when called from a pure Server Component,
+            // but works correctly inside Server Actions and Route Handlers.
           }
         },
       },

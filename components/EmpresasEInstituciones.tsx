@@ -144,7 +144,7 @@ export default function EmpresasEInstituciones() {
       return;
     }
     setIsSubmitted(true);
-    // 📊 Meta Pixel: lead B2B capturado (funnel).
+    // Meta Pixel: B2B lead captured (funnel).
     fireEvent("Lead");
   };
 
@@ -154,7 +154,7 @@ export default function EmpresasEInstituciones() {
       aria-labelledby="empresas-titulo"
       className="relative w-full overflow-hidden bg-[#FFFBEB] py-16 sm:py-20 lg:py-24"
     >
-      {/* 📍 Fondo Vectorial Repetido */}
+      {/* Repeating Vector Background */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 z-0 h-full w-full opacity-15 bg-[url('/assets/patron-2.svg')] bg-repeat bg-top-left [background-size:1400px] md:bg-auto"
@@ -162,7 +162,7 @@ export default function EmpresasEInstituciones() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         
-        {/* 1. ENCABEZADO Y PROPUESTA B2B */}
+        {/* 1. HEADER AND B2B PROPOSAL */}
         <div className="mx-auto max-w-3xl text-center">
           <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-yellow px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             ✦ EMPRESAS E INSTITUCIONES
@@ -183,7 +183,7 @@ export default function EmpresasEInstituciones() {
           </p>
         </div>
 
-        {/* 2. ÁREAS DE TRABAJO (BENTO BOX CON NÚMEROS GIGANTES) */}
+        {/* 2. WORK AREAS (BENTO BOX WITH GIANT NUMBERS) */}
         <div className="mt-14">
           <div className="mb-8 text-center">
             <h3 className="font-poppins text-2xl font-black text-black sm:text-3xl">
@@ -226,7 +226,7 @@ export default function EmpresasEInstituciones() {
           </div>
         </div>
 
-        {/* 3. FORMATOS DISPONIBLES: CINTA BANNER CONTINUA */}
+        {/* 3. AVAILABLE FORMATS: CONTINUOUS BANNER TAPE */}
         <div className="mt-16 rounded-2xl border-2 border-black bg-purple py-3.5 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] text-white">
           <p className="mb-2 text-center font-poppins text-[10px] font-black uppercase tracking-widest text-yellow">
             ✦ FORMATOS DISPONIBLES Y A LA MEDIDA ✦
@@ -246,7 +246,7 @@ export default function EmpresasEInstituciones() {
           </div>
         </div>
 
-        {/* 4. FRASE DE IMPACTO */}
+        {/* 4. IMPACT STATEMENT */}
         <div className="mt-14 text-center">
           <div className="mx-auto max-w-3xl rounded-3xl border-2 border-black bg-pink-soft p-6 sm:p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] -rotate-1">
             <p className="font-poppins text-lg font-black text-black sm:text-2xl leading-snug">
@@ -255,7 +255,7 @@ export default function EmpresasEInstituciones() {
           </div>
         </div>
 
-        {/* 5. FORMULARIO PASO A PASO */}
+        {/* 5. STEP-BY-STEP FORM */}
         <div id="formulario-cotizacion" className="mt-16 scroll-mt-10">
           <div className="relative mx-auto max-w-3xl rounded-3xl border-2 border-black bg-white p-6 sm:p-10 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
             
@@ -293,7 +293,7 @@ export default function EmpresasEInstituciones() {
             ) : (
               <div className="mt-6">
                 
-                {/* BARRA DE PROGRESO */}
+                {/* PROGRESS BAR */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between font-poppins text-xs font-black text-gray-500 uppercase mb-2">
                     <span>Paso {currentStep} de 3</span>
@@ -326,7 +326,7 @@ export default function EmpresasEInstituciones() {
                   className="space-y-6"
                 >
                   
-                  {/* 🍯 Honeypot anti-spam */}
+                  {/* Anti-spam honeypot */}
                   <input
                     {...register("honeypot")}
                     type="text"
@@ -337,7 +337,7 @@ export default function EmpresasEInstituciones() {
                     className="absolute left-[-9999px] top-[-9999px] h-0 w-0 opacity-0"
                   />
 
-                  {/* PASO 1: TU ENTIDAD */}
+                  {/* STEP 1: YOUR ENTITY */}
                   {currentStep === 1 && (
                     <div className="space-y-5 animate-fadeIn">
                       
@@ -399,7 +399,7 @@ export default function EmpresasEInstituciones() {
                     </div>
                   )}
 
-                  {/* PASO 2: LA CAPACITACIÓN */}
+                  {/* STEP 2: THE TRAINING */}
                   {currentStep === 2 && (
                     <div className="space-y-5 animate-fadeIn">
                       
@@ -497,7 +497,7 @@ export default function EmpresasEInstituciones() {
                     </div>
                   )}
 
-                  {/* PASO 3: CONTACTO */}
+                  {/* STEP 3: CONTACT */}
                   {currentStep === 3 && (
                     <div className="space-y-4 animate-fadeIn">
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -584,7 +584,7 @@ export default function EmpresasEInstituciones() {
                     </div>
                   )}
 
-                  {/* MENSAJE DE ERROR DINÁMICO */}
+                  {/* DYNAMIC ERROR MESSAGE */}
                   <div
                     aria-live="polite"
                     className={`grid transition-[grid-template-rows] duration-300 ease-out ${
@@ -601,7 +601,7 @@ export default function EmpresasEInstituciones() {
                     </div>
                   </div>
 
-                  {/* CONTROLES DE NAVEGACIÓN */}
+                  {/* NAVIGATION CONTROLS */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                     {currentStep > 1 ? (
                       <button

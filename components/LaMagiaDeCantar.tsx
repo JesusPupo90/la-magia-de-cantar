@@ -10,7 +10,7 @@ const pillars = [
     icon: <Mic className="h-6 w-6 text-purple stroke-[2.5]" />,
     title: "Técnica Vocal Saludable",
     description: "Desarrolla afinación, potencia y control sin lastimar tu voz.",
-    bgCard: "bg-[#F3E8FF]", // Lavanda pastel
+    bgCard: "bg-[#F3E8FF]", // Pastel lavender
     borderTag: "border-purple/40 bg-purple/10 text-purple",
     rotation: "lg:-rotate-2 hover:rotate-0",
   },
@@ -19,7 +19,7 @@ const pillars = [
     icon: <Sparkles className="h-6 w-6 text-amber-700 stroke-[2.5]" />,
     title: "Confianza & Seguridad",
     description: "Vence el miedo a cantar en público y conecta con tu autenticidad.",
-    bgCard: "bg-[#FEF9C3]", // Amarillo/Crema pastel
+    bgCard: "bg-[#FEF9C3]", // Pastel yellow/cream
     borderTag: "border-amber-400/40 bg-amber-100 text-amber-900",
     rotation: "lg:rotate-1 lg:translate-y-2 hover:rotate-0",
   },
@@ -28,7 +28,7 @@ const pillars = [
     icon: <Drama className="h-6 w-6 text-pink stroke-[2.5]" />,
     title: "Interpretación & Escena",
     description: "Domina la expresión corporal, la presencia y la conexión emocional.",
-    bgCard: "bg-[#FCE7F3]", // Rosa pastel
+    bgCard: "bg-[#FCE7F3]", // Pastel pink
     borderTag: "border-pink/40 bg-pink-soft text-pink",
     rotation: "lg:-rotate-1 hover:rotate-0",
   },
@@ -37,7 +37,7 @@ const pillars = [
     icon: <Rocket className="h-6 w-6 text-black stroke-[2.5]" />,
     title: "Proyección Artística",
     description: "Prepárate para audiciones, grabar en estudio o realities de TV.",
-    bgCard: "bg-[#E6F4F1]", // Menta pastel
+    bgCard: "bg-[#E6F4F1]", // Pastel mint
     borderTag: "border-dark-mint/40 bg-mint/40 text-black",
     rotation: "lg:rotate-2 lg:translate-y-2 hover:rotate-0",
   },
@@ -50,7 +50,7 @@ export default function LaMagiaDeCantar() {
       aria-labelledby="la-magia-de-cantar-titulo"
       className="relative w-full overflow-hidden bg-white py-16 sm:py-20 lg:py-24"
     >
-      {/* 📍 Imagen de fondo */}
+      {/* Background image */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 z-0 h-full w-full">
         <Image
           src="/assets/bg-composition.webp"
@@ -62,10 +62,10 @@ export default function LaMagiaDeCantar() {
         />
       </div>
 
-      {/* 📍 Contenido principal */}
+      {/* Main content */}
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-8">
         
-        {/* BLOQUE SUPERIOR: Título, Filosofía, Descripción y CTA */}
+        {/* TOP BLOCK: Title, Philosophy, Description and CTA */}
         <div className="mx-auto max-w-3xl text-center">
           <p className="inline-flex items-center gap-2 rounded-full border-2 border-black bg-pink-soft px-4 py-1.5 font-poppins text-xs font-black uppercase tracking-wider text-black shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
             ✦ Nuestra Filosofía
@@ -100,7 +100,7 @@ export default function LaMagiaDeCantar() {
           </div>
         </div>
 
-        {/* BLOQUE INFERIOR: Tarjetas estilo Sticker Pop con rotación e Iconos Lucide */}
+        {/* BOTTOM BLOCK: Sticker Pop-style cards with rotation and Lucide icons */}
         <div className="mt-16">
           <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {pillars.map((pillar) => (
@@ -109,7 +109,7 @@ export default function LaMagiaDeCantar() {
                   className={`group relative flex w-full flex-col justify-between rounded-3xl border-2 border-black ${pillar.bgCard} p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all duration-300 ${pillar.rotation} hover:z-20 hover:-translate-y-2 hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]`}
                 >
                   <div>
-                    {/* Header de la tarjeta: Badge / Sticker e Icono Lucide */}
+                    {/* Card header: Badge / Sticker and Lucide icon */}
                     <div className="flex items-center justify-between gap-2">
                       <span
                         className={`inline-block rounded-lg border px-2.5 py-1 font-poppins text-[10px] font-black uppercase tracking-wider ${pillar.borderTag}`}
@@ -124,7 +124,7 @@ export default function LaMagiaDeCantar() {
                       </span>
                     </div>
 
-                    {/* Título y descripción */}
+                    {/* Title and description */}
                     <h3 className="mt-5 font-poppins text-lg font-extrabold text-black">
                       {pillar.title}
                     </h3>
@@ -137,7 +137,7 @@ export default function LaMagiaDeCantar() {
             ))}
           </ul>
 
-          {/* Tarjeta Informativa estilo "Bono / Tape" al final */}
+          {/* Informational card styled as "Bonus / Tape" at the end */}
           <div className="mt-8 rounded-2xl border-2 border-black bg-white p-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
             <p className="font-jakarta text-center text-xs font-bold text-black sm:text-sm">
               ✨ Un programa pensado para todos los niveles: desde tu primera nota hasta el escenario.

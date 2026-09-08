@@ -1,8 +1,8 @@
 // lib/orders/process-payment.ts
-// Crea el pago REAL en Mercado Pago (POST /v1/payments) cuando el usuario
-// completa el Payment Brick. El brick SOLO entrega el token de la tarjeta;
-// el backend cobra (regla de oro §1: el monto viene de la BD, nunca del cliente).
-// SIN "use server": función pura ejecutable desde Server Actions.
+// Creates the REAL payment on Mercado Pago (POST /v1/payments) when the user
+// completes the Payment Brick. The brick ONLY delivers the card token;
+// the backend charges (golden rule §1: the amount comes from the DB, never from the client).
+// WITHOUT "use server": pure function callable from Server Actions.
 
 import { randomUUID } from "crypto";
 import { createAdminClient } from "../supabase/admin";
@@ -41,18 +41,18 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 function getBaseUrl(): string | null {
   const url = process.env.NEXT_PUBLIC_APP_URL;
   if (url) return url;
-  // En dev se mantiene un túnel local de respaldo. En producción NO hay fallback:
-  // si falta NEXT_PUBLIC_APP_URL el cobro se bloquea (jamás un pago sin
-  // notification_url hacia una URL muerta).
+// Dev keeps a local fallback tunnel. In production there's NO fallback:
+// if NEXT_PUBLIC_APP_URL is missing the charge is blocked (never a payment without a
+// notification_url toward a dead URL).
   if (process.env.NODE_ENV !== "production") {
     return "https://pocket-proposed-rarely-recorded.trycloudflare.com";
   }
   return null;
 }
 
-// El SDK v3 (3.16.0) llama a onSubmit(formData, additionalData) donde formData
-// es { selectedPaymentMethod, formData }. Según la versión, formData.inner puede
-// ser un objeto CardData (token plano) o un array con { payment_method: { token } }.
+// SDK v3 (3.16.0) calls onSubmit(formData, additionalData) where formData
+// is { selectedPaymentMethod, formData }. Depending on the version, formData.inner can
+// be a CardData object (flat token) or an array with { payment_method: { token } }.
 function extractCardData(input: unknown): {
   token: string;
   paymentMethodId?: string;
@@ -93,8 +93,8 @@ function extractCardData(input: unknown): {
   return { token, paymentMethodId, issuerId, installments };
 }
 
-// PSE (bank_transfer): no trae token de tarjeta; trae payment_method_id ("pse")
-// y el banco (financial_institution). Se extrae defensivamente.
+// PSE (bank_transfer): no card token; it carries payment_method_id ("pse")
+// and the bank (financial_institution). Extracted defensively.
 function extractBankTransferData(input: unknown): {
   paymentMethodId?: string;
   financialInstitution?: string;
@@ -138,13 +138,13 @@ export async function processCardPayment(
   paymentFormData: unknown,
   ipAddress?: string
 ): Promise<ProcessPaymentResult> {
-  // 1. VALIDAR orderId (uuid generado en el servidor)
+  // 1. VALIDATE orderId (uuid generated on the server)
   const cleanOrderId = (orderId ?? "").trim();
   if (!UUID_RE.test(cleanOrderId)) {
     return { success: false, message: "La intención de pago no es válida." };
   }
 
-  // 2. DETECTAR MÉTODO Y EXTRAER DATOS del formData del brick
+  // 2. DETECT METHOD AND EXTRACT DATA from the brick's formData
   const selectedMethod = (paymentFormData as { selectedPaymentMethod?: string } | null)?.selectedPaymentMethod;
   const isPse = selectedMethod === "bank_transfer";
 
@@ -163,7 +163,7 @@ export async function processCardPayment(
     }
   }
 
-  // 3. CARGAR LA ORDEN (service-role) — fuente de verdad del monto y del pagador.
+  // 3. LOAD THE ORDER (service-role) — source of truth for amount and payer.
   const supabase = createAdminClient();
   const { data: order, error: orderError } = await supabase
     .from("orders")
@@ -177,7 +177,7 @@ export async function processCardPayment(
     return { success: false, message: "La intención de pago no existe." };
   }
 
-  // 3b. GUARDAS DE ESTADO (blinda el cobro: no pagar dos veces ni pagar vencido)
+  // 3b. STATE GUARDS (hardens the charge: no double payments, no paying expired)
   if (order.status === "paid") {
     return { success: true, status: "approved", orderId: cleanOrderId, message: "El pago ya fue confirmado." };
   }
@@ -189,7 +189,7 @@ export async function processCardPayment(
     };
   }
 
-  // draft con expires_at vencido (o ya marcado expired por el cron) → expirado.
+  // draft with expired expires_at (or already marked expired by the cron) → expired.
   const isExpired =
     order.status === "expired" ||
     (order.status === "draft" && !!order.expires_at && new Date(order.expires_at).getTime() < Date.now());
@@ -204,7 +204,7 @@ export async function processCardPayment(
     };
   }
 
-  // 4. CREAR EL PAGO EN MERCADO PAGO (POST /v1/payments)
+  // 4. CREATE THE PAYMENT AT MERCADO PAGO (POST /v1/payments)
   const idempotencyKey = randomUUID();
   const baseUrl = getBaseUrl();
   if (!baseUrl) {
@@ -223,13 +223,13 @@ export async function processCardPayment(
       type: MP_DOC_TYPES[order.payer_doc_type] ?? "Otro",
       number: order.payer_doc_number,
     },
-    // PSE (Colombia) exige entity_type: "individual" (persona natural) o
-    // "association" (persona jurídica). Derivado del tipo de documento.
+    // PSE (Colombia) requires entity_type: "individual" (natural person) or
+    // "association" (legal entity). Derived from the document type.
     ...(isPse ? { entity_type: order.payer_doc_type === "NIT" ? "association" : "individual" } : {}),
   };
 
   const body: Record<string, unknown> = {
-    transaction_amount: order.amount_total, // NUNCA confiar en el monto del cliente
+    transaction_amount: order.amount_total, // NEVER trust the client-side amount
     description: `${order.service_title} · ${order.variant_label}`,
     payer,
     external_reference: order.external_reference ?? cleanOrderId,
@@ -237,10 +237,10 @@ export async function processCardPayment(
   };
 
   if (isPse && bankTransfer) {
-    // PSE: sin token de tarjeta; se indica el banco (financial_institution).
+    // PSE: no card token; the bank is indicated (financial_institution).
     body.payment_method_id = bankTransfer.paymentMethodId;
     body.transaction_details = { financial_institution: bankTransfer.financialInstitution };
-    // URL de retorno tras completar la transferencia en el banco (requerida por MP).
+    // Return URL after completing the transfer at the bank (required by MP).
     body.callback_url = `${baseUrl}/checkout/success`;
   } else if (card) {
     body.token = card.token;
@@ -249,12 +249,12 @@ export async function processCardPayment(
     if (card.issuerId) body.issuer_id = card.issuerId;
   }
 
-  // PSE (Colombia) exige additional_info.ip_address + payer con identificación.
+  // PSE (Colombia) requires additional_info.ip_address + payer with identification.
   const additionalInfo: Record<string, unknown> = {};
   if (ipAddress) additionalInfo.ip_address = ipAddress;
   if (isPse) {
-    // La identificación del pagador va a nivel payer (top-level), NO aquí
-    // (MP rechaza additional_info.payer.identification).
+    // The payer identification goes at the payer level (top-level), NOT here
+    // (MP rejects additional_info.payer.identification).
     additionalInfo.payer = {
       first_name: order.payer_first_name,
       last_name: order.payer_last_name,
@@ -264,7 +264,7 @@ export async function processCardPayment(
     body.additional_info = additionalInfo;
   }
 
-  // Diagnóstico PSE (MP): registrar los campos del request justo antes del POST.
+  // PSE diagnosis (MP): log the request fields right before the POST.
   if (isPse) {
     const institution = (body.transaction_details as { financial_institution?: unknown } | undefined)
       ?.financial_institution;
@@ -313,7 +313,7 @@ export async function processCardPayment(
 
   if (!res.ok || !mpBody || !mpBody.id) {
     console.error("MP rechazó el pago:", res.status, JSON.stringify(mpBody), "| order:", cleanOrderId);
-    // Diagnóstico PSE (MP): correlación interna (cause[0].data) del fallo.
+    // PSE diagnosis (MP): internal correlation (cause[0].data) of the failure.
     const cause = (mpBody as { cause?: Array<{ code?: number | string; description?: string; data?: string }> } | null)?.cause;
     if (isPse && cause?.[0]) {
       console.error(
@@ -331,7 +331,7 @@ export async function processCardPayment(
   const paymentId = String(mpBody.id);
   const mapped = mapPaymentStatus(mpBody.status ?? "");
 
-  // URL de PSE (banco simulado) para completar la transferencia, si aplica.
+  // PSE (simulated bank) URL to complete the transfer, if applicable.
   const redirectUrl =
     mpBody.payment_method?.data?.redirect_url ??
     mpBody.payment_method?.redirect_url ??
@@ -339,7 +339,7 @@ export async function processCardPayment(
     mpBody.point_of_interaction?.transaction_data?.ticket_url ??
     undefined;
 
-  // 5. ACTUALIZAR LA ORDEN (la orden NO retrocede desde 'paid'; §5).
+  // 5. UPDATE THE ORDER (the order does NOT move back from 'paid'; §5).
   const now = new Date().toISOString();
   const patch: Record<string, string | null> = {};
   if (mapped) {
@@ -366,7 +366,7 @@ export async function processCardPayment(
     console.error("Error actualizando orden tras pago:", updateError);
   }
 
-  // 6. REGISTRAR EL INTENTO DE PAGO (1 fila por mp_payment_id).
+  // 6. LOG THE PAYMENT ATTEMPT (1 row per mp_payment_id).
   const { error: paymentUpsertError } = await supabase.from("order_payments").upsert(
     {
       order_id: cleanOrderId,
@@ -387,7 +387,7 @@ export async function processCardPayment(
     console.error(`Error en order_payments (order ${cleanOrderId}, payment ${paymentId}):`, paymentUpsertError);
   }
 
-  // 7. EMAIL DE CONFIRMACIÓN (solo si quedó pagado; guarda anti-duplicados interna).
+  // 7. CONFIRMATION EMAIL (only if it ended up paid; internal anti-duplicate guard).
   if (mapped?.dbStatus === "paid") {
     void maybeSendConfirmation(cleanOrderId).catch((err) =>
       console.error("[email] Error en maybeSendConfirmation:", err)

@@ -15,18 +15,18 @@ export default function MetaPurchaseEvent({ value, currency = "COP", orderId, st
 
   useEffect(() => {
     if (fired.current) return;
-    // Solo compras aprobadas; sin monto o sin orden → no disparamos.
+    // Only approved purchases; no amount or no order → we don't fire.
     if (status !== "approved") return;
     if (!Number.isFinite(value)) return;
     if (!orderId) return;
 
-    // Dedupe: una sola vez por orden (sessionStorage).
+    // Dedupe: only once per order (sessionStorage).
     try {
       const key = `meta_purchase_${orderId}`;
       if (window.sessionStorage.getItem(key)) return;
       window.sessionStorage.setItem(key, "1");
     } catch {
-      // storage bloqueado → disparamos igual
+      // storage blocked → still fire
     }
 
     fired.current = true;
