@@ -30,6 +30,16 @@ export default function PromoModal({
     onClose?.();
   };
 
+  const goToServices = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    close();
+    requestAnimationFrame(() => {
+      document
+        .getElementById("nuestros-servicios")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
   return (
     <div
       role="dialog"
@@ -39,14 +49,21 @@ export default function PromoModal({
     >
       <div className="w-full max-w-[min(88vw,27rem)] rounded-2xl border-[3px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className={`relative w-full overflow-hidden rounded-xl ${aspectClassName}`}>
-          <Image
-            src={src}
-            alt={alt}
-            fill
-            priority
-            sizes="(max-width: 768px) 88vw, 432px"
-            className="object-cover"
-          />
+          <a
+            href="#nuestros-servicios"
+            onClick={goToServices}
+            aria-label="Ver nuestros servicios"
+            className="relative block h-full w-full cursor-pointer"
+          >
+            <Image
+              src={src}
+              alt={alt}
+              fill
+              priority
+              sizes="(max-width: 768px) 88vw, 432px"
+              className="object-cover transition-transform duration-300 hover:scale-105"
+            />
+          </a>
           <button
             type="button"
             onClick={close}
