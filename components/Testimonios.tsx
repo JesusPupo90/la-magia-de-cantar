@@ -67,7 +67,7 @@ const OTHER_ARTISTS = [
     {
         name: "Maluma",
         role: "Artista Global",
-        detail: "Entrenamiento vocal y presencia en escena"
+        detail: "Coach en La Voz Kids en 2014 y 2015."
     },
     {
         name: "Goyo",

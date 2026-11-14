@@ -45,7 +45,7 @@ export default function PromoModal({
       role="dialog"
       aria-modal="true"
       aria-label={alt}
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 p-4"
+      className="fixed inset-0 z-60 flex items-center justify-center bg-black/60 p-4"
     >
       <div className="w-full max-w-[min(88vw,27rem)] rounded-2xl border-[3px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className={`relative w-full overflow-hidden rounded-xl ${aspectClassName}`}>
