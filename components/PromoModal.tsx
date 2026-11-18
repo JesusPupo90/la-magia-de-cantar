@@ -50,7 +50,7 @@ export default function PromoModal({
       <div className="w-full max-w-[min(88vw,27rem)] rounded-2xl border-[3px] border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         <div className={`relative w-full overflow-hidden rounded-xl ${aspectClassName}`}>
           <a
-            href="#nuestros-servicios"
+            href="https://wa.me/573053678742"
             onClick={goToServices}
             aria-label="Ver nuestros servicios"
             className="relative block h-full w-full cursor-pointer"
