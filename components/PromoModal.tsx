@@ -30,16 +30,6 @@ export default function PromoModal({
     onClose?.();
   };
 
-  const goToServices = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    close();
-    requestAnimationFrame(() => {
-      document
-        .getElementById("nuestros-servicios")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  };
-
   return (
     <div
       role="dialog"
@@ -51,8 +41,8 @@ export default function PromoModal({
         <div className={`relative w-full overflow-hidden rounded-xl ${aspectClassName}`}>
           <a
             href="https://wa.me/573053678742"
-            onClick={goToServices}
-            aria-label="Ver nuestros servicios"
+            onClick={close}
+            aria-label="Escríbenos por WhatsApp"
             className="relative block h-full w-full cursor-pointer"
           >
             <Image
