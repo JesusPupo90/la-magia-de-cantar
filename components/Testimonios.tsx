@@ -54,6 +54,19 @@ const FEATURED_TESTIMONIALS = [
         testimonial:
             "Ha sido mi Coach vocal, durante más de 15 años, acompañándome en el proceso de encontrar una identidad y un manejo de la voz conectando lo físico con las emociones.",
         tag: "Actuación & Música"
+    },
+    {
+        id: "maia",
+        name: "Maía",
+        role: "Artista / Cantante / Compositora",
+        badge: "Testimonio de Trayectoria",
+        bg: "bg-pink-soft",
+        image: "/assets/maia.webp",
+        // Move the photo up into the frame (same technique as Martin)
+        imageClass: "object-cover object-top scale-100 -translate-y-0 hover:scale-180",
+        process: "Técnica vocal, Gira / tour, Coaching vocal",
+        testimonial:
+            "Yanetsis es mi columna vertebral en todos los aspectos artísticos, además me ha acompañado en los diferentes retos que ha vivido mi escena, mi música y mi voz. Con ella no paro de aprender."
     }
 ];
 
