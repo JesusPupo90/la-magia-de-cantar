@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import {
     Star,
@@ -9,11 +9,41 @@ import {
     Sparkles,
     Award,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Play
 } from "lucide-react";
 
 // 1. FEATURED TESTIMONIALS
-const FEATURED_TESTIMONIALS = [
+type TestimonialBase = {
+    id: string;
+    name: string;
+    role: string;
+    badge: string;
+    bg: string;
+    process: string;
+    testimonial: string;
+    tag: string;
+};
+
+type FeaturedImage = TestimonialBase & { image: string; imageClass: string };
+type FeaturedVideo = TestimonialBase & { video: string; poster: string; duration: string };
+type FeaturedTestimonial = FeaturedImage | FeaturedVideo;
+
+const FEATURED_TESTIMONIALS: FeaturedTestimonial[] = [
+    {
+        id: "gilberto",
+        name: "Gilberto Santa Rosa",
+        role: "Cantante de salsa",
+        badge: "Testimonio de Trayectoria",
+        bg: "bg-lilac",
+        video: "/assets/testimonio-de-gilberto-santarosa.mp4",
+        poster: "/assets/testimonio-de-gilberto-santarosa-poster.webp",
+        duration: "1:10",
+        process: "Coaching vocal",
+        testimonial:
+            "Trabajé en La Voz Colombia en 2013 y ahí tuve la oportunidad de trabajar con Yanetsis.",
+        tag: "La Voz Colombia 2013"
+    },
     {
         id: "lauradl",
         name: "Laura de León",
@@ -133,6 +163,58 @@ const OTHER_ARTISTS = [
     }
 ];
 
+function TestimonialVideo({
+    src,
+    poster,
+    name,
+    duration
+}: {
+    src: string;
+    poster: string;
+    name: string;
+    duration: string;
+}) {
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const [playing, setPlaying] = useState(false);
+
+    // Called inside the click handler so the browser treats play() as a user
+    // gesture: the video starts unmuted, with audio.
+    const handlePlay = () => {
+        setPlaying(true);
+        void videoRef.current?.play().catch(() => undefined);
+    };
+
+    return (
+        <div className="relative aspect-video w-full overflow-hidden rounded-2xl border-2 border-black bg-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+            <video
+                ref={videoRef}
+                src={src}
+                poster={poster}
+                preload="none"
+                playsInline
+                controls={playing}
+                aria-label={`Testimonio de ${name}`}
+                className="h-full w-full object-cover"
+            />
+            {!playing && (
+                <button
+                    type="button"
+                    onClick={handlePlay}
+                    aria-label={`Reproducir testimonio de ${name}`}
+                    className="group absolute inset-0 flex items-center justify-center bg-black/25 transition-colors hover:bg-black/35"
+                >
+                    <span className="flex h-16 w-16 items-center justify-center rounded-full border-[3px] border-black bg-yellow shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-transform group-hover:scale-105">
+                        <Play className="ml-1 h-7 w-7 fill-black text-black" />
+                    </span>
+                    <span className="absolute bottom-3 right-3 rounded-md border-2 border-black bg-white px-2 py-0.5 font-poppins text-[10px] font-black text-black">
+                        {duration}
+                    </span>
+                </button>
+            )}
+        </div>
+    );
+}
+
 export default function TestimoniosSection() {
     const [activeIndex, setActiveIndex] = useState(0);
     const featuredCount = FEATURED_TESTIMONIALS.length;
@@ -210,19 +292,28 @@ export default function TestimoniosSection() {
                                     </div>
                                 </div>
 
-                                {/* VERTICAL PHOTO + DETAILS LAYOUT */}
-                                <div className="flex flex-col sm:flex-row gap-6 items-start">
+                                {/* MEDIA (video or photo) + DETAILS LAYOUT */}
+                                <div className={"video" in current ? "flex flex-col gap-6" : "flex flex-col sm:flex-row gap-6 items-start"}>
 
-                                    {/* VERTICAL PHOTO */}
-                                    <div className="relative w-full sm:w-44 md:w-48 shrink-0 aspect-[3/4] rounded-2xl border-2 border-black bg-white/60 overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                                        <Image
-                                            src={current.image}
-                                            alt={current.name}
-                                            fill
-                                            sizes="(max-width: 640px) 100vw, 200px"
-                                            className={`transition-transform duration-500 ${current.imageClass}`}
+                                    {/* HORIZONTAL VIDEO OR VERTICAL PHOTO */}
+                                    {"video" in current ? (
+                                        <TestimonialVideo
+                                            src={current.video}
+                                            poster={current.poster}
+                                            name={current.name}
+                                            duration={current.duration}
                                         />
-                                    </div>
+                                    ) : (
+                                        <div className="relative w-full sm:w-44 md:w-48 shrink-0 aspect-[3/4] rounded-2xl border-2 border-black bg-white/60 overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                                            <Image
+                                                src={current.image}
+                                                alt={current.name}
+                                                fill
+                                                sizes="(max-width: 640px) 100vw, 200px"
+                                                className={`transition-transform duration-500 ${current.imageClass}`}
+                                            />
+                                        </div>
+                                    )}
 
                                     {/* CONTENT AND TESTIMONIAL */}
                                     <div className="flex flex-col justify-between w-full flex-1 min-w-0">
