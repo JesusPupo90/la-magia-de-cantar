@@ -12,10 +12,10 @@ import {
     ChevronRight
 } from "lucide-react";
 
-// 1. FEATURED TESTIMONIALS (Laura de León & Martin Trevy)
+// 1. FEATURED TESTIMONIALS
 const FEATURED_TESTIMONIALS = [
     {
-        id: "laura",
+        id: "lauradl",
         name: "Laura de León",
         role: "Actriz & Cantante",
         badge: "Testimonio Destacado",
@@ -35,7 +35,7 @@ const FEATURED_TESTIMONIALS = [
         bg: "bg-mint",
         image: "/assets/martin-trevy.webp",
         // Zoom in (scale-125) and move the photo up (-translate-y-7)
-        imageClass: "object-cover object-top scale-125 -translate-y-7 hover:scale-180",
+        imageClass: "object-cover object-top scale-125 -translate-y-7 hover:scale-135",
         process: "Técnica vocal, Entrenamiento para personaje, Proceso artístico, Acompañamiento en producción, Preparación escénica, Gira / tour, Coaching vocal",
         testimonial:
             "De la mano de Yanetsis me convertí en el artista que soy hoy. Me ayudó a enfrentar mis miedos, ganar seguridad sobre el escenario y confiar más en mí mismo. Su guía ha sido fundamental en mi crecimiento y en el desarrollo de mi carrera.",
@@ -46,10 +46,10 @@ const FEATURED_TESTIMONIALS = [
         name: "Karoll Márquez",
         role: "Actor & Cantante",
         badge: "Testimonio de Trayectoria",
-        bg: "bg-pink-soft",
+        bg: "bg-lilac",
         image: "/assets/karoll-marquez.webp",
         // Move the photo up into the frame (same technique as Martin)
-        imageClass: "object-cover object-top scale-135 -translate-y-10 hover:scale-180",
+        imageClass: "object-cover object-top scale-135 -translate-y-10 hover:scale-140",
         process: "Técnica vocal, Proceso artístico, Coaching vocal",
         testimonial:
             "Ha sido mi Coach vocal, durante más de 15 años, acompañándome en el proceso de encontrar una identidad y un manejo de la voz conectando lo físico con las emociones.",
@@ -58,15 +58,44 @@ const FEATURED_TESTIMONIALS = [
     {
         id: "maia",
         name: "Maía",
-        role: "Artista / Cantante / Compositora",
+        role: "Artista, Cantante y Compositora",
         badge: "Testimonio de Trayectoria",
-        bg: "bg-pink-soft",
+        bg: "bg-light-mint",
         image: "/assets/maia.webp",
         // Move the photo up into the frame (same technique as Martin)
-        imageClass: "object-cover object-top scale-100 -translate-y-0 hover:scale-180",
+        imageClass: "object-cover object-top scale-100 -translate-y-0 hover:scale-105",
         process: "Técnica vocal, Gira / tour, Coaching vocal",
         testimonial:
-            "Yanetsis es mi columna vertebral en todos los aspectos artísticos, además me ha acompañado en los diferentes retos que ha vivido mi escena, mi música y mi voz. Con ella no paro de aprender."
+            "Yanetsis es mi columna vertebral en todos los aspectos artísticos, además me ha acompañado en los diferentes retos que ha vivido mi escena, mi música y mi voz. Con ella no paro de aprender.",
+        tag: "Giras & Composición"
+    },
+    {
+        id: "junior",
+        name: "Junior Cuesta",
+        role: "Cantante y Actor",
+        badge: "Testimonio de Superación",
+        bg: "bg-pink-soft",
+        image: "/assets/junior-cuesta.webp",
+        // Move the photo up into the frame (same technique as Martin)
+        imageClass: "object-cover object-top scale-100 -translate-y-0 hover:scale-105",
+        process: "Técnica vocal, Coaching vocal",
+        testimonial:
+            "La maestra Yanetsis apareció en un momento crucial de mi carrera y eso me transformó como artista. Mientras concursaba en el reality, tuve un desafortunado episodio, donde estuve muy enfermo, esto en etapas finales de la competencia. Mi voz desapareció y la seguridad para salir al escenario también. Yanetsis hizo un trabajo de coucheo, no solo en la técnica vocal, si no en la seguridad de cómo enfrentar esto. Cantaba when I was your man de Bruno mars y gracias al trabajo profundo y detallado de Yanetsis logre ser el finalista del reality y consolidarme como una de las mejores voces del programa. Hoy en día me acompaña en mi show tributo de Bruno mars y en hombres a la plancha.",
+        tag: "Realities & Tributos"
+    },
+    {
+        id: "lauragon",
+        name: "Laura Barjum",
+        role: "Actriz",
+        badge: "Testimonio de Confianza",
+        bg: "bg-mint",
+        image: "/assets/laura-barjum.webp",
+        // Move the photo up into the frame (same technique as Martin)
+        imageClass: "object-cover object-top scale-100 -translate-y-0 hover:scale-105",
+        process: "Técnica vocal, Entrenamiento para personaje, Proceso artístico, Acompañamiento en producción, Preparación escénica",
+        testimonial:
+            "Yane me ha ayudado a superar una de las inseguridades más grandes que yo he tenido en la vida que es: CANTAR. Atreverme, confiar y creer que tengo las herramientas y que con el buen entrenamiento puedo hacerlo bien. Es una compañía maravillosa que no solo te brinda técnica sino que emocionalmente es un impulso grandísimo.",
+        tag: "Actuación & Producción"
     }
 ];
 
@@ -101,12 +130,6 @@ const OTHER_ARTISTS = [
         name: "Producciones Audiovisuales",
         role: "La Reina del Flow / La Primera Vez",
         detail: "Coaching vocal para actrices y cantantes"
-    },
-    {
-        name: "Maía",
-        role: "Artista / Cantante / Compositora",
-        detail: "Técnica vocal, Gira / tour, Coaching vocal",
-        quote: "Yanetsis es mi columna vertebral en todos los aspectos artísticos, además me ha acompañado en los diferentes retos que ha vivido mi escena, mi música y mi voz. Con ella no paro de aprender."
     }
 ];
 
@@ -315,11 +338,6 @@ export default function TestimoniosSection() {
                                     <p className="mt-2 font-jakarta text-xs text-gray-700 font-medium">
                                         {artist.detail}
                                     </p>
-                                    {artist.quote && (
-                                        <p className="mt-3 font-jakarta text-xs font-semibold italic leading-relaxed text-gray-900">
-                                            &ldquo;{artist.quote}&rdquo;
-                                        </p>
-                                    )}
                                 </div>
                             </div>
                         ))}
